@@ -6,6 +6,11 @@
     <artifactId>orientdb-neo4j-importer</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+
+    <properties>
+        <VERSION>${project.version}</VERSION>
+    </properties>
+
     <build>
         <pluginManagement>
             <plugins>
