@@ -10,7 +10,7 @@
 
     <properties>
         <VERSION>${project.version}</VERSION>
-        <orient.version>3.0.0-SNAPSHOT</orient.version>
+        <orient.version>2.2.12</orient.version>
     </properties>
 
     <build>
