@@ -100,7 +100,6 @@ import com.orientechnologies.common.io.OFileUtils;
 *		- The Neo4j property where the constraint or index is defined on is determined, and, using java 'instanceof' we determine the data type of this property (there's no way, in fact, to get the data type via the Neo4j API)
 *		- Once we know the data type, we map it to an orientdb data type and we create a property with the corresponding data type
 *	- If a Neo4j unique constraint is found, a corresponding unique index is created in OrientDB 
-*	- If a Neo4j "existence" constraint is found (available only in Neo4j Enterprise) --> this case is still to be implemented
 *   - If a Neo4j index is found, a corresponding (notunique) OrientDB index is created
 *
 * Limitations:
@@ -109,6 +108,7 @@ import com.orientechnologies.common.io.OFileUtils;
 *	-- In case a node in Neo4j has multiple labels, only the first label is imported in OrientDB	
 *	-- Neo4j Nodes with same label but different case, e.g. LABEL and LAbel will be aggregated into a single OrientDB vertex class 
 *	-- Neo4j Relationship with same name but different case, e.g. relaTIONship and RELATIONSHIP will be aggregated into a single edge class  
+*	-- Migration of Neo4j "existence" constraints (available only in Neo4j Enterprise) is not implemented 
 *
 */
 
@@ -131,17 +131,21 @@ public class ONeo4jImporter {
         System.out.println(String.format(ProgramName + " v.%s - %s", OConstants.getVersion(), OConstants.COPYRIGHT));		
 		System.out.println();
 		//
-				
+		
+		//parses the command line parameters, and starts the import (.execute). Then exits
 	    int returnValue = 1;
 		try {
 		  
 		  final ONeo4jImporter neo4jImporter = ONeo4jImporterCommandLineParser.getNeo4jImporter(args);	
 		  
 		  returnValue = neo4jImporter.execute(ProgramName);
+		  
 		} catch (Exception ex) {
 		  System.err.println(ex.getMessage());
 		}
+		
 		System.exit(returnValue);
+		//
 	
 	}
 	
@@ -170,9 +174,11 @@ public class ONeo4jImporter {
 		final File f = new File(OrientDbFolder);
 		if (f.exists()){
 			if(overwriteOrientDBDir){
+
 				ImportLogger.log( Level.WARNING, "Directory '" + OrientDbFolder + "' exists already and the overwrite option '-o' is 'true'. Directory will be erased" );
 				
-				OFileUtils.deleteRecursively(f);		
+				OFileUtils.deleteRecursively(f);	
+				
 			} else {
 				
 				//we exit the program 
@@ -314,12 +320,12 @@ public class ONeo4jImporter {
 				for (final Label myLabel : nodeLabels) {		
 					q++;	
 					
-					OrientVertexClass=myLabel.name();
+					OrientVertexClass = myLabel.name();
 					
 					//takes only the first label, in case of multi labels
 					String[] parts = OrientVertexClass.split(":");
 					
-					OrientVertexClass=parts[0];
+					OrientVertexClass = parts[0];
 					
 					if (parts.length >= 2) {
 						
