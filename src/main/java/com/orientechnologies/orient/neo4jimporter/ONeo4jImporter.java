@@ -159,6 +159,9 @@ public class ONeo4jImporter {
 		double startTime = System.currentTimeMillis();
 		double value;
 		
+		boolean migrateRels = true;  
+		boolean migrateNodes = true; 
+		
 		DecimalFormat df = new DecimalFormat("#");
 		DecimalFormat dfd = new DecimalFormat("#.##");
 		//
@@ -266,11 +269,7 @@ public class ONeo4jImporter {
 		
 		
 		
-		
-		//gets all nodes from Neo4j and creates corresponding Vertices in OrientDB
-		System.out.println();
-        System.out.println( "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB..." );
-				
+		//
 		double Neo4jNodeCounter=0L;
 		double Neo4jNodeNoLabelCounter=0L;
 		double Neo4jNodeMultipleLabelsCounter=0L;
@@ -287,275 +286,302 @@ public class ONeo4jImporter {
 		double Neo4jTotalNodes=0L;
 		double Neo4jTotalRels=0L;
 		double Neo4jTotalUniqueConstraints=0L;
-		double Neo4jTotalIndices=0L;
-		
-		//counting Neo4j Nodes so that we can show a % on OrientDB vertices creation
-		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
-				
-		    Iterable<Node> Neo4jNodes =  Neo4jGraphDb.getAllNodes();
-			
-			for (final Node myNode : Neo4jNodes) {
-				Neo4jTotalNodes++;
-			}
-			
-		}
+		double Neo4jTotalIndices=0L;						
 		//
 		
-		double ImportingNodesStartTime = System.currentTimeMillis();		
+		//
+		double ImportingNodesStartTime = 0L;		
+		double ImportingNodesStopTime = 0L;		
+		double InternalIndicesStartTime = 0L;
+		double OrientDBVerticesClassCount = 0L;
+		double InternalIndicesStopTime = 0L;		
+		//
+				
+		//gets all nodes from Neo4j and creates corresponding Vertices in OrientDB
+		if (migrateNodes){
 		
-		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
-				
-		    Iterable<Node> Neo4jNodes =  Neo4jGraphDb.getAllNodes();		
-		
-			for (final Node myNode : Neo4jNodes) {
-				
-				Neo4jNodeCounter++;
-								
-				//System.out.println(myNode); //debug 
-				
-				final Iterable<Label> nodeLabels = myNode.getLabels();
-				
-				//determines the class to use in OrientDB, starting from the original Neo4j label. First thing we check if this node has multiple labels 
-				int q = 0;				
-				for (final Label myLabel : nodeLabels) {		
-					q++;	
+			System.out.println();
+			System.out.println( "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB..." );
+			
+			//counting Neo4j Nodes so that we can show a % on OrientDB vertices creation
+			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
 					
-					OrientVertexClass = myLabel.name();
+				Iterable<Node> Neo4jNodes =  Neo4jGraphDb.getAllNodes();
+				
+				for (final Node myNode : Neo4jNodes) {
+					Neo4jTotalNodes++;
+				}
+				
+			}
+			//
+			
+			ImportingNodesStartTime = System.currentTimeMillis();		
+			
+			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
 					
-					//takes only the first label, in case of multi labels
-					String[] parts = OrientVertexClass.split(":");
+				Iterable<Node> Neo4jNodes =  Neo4jGraphDb.getAllNodes();		
+			
+				for (final Node myNode : Neo4jNodes) {
 					
-					OrientVertexClass = parts[0];
+					Neo4jNodeCounter++;
+									
+					//System.out.println(myNode); //debug 
 					
-					if (parts.length >= 2) {
+					final Iterable<Label> nodeLabels = myNode.getLabels();
+					
+					//determines the class to use in OrientDB, starting from the original Neo4j label. First thing we check if this node has multiple labels 
+					int q = 0;				
+					for (final Label myLabel : nodeLabels) {		
+						q++;	
 						
-						Neo4jNodeMultipleLabelsCounter++;
-					
+						OrientVertexClass = myLabel.name();
 						
-						//System.out.println("\nWARNING: Found node ('" + myNode + "') with multiple labels. Only the first (" + OrientVertexClass + ") will be used as Class when importing this node in OrientDB");	
+						//takes only the first label, in case of multi labels
+						String[] parts = OrientVertexClass.split(":");
 						
-						ImportLogger.log( Level.WARNING, "Found node ('" + myNode + "') with multiple labels. Only the first (" + OrientVertexClass + ") will be used as Class when importing this node in OrientDB" );
+						OrientVertexClass = parts[0];
+						
+						if (parts.length >= 2) {
 							
-												
+							Neo4jNodeMultipleLabelsCounter++;
+						
+							
+							//System.out.println("\nWARNING: Found node ('" + myNode + "') with multiple labels. Only the first (" + OrientVertexClass + ") will be used as Class when importing this node in OrientDB");	
+							
+							ImportLogger.log( Level.WARNING, "Found node ('" + myNode + "') with multiple labels. Only the first (" + OrientVertexClass + ") will be used as Class when importing this node in OrientDB" );
+								
+													
+						}
+		
+					}	
+					
+					// if q=0 the neo4j node has no label because q is incremented in the for cicly of the nodeLabels itarable
+					if (q==0){
+						
+						Neo4jNodeNoLabelCounter++;
+						
+						// set generic class for OrientDB 					
+						OrientVertexClass="GenericClassNeo4jConversion";
+						
+						//System.out.println("\nWARNING: Found node ('" + myNode + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB");	
+						
+						ImportLogger.log( Level.WARNING, "Found node ('" + myNode + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB" );
+						
 					}
-	
-				}	
-				
-				// if q=0 the neo4j node has no label because q is incremented in the for cicly of the nodeLabels itarable
-				if (q==0){
+					//
 					
-					Neo4jNodeNoLabelCounter++;
+					//gets the node properties
+					Map<String,Object> myNodeProperties = myNode.getAllProperties();
 					
-					// set generic class for OrientDB 					
-					OrientVertexClass="GenericClassNeo4jConversion";
+					//stores also the original neo4j nodeId in the property map - we will use it when creating the corresponding OrientDB vertex
+					myNodeProperties.put("Neo4jNodeID", myNode.getId());
 					
-					//System.out.println("\nWARNING: Found node ('" + myNode + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB");	
+					//System.out.println (myNodeProperties); //debug 
 					
-					ImportLogger.log( Level.WARNING, "Found node ('" + myNode + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB" );
+					try {				
+						// store the vertex on OrientDB 
+						Vertex myVertex = Odb.addVertex("class:" + OrientVertexClass, myNodeProperties);	
+											
+						//System.out.print(myVertex); //debug 
+					
+						OrientDBImportedVerticesCounter++;
+						
+						value = 100.0 * (OrientDBImportedVerticesCounter / Neo4jTotalNodes);					
+						System.out.print("\r  " + df.format(OrientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value) + "% done)");		
+						value =0;
+					
+					}catch (Exception e){
+						
+						ImportLogger.log( Level.SEVERE, "Found an error when trying to store node ('" + myNode + "') to OrientDB: " + e.getMessage() );
+											
+					}
 					
 				}
-				//
-				
-				//gets the node properties
-				Map<String,Object> myNodeProperties = myNode.getAllProperties();
-				
-				//stores also the original neo4j nodeId in the property map - we will use it when creating the corresponding OrientDB vertex
-				myNodeProperties.put("Neo4jNodeID", myNode.getId());
-				
-				//System.out.println (myNodeProperties); //debug 
-				
-				try {				
-					// store the vertex on OrientDB 
-					Vertex myVertex = Odb.addVertex("class:" + OrientVertexClass, myNodeProperties);	
-										
-					//System.out.print(myVertex); //debug 
-				
-					OrientDBImportedVerticesCounter++;
-					
-					value = 100.0 * (OrientDBImportedVerticesCounter / Neo4jTotalNodes);					
-					System.out.print("\r  " + df.format(OrientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value) + "% done)");		
-					value =0;
-				
-				}catch (Exception e){
-					
-					ImportLogger.log( Level.SEVERE, "Found an error when trying to store node ('" + myNode + "') to OrientDB: " + e.getMessage() );
-										
-				}
-				
+				System.out.println ("\nDone");
 			}
-			System.out.println ("\nDone");
-		}
 
-		double ImportingNodesStopTime = System.currentTimeMillis();				
-		//
-		
-		//creates an index on each OrientDB vertices class on Neo4jNodeID property - this will help in speeding up vertices lookup during relationships creation 		
-		double InternalIndicesStartTime = System.currentTimeMillis();
-		
-		System.out.println();
-        System.out.println( "Creating internal Indices on property 'Neo4jNodeID' on all OrientDB Vertices Classes..." );		
-		Collection<OClass> ClassCollection = Odb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
-		
-		double OrientDBVerticesClassCount = (double)ClassCollection.size();
-		
-		for (OClass ClassCollectionElement : ClassCollection) {
+			ImportingNodesStopTime = System.currentTimeMillis();				
+			//
 			
-			//System.out.println(ClassCollectionElement); //debug 
+			//creates an index on each OrientDB vertices class on Neo4jNodeID property - this will help in speeding up vertices lookup during relationships creation 		
+			InternalIndicesStartTime = System.currentTimeMillis();
 			
-			try {
+			System.out.println();
+			System.out.println( "Creating internal Indices on property 'Neo4jNodeID' on all OrientDB Vertices Classes..." );		
+			Collection<OClass> ClassCollection = Odb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
+			
+			OrientDBVerticesClassCount = (double)ClassCollection.size();
+			
+			for (OClass ClassCollectionElement : ClassCollection) {
 				
-				//first create the property 
-				Odb.getRawGraph().getMetadata().getSchema().getClass(ClassCollectionElement.getName()).createProperty("Neo4jNodeID",OType.LONG);
-					
-				//creates the index if the property creation was successfull
+				//System.out.println(ClassCollectionElement); //debug 
+				
 				try {
 					
-					Odb.getRawGraph().getMetadata().getSchema().getClass(ClassCollectionElement.getName()).getProperty("Neo4jNodeID").createIndex(OClass.INDEX_TYPE.UNIQUE); 		
-					
-					Neo4jInternalIndicesCounter++;
-										
-					value = 100.0 * (Neo4jInternalIndicesCounter / OrientDBVerticesClassCount);
-					System.out.print("\r  " + df.format(Neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)");			
-					value =0;
-					
+					//first create the property 
+					Odb.getRawGraph().getMetadata().getSchema().getClass(ClassCollectionElement.getName()).createProperty("Neo4jNodeID",OType.LONG);
+						
+					//creates the index if the property creation was successfull
+					try {
+						
+						Odb.getRawGraph().getMetadata().getSchema().getClass(ClassCollectionElement.getName()).getProperty("Neo4jNodeID").createIndex(OClass.INDEX_TYPE.UNIQUE); 		
+						
+						Neo4jInternalIndicesCounter++;
+											
+						value = 100.0 * (Neo4jInternalIndicesCounter / OrientDBVerticesClassCount);
+						System.out.print("\r  " + df.format(Neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)");			
+						value =0;
+						
+					}catch (Exception e){
+											
+						ImportLogger.log( Level.SEVERE, "Found an error when trying to create a UNIQUE Index in OrientDB on the 'Neo4jNodeID' Property of the vertices Class '" + ClassCollectionElement.getName() + "': " + e.getMessage() );
+											
+					}
 				}catch (Exception e){
-										
-					ImportLogger.log( Level.SEVERE, "Found an error when trying to create a UNIQUE Index in OrientDB on the 'Neo4jNodeID' Property of the vertices Class '" + ClassCollectionElement.getName() + "': " + e.getMessage() );
-										
-				}
-			}catch (Exception e){
-				
-				ImportLogger.log( Level.SEVERE, "Found an error when trying to create the 'Neo4jNodeID' Property in OrientDB on the vertices Class '" + ClassCollectionElement.getName() + "': " + e.getMessage() );
 					
-			}
-
-		}		
-		
-		double InternalIndicesStopTime = System.currentTimeMillis();
-		
-        System.out.println ("\nDone");
-		//
-		
-		// gets all relationships from Neo4j and creates the corresponding Edges in OrientDB 
-		System.out.println();
-        System.out.println( "Getting all Relationships from Neo4j and creating corresponding Edges in OrientDB..." );
-				
-		//counting Neo4j Relationships so that we can show a % on OrientDB Edges creation
-		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
-				
-		    Iterable<Relationship> Neo4jRelationships =  Neo4jGraphDb.getAllRelationships();	
-			
-			for (final Relationship myRelationship : Neo4jRelationships) {
-				Neo4jTotalRels++;
-			}
-			
-		}		
-		//
-		
-		double ImportingRelsStartTime = System.currentTimeMillis();
-		
-		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
-				
-		    Iterable<Relationship> Neo4jRelationships =  Neo4jGraphDb.getAllRelationships();	
-			
-			for (final Relationship myRelationship : Neo4jRelationships) {
-				
-				Neo4jRelCounter++;
+					ImportLogger.log( Level.SEVERE, "Found an error when trying to create the 'Neo4jNodeID' Property in OrientDB on the vertices Class '" + ClassCollectionElement.getName() + "': " + e.getMessage() );
 						
-				//System.out.println(myRelationship);				
-				
-				RelationshipType myRelationshipType = myRelationship.getType();
-				
-				//get the relationship properties
-				Map<String,Object> myRelationshipProperties = myRelationship.getAllProperties();
-				
-				//store also the original neo4j relationship id
-				myRelationshipProperties.put("Neo4jRelID", myRelationship.getId());
-								
-				//get the out node of this relationships					
-				Node Neo4jOutNode = myRelationship.getStartNode();
-
-				//get the in node of this relationships					
-				Node Neo4jInNode = myRelationship.getEndNode();
-				
-				// so we have Neo4jOutNode - myRelationship -> Neo4jInNode										
-				
-				//debug
-				//System.out.println("Neo:" + Neo4jOutNode +"-"+ myRelationshipType.name()  +"->"+ Neo4jInNode);					
-
-				//lookup the corresponding OUTVertex in OrientDB 
-				Iterable<Vertex> outVertex = Odb.getVertices("Neo4jNodeID", Neo4jOutNode.getId());		
-				for (final Vertex myOutVertex : outVertex) {				
-
-					//cast from Vertex to OrientVertex so that we can make use of more functionalities 				
-					OrientVertex myOutOrientVertex = (OrientVertex) myOutVertex;				
-						
-					//lookup the corresponding inVertex in OrientDB 
-					Iterable<Vertex> inVertex = Odb.getVertices("Neo4jNodeID", Neo4jInNode.getId());		
-					for (final Vertex myInVertex : inVertex) {		
-					
-						OrientVertex myInOrientVertex = (OrientVertex) myInVertex;	
-
-						String OrientEdgeClass = myRelationshipType.name();
-						
-						//in neo4j we can have labels on nodes and relationship with the same name 
-						//to handle this case, we append an E_ to the relationship name in case the relationship name is the same of a vertex class 
-						Collection<OClass> CheckClassCollection = Odb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
-						for (OClass ClassCollectionElement : CheckClassCollection) {
-							
-							//debug 
-							//System.out.println ("\n" + OrientEdgeClass + " " + ClassCollectionElement.getName());
-							
-							if(OrientEdgeClass.equalsIgnoreCase(ClassCollectionElement.getName())){
-								//we have already a label on a vertex with the same name, changes the edge class by adding an "E_" prefix
-																	
-								//System.out.println ("\n\nWARNING: Found a Neo4j Relationship ('" + OrientEdgeClass + "') with same name of a Neo4j node Label ('"+ ClassCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + OrientEdgeClass + "'\n");
-								
-								ImportLogger.log( Level.WARNING, "WARNING: Found a Neo4j Relationship ('" + OrientEdgeClass + "') with same name of a Neo4j node Label ('"+ ClassCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + OrientEdgeClass );
-								
-								OrientEdgeClass = "E_" + OrientEdgeClass;
-							}	
-						}						
-						//
-												
-						// Converting map myRelationshipProperties to an Object[], so that it can be passed to addEdge method below
-						// This will allow to create edges with a single create operation, instead of a create and update operation similar to the following:
-							//OrientEdge myOrientEdge = Odb.addEdge("class:" + OrientEdgeClass, myOutVertex, myInVertex, OrientEdgeClass);
-							//myOrientEdge.setProperties(myRelationshipProperties);								
-						Object[] EdgeProps = new Object[myRelationshipProperties.size()*2];
-						int i=0;
-						for(Map.Entry entry:myRelationshipProperties.entrySet()){
-						   EdgeProps[i++] = entry.getKey();
-						   EdgeProps[i++] = entry.getValue();
-						} 
-						//
-						
-						try{
-							OrientEdge myOrientEdge = myOutOrientVertex.addEdge("class:" + OrientEdgeClass, myInOrientVertex, EdgeProps);
-						
-							OrientDBImportedEdgesCounter++;
-						
-							//debug 
-							//System.out.println("Orient:" + myOutOrientVertex.getProperty("Neo4jID") +"-"+ myRelationshipType.name()  +"->"+ myInOrientVertex.getProperty("Neo4jID"));
-							
-							value = 100 * ( OrientDBImportedEdgesCounter / Neo4jTotalRels );
-							
-							System.out.print("\r  " + df.format(OrientDBImportedEdgesCounter) + " OrientDB Edges have been created (" + df.format(value) + "% done)");
-							value = 0;
-							
-						} catch (Exception e) {
-							
-							ImportLogger.log( Level.SEVERE, "Found an error when trying to create an Edge in OrientDB. Correspinding Relationship in Neo4j is '" + myRelationship + "': " + e.getMessage() );
-						}													
-					}					
 				}
-			}				
+
+			}		
+			
+			InternalIndicesStopTime = System.currentTimeMillis();
+						
+			System.out.println ("\nDone");
+			
 		}
+		//
+			
+			
+		// gets all relationships from Neo4j and creates the corresponding Edges in OrientDB 
 		
-		double ImportingRelsStopTime = System.currentTimeMillis();
+		double ImportingRelsStartTime = 0L;
+		double ImportingRelsStopTime = 0L;
 		
-		System.out.println ("\nDone");
+		if (migrateRels) {
+					
+			System.out.println();
+			System.out.println( "Getting all Relationships from Neo4j and creating corresponding Edges in OrientDB..." );
+					
+			//counting Neo4j Relationships so that we can show a % on OrientDB Edges creation
+			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+					
+				Iterable<Relationship> Neo4jRelationships =  Neo4jGraphDb.getAllRelationships();	
+				
+				for (final Relationship myRelationship : Neo4jRelationships) {
+					Neo4jTotalRels++;
+				}
+				
+			}		
+			//
+			
+			ImportingRelsStartTime = System.currentTimeMillis();
+			
+			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+					
+				Iterable<Relationship> Neo4jRelationships =  Neo4jGraphDb.getAllRelationships();	
+				
+				for (final Relationship myRelationship : Neo4jRelationships) {
+					
+					Neo4jRelCounter++;
+							
+					//System.out.println(myRelationship);				
+					
+					RelationshipType myRelationshipType = myRelationship.getType();
+					
+					//get the relationship properties
+					Map<String,Object> myRelationshipProperties = myRelationship.getAllProperties();
+					
+					//store also the original neo4j relationship id
+					myRelationshipProperties.put("Neo4jRelID", myRelationship.getId());
+									
+					//get the out node of this relationships					
+					Node Neo4jOutNode = myRelationship.getStartNode();
+
+					//get the in node of this relationships					
+					Node Neo4jInNode = myRelationship.getEndNode();
+					
+					// so we have Neo4jOutNode - myRelationship -> Neo4jInNode										
+					
+					//debug
+					//System.out.println("Neo:" + Neo4jOutNode +"-"+ myRelationshipType.name()  +"->"+ Neo4jInNode);					
+
+					//lookup the corresponding OUTVertex in OrientDB 
+					Iterable<Vertex> outVertex = Odb.getVertices("Neo4jNodeID", Neo4jOutNode.getId());		
+					for (final Vertex myOutVertex : outVertex) {				
+
+						//cast from Vertex to OrientVertex so that we can make use of more functionalities 				
+						OrientVertex myOutOrientVertex = (OrientVertex) myOutVertex;				
+							
+						//lookup the corresponding inVertex in OrientDB 
+						Iterable<Vertex> inVertex = Odb.getVertices("Neo4jNodeID", Neo4jInNode.getId());		
+						for (final Vertex myInVertex : inVertex) {		
+						
+							OrientVertex myInOrientVertex = (OrientVertex) myInVertex;	
+
+							String OrientEdgeClass = myRelationshipType.name();
+							
+							//in neo4j we can have labels on nodes and relationship with the same name 
+							//to handle this case, we append an E_ to the relationship name in case the relationship name is the same of a vertex class 
+							Collection<OClass> CheckClassCollection = Odb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
+							for (OClass ClassCollectionElement : CheckClassCollection) {
+								
+								//debug 
+								//System.out.println ("\n" + OrientEdgeClass + " " + ClassCollectionElement.getName());
+								
+								if(OrientEdgeClass.equalsIgnoreCase(ClassCollectionElement.getName())){
+									//we have already a label on a vertex with the same name, changes the edge class by adding an "E_" prefix
+																		
+									//System.out.println ("\n\nWARNING: Found a Neo4j Relationship ('" + OrientEdgeClass + "') with same name of a Neo4j node Label ('"+ ClassCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + OrientEdgeClass + "'\n");
+									
+									ImportLogger.log( Level.WARNING, "Found a Neo4j Relationship ('" + OrientEdgeClass + "') with same name of a Neo4j node Label ('"+ ClassCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + OrientEdgeClass );
+									
+									OrientEdgeClass = "E_" + OrientEdgeClass;
+								}	
+							}						
+							//
+													
+							// Converting map myRelationshipProperties to an Object[], so that it can be passed to addEdge method below
+							// This will allow to create edges with a single create operation, instead of a create and update operation similar to the following:
+								//OrientEdge myOrientEdge = Odb.addEdge("class:" + OrientEdgeClass, myOutVertex, myInVertex, OrientEdgeClass);
+								//myOrientEdge.setProperties(myRelationshipProperties);								
+							Object[] EdgeProps = new Object[myRelationshipProperties.size()*2];
+							int i=0;
+							for(Map.Entry entry:myRelationshipProperties.entrySet()){
+							   EdgeProps[i++] = entry.getKey();
+							   EdgeProps[i++] = entry.getValue();
+							} 
+							//
+							
+							try{
+								OrientEdge myOrientEdge = myOutOrientVertex.addEdge("class:" + OrientEdgeClass, myInOrientVertex, EdgeProps);
+							
+								OrientDBImportedEdgesCounter++;
+							
+								//debug 
+								//System.out.println("Orient:" + myOutOrientVertex.getProperty("Neo4jID") +"-"+ myRelationshipType.name()  +"->"+ myInOrientVertex.getProperty("Neo4jID"));
+								
+								value = 100 * ( OrientDBImportedEdgesCounter / Neo4jTotalRels );
+								
+								System.out.print("\r  " + df.format(OrientDBImportedEdgesCounter) + " OrientDB Edges have been created (" + df.format(value) + "% done)");
+								value = 0;
+								
+							} catch (Exception e) {
+								
+								ImportLogger.log( Level.SEVERE, "Found an error when trying to create an Edge in OrientDB. Correspinding Relationship in Neo4j is '" + myRelationship + "': " + e.getMessage() );
+							}													
+						}					
+					}
+				}				
+			}
+			
+			ImportingRelsStopTime = System.currentTimeMillis();
+			
+			System.out.println ("\nDone");
+		}		
+		//
 		
+		//
 		logString = myProgramName + " - v." + OConstants.getVersion() + " - PHASE 2 completed!\n";
 		ImportLogger.log( Level.INFO, logString  );		
 		//
@@ -979,7 +1005,7 @@ public class ONeo4jImporter {
 	}
 	
 	private static boolean createOrientDBProperty(final Label myNeo4jLabel, final String myOrientDBIndexClass, final String myNeo4jPropKey, final GraphDatabaseService myNeo4jGraphDb, OrientGraphNoTx myOdb, final String myNeo4jConstraintType) {
-
+				
 		//To create a property in OrientDB first we need to understand the Neo4j property data type. 
 		//To do this we will use java instanceof, as there are no specific methods in the noe4j api to get the data type of a property		
 		//To be able to use instanceof, we first need to find a node that has that property 
@@ -987,38 +1013,59 @@ public class ONeo4jImporter {
 		String Neo4jPropType = "";			
 		OType OrientOtype = null;       
 		boolean foundNode = false; 
+		long debugCounter = 0L;
 		
-		//find a node that has this property, then get the data type of this property
-		ResourceIterator<Node> Neo4jNodes = myNeo4jGraphDb.findNodes(myNeo4jLabel);				
-		try {
-			 while ( Neo4jNodes.hasNext() ) {
+		//find a node that has this property, then get the data type of this property		
+		try (final Transaction tx = myNeo4jGraphDb.beginTx()) {
+					
+			ResourceIterator<Node> Neo4jNodes = myNeo4jGraphDb.findNodes(myNeo4jLabel);				
+			try {
+
+				 while ( Neo4jNodes.hasNext() ) {
+					
+					debugCounter++;
+					
+					try {
+						
+						Node myNode = Neo4jNodes.next();	
+						
+						//not all nodes with label myNeo4jLabel may have this property - even if we have a unique constraint on this property (it is unique in the nodes where the property exists). When we find a node with this property, we exit the loop				
+						if (myNode.hasProperty(myNeo4jPropKey)){
+							
+							foundNode = true;
+							
+							//debug
+							//System.out.println("Found node. debugCounter is: " + debugCounter + ". Working on node " + myNode); 
+							
+							Object PropertyValue = myNode.getProperty( myNeo4jPropKey, null );
+							
+							//get the Neo4j property data type 
+							Neo4jPropType = Neo4jPropType(PropertyValue);
+							
+							//map the Neo4j property type to an OrientDB property data type 
+							OrientOtype = MapNeo4jToOrientDBPropertyType (Neo4jPropType);
+							
+							//debug
+							//System.out.println("Property defined on this node: " + myNeo4jPropKey + " value: " + PropertyValue + " data type: " + Neo4jPropType); 
+							
+							break;
+						}						
+						
+					}catch (Exception e){	
+						
+						ImportLogger.log( Level.WARNING, e.toString() );
+						
+						break;
+					}
+					
+				 }
+			
+			} finally {				
 				
-				Node myNode = Neo4jNodes.next();	
+				Neo4jNodes.close();
 				
-				//not all nodes with label myNeo4jLabel may have this property - even if we have a unique constraint on this property (it is unique in the nodes where the property exists). When we find a node with this property, we exit the loop				
-				if (myNode.hasProperty(myNeo4jPropKey)){
-					
-					foundNode = true;
-					
-					//System.out.println("working on node " + myNode); //debug
-					
-					Object PropertyValue = myNode.getProperty( myNeo4jPropKey, null );
-					
-					//get the Neo4j property data type 
-					Neo4jPropType = Neo4jPropType(PropertyValue);
-					
-					//map the Neo4j property type to an OrientDB property data type 
-					OrientOtype = MapNeo4jToOrientDBPropertyType (Neo4jPropType);
-					
-					//System.out.println("Property defined on this node: " + myNeo4jPropKey + " value: " + PropertyValue + " data type: " + Neo4jPropType); //debug
-					
-					break;
-				}
-				
-			 }
-		}
-		finally {					
-			Neo4jNodes.close();
+			}
+			
 		}
 		//
 										
@@ -1029,8 +1076,9 @@ public class ONeo4jImporter {
 			Neo4jPropType="Sting";		
 			OrientOtype	= OType.STRING;
 		}
-			
-		//System.out.println("Creating OrientDB Property '" + myNeo4jPropKey + "' of type '" + OrientOtype + "' on Class '" + myOrientDBIndexClass + "' "); //debug 
+		
+		//debug 
+		//System.out.println("Creating OrientDB Property '" + myNeo4jPropKey + "' of type '" + OrientOtype + "' on Class '" + myOrientDBIndexClass + "' "); 
 					
 		try{
 				
