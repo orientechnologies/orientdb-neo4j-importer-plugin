@@ -234,14 +234,14 @@ public class ONeo4jImporter {
 				
 		String dbUrl ="plocal:" + OrientDbFolder;
 		
-		//OLogManager.instance().setConsoleLevel("OFF");
-		
 	    OGlobalConfiguration.USE_WAL.setValue(false);		
 		OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
 				
 		OrientGraphFactory Ofactory = new OrientGraphFactory(dbUrl, "admin", "admin");
 		Ofactory.declareIntent(new OIntentMassiveInsert());
 		OrientGraphNoTx Odb = Ofactory.getNoTx();
+		
+		Odb.setStandardElementConstraints(false); 
 		
 		String OrientVertexClass ="";
 		
