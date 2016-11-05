@@ -224,7 +224,10 @@ public class ONeo4jImporter {
 		GraphDatabaseService Neo4jGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 		registerNeo4jShutdownHook( Neo4jGraphDb );
 		
-		System.out.print("\rInitializing Neo4j...Done\n");
+		logString = "Initializing Neo4j...Done";
+		
+		System.out.print("\r" + logString + "\n");
+		ImportLogger.log( Level.INFO, logString );
 		//
 
 		
@@ -245,7 +248,10 @@ public class ONeo4jImporter {
 		
 		String OrientVertexClass ="";
 		
-        System.out.print("\rInitializing OrientDB...Done\n");
+		logString = "Initializing OrientDB...Done";
+		
+        System.out.print("\r" + logString + "\n");
+		ImportLogger.log( Level.INFO, logString );
 		//
 						
 		//
@@ -257,7 +263,7 @@ public class ONeo4jImporter {
 		//
 		
 		logString =  myProgramName + " - v." + OConstants.getVersion() + " - PHASE 1 completed!\n";
-		ImportLogger.log( Level.INFO, logString  );
+		ImportLogger.log( Level.INFO, logString );
 
 		double InitializationStopTime = System.currentTimeMillis();				
 		
@@ -299,9 +305,13 @@ public class ONeo4jImporter {
 				
 		//gets all nodes from Neo4j and creates corresponding Vertices in OrientDB
 		if (migrateNodes){
-		
+			
+			logString = "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB...";
+			
 			System.out.println();
-			System.out.println( "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB..." );
+			System.out.println( logString );
+			
+			ImportLogger.log( Level.INFO, logString );
 			
 			//counting Neo4j Nodes so that we can show a % on OrientDB vertices creation
 			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
@@ -386,8 +396,9 @@ public class ONeo4jImporter {
 					
 						OrientDBImportedVerticesCounter++;
 						
-						value = 100.0 * (OrientDBImportedVerticesCounter / Neo4jTotalNodes);					
-						System.out.print("\r  " + df.format(OrientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value) + "% done)");		
+						value = 100.0 * (OrientDBImportedVerticesCounter / Neo4jTotalNodes);
+						logString = df.format(OrientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value) + "% done)";
+						System.out.print("\r  " + logString);		
 						value =0;
 					
 					}catch (Exception e){
@@ -397,6 +408,16 @@ public class ONeo4jImporter {
 					}
 					
 				}
+				
+				if (OrientDBImportedVerticesCounter==0){						
+					logString = df.format(OrientDBImportedVerticesCounter) + " OrientDB Vertices have been created";
+					System.out.print("\r  " + logString);		
+										
+				}
+				
+				//prints number of created vertices in the log 
+				ImportLogger.log( Level.INFO, logString );
+				
 				System.out.println ("\nDone");
 			}
 
@@ -406,8 +427,13 @@ public class ONeo4jImporter {
 			//creates an index on each OrientDB vertices class on Neo4jNodeID property - this will help in speeding up vertices lookup during relationships creation 		
 			InternalIndicesStartTime = System.currentTimeMillis();
 			
+			logString = "Creating internal Indices on property 'Neo4jNodeID' on all OrientDB Vertices Classes...";	
+			
 			System.out.println();
-			System.out.println( "Creating internal Indices on property 'Neo4jNodeID' on all OrientDB Vertices Classes..." );		
+			System.out.println( logString );
+			
+			ImportLogger.log( Level.INFO, logString );	
+			
 			Collection<OClass> ClassCollection = Odb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
 			
 			OrientDBVerticesClassCount = (double)ClassCollection.size();
@@ -429,7 +455,8 @@ public class ONeo4jImporter {
 						Neo4jInternalIndicesCounter++;
 											
 						value = 100.0 * (Neo4jInternalIndicesCounter / OrientDBVerticesClassCount);
-						System.out.print("\r  " + df.format(Neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)");			
+						logString = df.format(Neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
+						System.out.print("\r  " + logString);			
 						value =0;
 						
 					}catch (Exception e){
@@ -446,6 +473,15 @@ public class ONeo4jImporter {
 			}		
 			
 			InternalIndicesStopTime = System.currentTimeMillis();
+			
+			if (Neo4jInternalIndicesCounter==0){						
+				logString = df.format(Neo4jInternalIndicesCounter) + " OrientDB Indices have been created";
+				System.out.print("\r  " + logString);		
+										
+			}
+				
+			//prints number of created internal indices in the log 
+			ImportLogger.log( Level.INFO, logString );
 						
 			System.out.println ("\nDone");
 			
@@ -459,9 +495,13 @@ public class ONeo4jImporter {
 		double ImportingRelsStopTime = 0L;
 		
 		if (migrateRels) {
-					
+			
+			logString = "Getting all Relationships from Neo4j and creating corresponding Edges in OrientDB...";
+			
 			System.out.println();
-			System.out.println( "Getting all Relationships from Neo4j and creating corresponding Edges in OrientDB..." );
+			System.out.println( logString );
+			
+			ImportLogger.log( Level.INFO, logString );
 					
 			//counting Neo4j Relationships so that we can show a % on OrientDB Edges creation
 			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
@@ -562,8 +602,8 @@ public class ONeo4jImporter {
 								//System.out.println("Orient:" + myOutOrientVertex.getProperty("Neo4jID") +"-"+ myRelationshipType.name()  +"->"+ myInOrientVertex.getProperty("Neo4jID"));
 								
 								value = 100 * ( OrientDBImportedEdgesCounter / Neo4jTotalRels );
-								
-								System.out.print("\r  " + df.format(OrientDBImportedEdgesCounter) + " OrientDB Edges have been created (" + df.format(value) + "% done)");
+								logString = df.format(OrientDBImportedEdgesCounter) + " OrientDB Edges have been created (" + df.format(value) + "% done)";
+								System.out.print("\r  " + logString);
 								value = 0;
 								
 							} catch (Exception e) {
@@ -576,6 +616,15 @@ public class ONeo4jImporter {
 			}
 			
 			ImportingRelsStopTime = System.currentTimeMillis();
+			
+			if (OrientDBImportedEdgesCounter==0){						
+				logString = df.format(OrientDBImportedEdgesCounter) + " OrientDB Edges have been created";
+				System.out.print("\r  " + logString);		
+										
+			}
+				
+			//prints number of created edges in the log 
+			ImportLogger.log( Level.INFO, logString );			
 			
 			System.out.println ("\nDone");
 		}		
@@ -603,8 +652,12 @@ public class ONeo4jImporter {
 		//
 				
 		//
+		logString = "Getting Constraints from Neo4j and creating corresponding ones in OrientDB...";
+		
 		System.out.println();
-        System.out.println( "Getting Constraints from Neo4j and creating corresponding ones in OrientDB..." );
+		System.out.println( logString );
+		
+		ImportLogger.log( Level.INFO, logString );		
 		
 		//counting Neo4j Constraints so that we can show a % on OrientDB Constraints creation
 		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
@@ -711,8 +764,8 @@ public class ONeo4jImporter {
 							OrientDBImportedConstraintsCounter++;
 							
 							value = 100 * ( OrientDBImportedUniqueConstraintsCounter / Neo4jTotalUniqueConstraints );
-					
-							System.out.print("\r  " + df.format(OrientDBImportedUniqueConstraintsCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)");
+							logString = df.format(OrientDBImportedUniqueConstraintsCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
+							System.out.print("\r  " + logString);
 							value = 0;							
 						
 						}catch (Exception e){
@@ -723,14 +776,28 @@ public class ONeo4jImporter {
 					}				
 				}					
 			}
-		}		
+		}
+
+		if (OrientDBImportedUniqueConstraintsCounter==0){						
+			logString = df.format(OrientDBImportedUniqueConstraintsCounter) + " OrientDB Indices have been created";
+			System.out.print("\r  " + logString);		
+									
+		}
+			
+		//prints number of unique constraints in the log 
+		ImportLogger.log( Level.INFO, logString );	
+			
 		System.out.println ("\nDone");	
 		//
 
 		//
-		System.out.println();
-        System.out.println( "Getting Indices from Neo4j and creating corresponding ones in OrientDB..." );
+		logString = "Getting Indices from Neo4j and creating corresponding ones in OrientDB...";
 		
+		System.out.println();
+		System.out.println( logString );
+		
+		ImportLogger.log( Level.INFO, logString );				
+        		
 		//counting Neo4j Indices so that we can show a % on OrientDB indices creation
 		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
 			
@@ -805,8 +872,8 @@ public class ONeo4jImporter {
 							OrientDBImportedIndicesCounter++;
 							
 							value = 100 * ( OrientDBImportedIndicesCounter / (Neo4jTotalIndices - OrientDBImportedUniqueConstraintsCounter) );
-					
-							System.out.print("\r  " + df.format(OrientDBImportedIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)");
+							logString = df.format(OrientDBImportedIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
+							System.out.print("\r  " + logString);
 							value = 0;							
 					
 						}catch (Exception e){
@@ -821,6 +888,15 @@ public class ONeo4jImporter {
 		}
 		
 		double ImportingSchemaStopTime = System.currentTimeMillis();
+		
+		if (OrientDBImportedIndicesCounter==0){						
+			logString = df.format(OrientDBImportedIndicesCounter) + " OrientDB Indices have been created";
+			System.out.print("\r  " + logString);		
+									
+		}
+			
+		//prints number of unique constraints in the log 
+		ImportLogger.log( Level.INFO, logString );	
 		
 		System.out.println ("\nDone");	
 		
@@ -842,9 +918,13 @@ public class ONeo4jImporter {
 
 
 		
-		//		
+		//
+		logString = "Shutting down OrientDB...";
+		
 		System.out.println();
-        System.out.print( "Shutting down OrientDB..." );
+		System.out.print( logString );
+		
+		ImportLogger.log( Level.INFO, logString );						
 				
 		Odb.shutdown();
 		Ofactory.close();	
@@ -853,13 +933,20 @@ public class ONeo4jImporter {
 		//
 
 		//
-        System.out.println();
-        System.out.print( "Shutting down Neo4j..." );
+        logString = "Shutting down Neo4j...";
+		
+		System.out.println();
+		System.out.print( logString );
+		
+		ImportLogger.log( Level.INFO, logString );			
 
         Neo4jGraphDb.shutdown();
+		
 		System.out.print( "\rShutting down Neo4j...Done" );
 		System.out.println();
+		//
 		
+		//
 		double stopTime = System.currentTimeMillis();		
         double elapsedTime = (stopTime - startTime);
 		double elapsedTimeSeconds = elapsedTime / (1000);
@@ -878,7 +965,9 @@ public class ONeo4jImporter {
 		
 		double InternalIndicesElapsedTime = InternalIndicesStopTime - InternalIndicesStartTime;		
 		double InternalIndicesElapsedTimeSeconds = InternalIndicesElapsedTime / (1000);
+		//
 		
+		//
 		System.out.println();
 		System.out.println( "===============" );
         System.out.println( "Import Summary:" );
@@ -974,20 +1063,21 @@ public class ONeo4jImporter {
 			value=0;		
 		}		
 		
-		System.out.println("\n");		
-		
+		System.out.println("\n");				
 		//
 
 		//				
 		logString =  myProgramName + " - v." + OConstants.getVersion() + " - PHASE 4 completed!\n";
 		ImportLogger.log( Level.INFO, logString  );
 		
-		logString =  myProgramName + " - v." + OConstants.getVersion() + " - Import completed!";
+		logString =  myProgramName + " - v." + OConstants.getVersion() + " - Import completed!\n";
 		ImportLogger.log( Level.INFO, logString  );
 		//
 		
+		//
 		returnCode = 0;
 		return returnCode;
+		//
 		
     }
 	
