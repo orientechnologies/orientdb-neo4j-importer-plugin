@@ -561,6 +561,15 @@ public class ONeo4jImporter {
 
 							String OrientEdgeClass = myRelationshipType.name();
 							
+							//System.out.println ("\n" + OrientEdgeClass);
+														
+							//if (OrientEdgeClass != null) {
+							//	if (OrientEdgeClass.startsWith(":")){
+							//		//remove :
+							//		OrientEdgeClass = OrientEdgeClass.substring(1);
+							//	}
+							//}
+							
 							//in neo4j we can have labels on nodes and relationship with the same name 
 							//to handle this case, we append an E_ to the relationship name in case the relationship name is the same of a vertex class 
 							Collection<OClass> CheckClassCollection = Odb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
@@ -594,7 +603,7 @@ public class ONeo4jImporter {
 							//
 							
 							try{
-								OrientEdge myOrientEdge = myOutOrientVertex.addEdge("class:" + OrientEdgeClass, myInOrientVertex, EdgeProps);
+								OrientEdge myOrientEdge = myOutOrientVertex.addEdge(OrientEdgeClass, myInOrientVertex, EdgeProps);
 							
 								OrientDBImportedEdgesCounter++;
 							
