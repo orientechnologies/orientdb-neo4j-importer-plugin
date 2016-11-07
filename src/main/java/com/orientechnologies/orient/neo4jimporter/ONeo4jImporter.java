@@ -123,12 +123,12 @@ public class ONeo4jImporter {
    	public static void main(String[] args) {
 		
 		//
-		String ProgramName = "OrientDB's Neo4j Importer";		
+		String programName = "OrientDB's Neo4j Importer";		
 		//
 		
 		//			
 		System.out.println();		
-        System.out.println(String.format(ProgramName + " v.%s - %s", OConstants.getVersion(), OConstants.COPYRIGHT));		
+        System.out.println(String.format(programName + " v.%s - %s", OConstants.getVersion(), OConstants.COPYRIGHT));		
 		System.out.println();
 		//
 		
@@ -138,7 +138,7 @@ public class ONeo4jImporter {
 		  
 		  final ONeo4jImporter neo4jImporter = ONeo4jImporterCommandLineParser.getNeo4jImporter(args);	
 		  
-		  returnValue = neo4jImporter.execute(ProgramName);
+		  returnValue = neo4jImporter.execute(programName);
 		  
 		} catch (Exception ex) {
 		  System.err.println(ex.getMessage());
@@ -151,11 +151,10 @@ public class ONeo4jImporter {
 	
 	public int execute(String myProgramName) throws Exception {
 		
-		ImportLogger.log( Level.INFO, myProgramName + " - v." + OConstants.getVersion() + " started!\n" );		
-		
 		//
 		int returnCode = 1;		
-		String logString ="";		
+		String logString = "";		
+		String keepLogString = "";				
 		double startTime = System.currentTimeMillis();
 		double value;
 		
@@ -166,31 +165,35 @@ public class ONeo4jImporter {
 		DecimalFormat dfd = new DecimalFormat("#.##");
 		//
 		
+		logString = myProgramName + " - v." + OConstants.getVersion() + " started!\n";
+		importLogger.log( Level.INFO, logString);	
+		
 		// parameters (from command line)
 		boolean overwriteOrientDBDir = settings.overwriteOrientDbDir; 		
-		String Neo4jLibPath = settings.Neo4jLibPath; //actually unused right now - but important to start the program from the command line 
-		String Neo4jDBPath = settings.Neo4jDbPath;								
-		String OrientDbFolder = settings.OrientDbDir;					
+		String neo4jLibPath = settings.neo4jLibPath; //actually unused right now - but important to start the program from the command line 
+		String neo4jDBPath = settings.neo4jDbPath;								
+		String orientDbFolder = settings.orientDbDir;					
 		//
 		
-		// check existance of OrientDbFolder and takes action accordingly to option overwriteOrientDBDir		
-		final File f = new File(OrientDbFolder);
+		// check existance of orientDbFolder and takes action accordingly to option overwriteOrientDBDir		
+		final File f = new File(orientDbFolder);
 		if (f.exists()){
 			if(overwriteOrientDBDir){
-
-				ImportLogger.log( Level.WARNING, "Directory '" + OrientDbFolder + "' exists already and the overwrite option '-o' is 'true'. Directory will be erased" );
+				
+				logString = "Directory '" + orientDbFolder + "' exists already and the overwrite option '-o' is 'true'. Directory will be erased";
+				importLogger.log( Level.WARNING, logString );
 				
 				OFileUtils.deleteRecursively(f);	
 				
 			} else {
 				
 				//we exit the program 
-				logString = "ERROR: The directory '" + OrientDbFolder + "' exists and the overwrite option '-o' is 'false' (default). Please delete the directory or run the program with the '-o true' option. Exiting";
+				logString = "ERROR: The directory '" + orientDbFolder + "' exists and the overwrite option '-o' is 'false' (default). Please delete the directory or run the program with the '-o true' option. Exiting";
 				
 				System.out.print(logString);
 				System.out.print("\n\n");
 				
-				ImportLogger.log( Level.SEVERE, logString );
+				importLogger.log( Level.SEVERE, logString );
 				
 				System.exit(1);
 				
@@ -206,28 +209,28 @@ public class ONeo4jImporter {
 		
 		
 				
-		double InitializationStartTime = System.currentTimeMillis();				
+		double initializationStartTime = System.currentTimeMillis();				
 				
 		//		
 		System.out.println( "Please make sure that there are no running servers on:" );
-		System.out.println( "  '" + Neo4jDBPath + "' (Neo4j)" );
+		System.out.println( "  '" + neo4jDBPath + "' (Neo4j)" );
 		System.out.println( "and:");
-		System.out.println( "  '" + OrientDbFolder + "' (OrientDB)" );
+		System.out.println( "  '" + orientDbFolder + "' (OrientDB)" );
 		//
 		
 		//
 		System.out.println();
         System.out.print( "Initializing Neo4j..." );
 		
-		File DB_PATH = new File( Neo4jDBPath );
+		File DB_PATH = new File( neo4jDBPath );
 		
-		GraphDatabaseService Neo4jGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
-		registerNeo4jShutdownHook( Neo4jGraphDb );
+		GraphDatabaseService neo4jGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+		registerNeo4jShutdownHook( neo4jGraphDb );
 		
 		logString = "Initializing Neo4j...Done";
 		
 		System.out.print("\r" + logString + "\n");
-		ImportLogger.log( Level.INFO, logString );
+		importLogger.log( Level.INFO, logString );
 		//
 
 		
@@ -235,37 +238,37 @@ public class ONeo4jImporter {
 		System.out.println();
         System.out.print( "Initializing OrientDB..." );
 				
-		String dbUrl ="plocal:" + OrientDbFolder;
+		String dbUrl ="plocal:" + orientDbFolder;
 		
 	    OGlobalConfiguration.USE_WAL.setValue(false);		
 		OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
 				
-		OrientGraphFactory Ofactory = new OrientGraphFactory(dbUrl, "admin", "admin");
-		Ofactory.declareIntent(new OIntentMassiveInsert());
-		OrientGraphNoTx Odb = Ofactory.getNoTx();
+		OrientGraphFactory oFactory = new OrientGraphFactory(dbUrl, "admin", "admin");
+		oFactory.declareIntent(new OIntentMassiveInsert());
+		OrientGraphNoTx oDb = oFactory.getNoTx();
 		
-		Odb.setStandardElementConstraints(false); 
+		oDb.setStandardElementConstraints(false); 
 		
-		String OrientVertexClass ="";
+		String orientVertexClass = "";
 		
 		logString = "Initializing OrientDB...Done";
 		
         System.out.print("\r" + logString + "\n");
-		ImportLogger.log( Level.INFO, logString );
+		importLogger.log( Level.INFO, logString );
 		//
 						
 		//
 		System.out.println();
         System.out.println( "Importing Neo4j database:");
-		System.out.println( "  '" + Neo4jDBPath + "'");
+		System.out.println( "  '" + neo4jDBPath + "'");
 		System.out.println( "into OrientDB database:");
-		System.out.println( "  '" + OrientDbFolder + "'");
+		System.out.println( "  '" + orientDbFolder + "'");
 		//
 		
 		logString =  myProgramName + " - v." + OConstants.getVersion() + " - PHASE 1 completed!\n";
-		ImportLogger.log( Level.INFO, logString );
+		importLogger.log( Level.INFO, logString );
 
-		double InitializationStopTime = System.currentTimeMillis();				
+		double initializationStopTime = System.currentTimeMillis();				
 		
 		
 		
@@ -276,31 +279,31 @@ public class ONeo4jImporter {
 		
 		
 		//
-		double Neo4jNodeCounter=0L;
-		double Neo4jNodeNoLabelCounter=0L;
-		double Neo4jNodeMultipleLabelsCounter=0L;
-		double OrientDBImportedVerticesCounter=0L;
-		double Neo4jRelCounter=0L;
-		double OrientDBImportedEdgesCounter=0L;
-		double Neo4jConstraintsCounter=0L;
-		double OrientDBImportedConstraintsCounter=0L;
-		double OrientDBImportedUniqueConstraintsCounter=0L;
-		double Neo4jIndicesCounter=0L;
-		double Neo4jNonConstraintsIndicesCounter=0L;
-		double Neo4jInternalIndicesCounter=0L;
-		double OrientDBImportedIndicesCounter=0L;				
-		double Neo4jTotalNodes=0L;
-		double Neo4jTotalRels=0L;
-		double Neo4jTotalUniqueConstraints=0L;
-		double Neo4jTotalIndices=0L;						
+		double neo4jNodeCounter=0L;
+		double neo4jNodeNoLabelCounter=0L;
+		double neo4jNodeMultipleLabelsCounter=0L;
+		double orientDBImportedVerticesCounter=0L;
+		double neo4jRelCounter=0L;
+		double orientDBImportedEdgesCounter=0L;
+		double neo4jConstraintsCounter=0L;
+		double orientDBImportedConstraintsCounter=0L;
+		double orientDBImportedUniqueConstraintsCounter=0L;
+		double neo4jIndicesCounter=0L;
+		double neo4jNonConstraintsIndicesCounter=0L;
+		double neo4jInternalIndicesCounter=0L;
+		double orientDBImportedIndicesCounter=0L;				
+		double neo4jTotalNodes=0L;
+		double neo4jTotalRels=0L;
+		double neo4jTotalUniqueConstraints=0L;
+		double neo4jTotalIndices=0L;						
 		//
 		
 		//
-		double ImportingNodesStartTime = 0L;		
-		double ImportingNodesStopTime = 0L;		
-		double InternalIndicesStartTime = 0L;
-		double OrientDBVerticesClassCount = 0L;
-		double InternalIndicesStopTime = 0L;		
+		double importingNodesStartTime = 0L;		
+		double importingNodesStopTime = 0L;		
+		double internalIndicesStartTime = 0L;
+		double orientDBVerticesClassCount = 0L;
+		double internalIndicesStopTime = 0L;		
 		//
 				
 		//gets all nodes from Neo4j and creates corresponding Vertices in OrientDB
@@ -311,29 +314,29 @@ public class ONeo4jImporter {
 			System.out.println();
 			System.out.println( logString );
 			
-			ImportLogger.log( Level.INFO, logString );
+			importLogger.log( Level.INFO, logString );
 			
 			//counting Neo4j Nodes so that we can show a % on OrientDB vertices creation
-			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+			try (final Transaction tx = neo4jGraphDb.beginTx()) {
 					
-				Iterable<Node> Neo4jNodes =  Neo4jGraphDb.getAllNodes();
+				Iterable<Node> neo4jNodes = neo4jGraphDb.getAllNodes();
 				
-				for (final Node myNode : Neo4jNodes) {
-					Neo4jTotalNodes++;
+				for (final Node myNode : neo4jNodes) {
+					neo4jTotalNodes++;
 				}
 				
 			}
 			//
 			
-			ImportingNodesStartTime = System.currentTimeMillis();		
+			importingNodesStartTime = System.currentTimeMillis();		
 			
-			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+			try (final Transaction tx = neo4jGraphDb.beginTx()) {
 					
-				Iterable<Node> Neo4jNodes =  Neo4jGraphDb.getAllNodes();		
+				Iterable<Node> neo4jNodes =  neo4jGraphDb.getAllNodes();		
 			
-				for (final Node myNode : Neo4jNodes) {
+				for (final Node myNode : neo4jNodes) {
 					
-					Neo4jNodeCounter++;
+					neo4jNodeCounter++;
 									
 					//System.out.println(myNode); //debug 
 					
@@ -344,21 +347,22 @@ public class ONeo4jImporter {
 					for (final Label myLabel : nodeLabels) {		
 						q++;	
 						
-						OrientVertexClass = myLabel.name();
+						orientVertexClass = myLabel.name();
 						
 						//takes only the first label, in case of multi labels
-						String[] parts = OrientVertexClass.split(":");
+						String[] parts = orientVertexClass.split(":");
 						
-						OrientVertexClass = parts[0];
+						orientVertexClass = parts[0];
 						
 						if (parts.length >= 2) {
 							
-							Neo4jNodeMultipleLabelsCounter++;
+							neo4jNodeMultipleLabelsCounter++;
 						
 							
-							//System.out.println("\nWARNING: Found node ('" + myNode + "') with multiple labels. Only the first (" + OrientVertexClass + ") will be used as Class when importing this node in OrientDB");	
+							//System.out.println("\nWARNING: Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass + ") will be used as Class when importing this node in OrientDB");	
 							
-							ImportLogger.log( Level.WARNING, "Found node ('" + myNode + "') with multiple labels. Only the first (" + OrientVertexClass + ") will be used as Class when importing this node in OrientDB" );
+							logString = "Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass + ") will be used as Class when importing this node in OrientDB";
+							importLogger.log( Level.WARNING, logString );
 								
 													
 						}
@@ -368,14 +372,15 @@ public class ONeo4jImporter {
 					// if q=0 the neo4j node has no label because q is incremented in the for cicly of the nodeLabels itarable
 					if (q==0){
 						
-						Neo4jNodeNoLabelCounter++;
+						neo4jNodeNoLabelCounter++;
 						
 						// set generic class for OrientDB 					
-						OrientVertexClass="GenericClassNeo4jConversion";
+						orientVertexClass = "GenericClassNeo4jConversion";
 						
 						//System.out.println("\nWARNING: Found node ('" + myNode + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB");	
 						
-						ImportLogger.log( Level.WARNING, "Found node ('" + myNode + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB" );
+						logString = "Found node ('" + myNode + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB";
+						importLogger.log( Level.WARNING, logString);
 						
 					}
 					//
@@ -390,98 +395,100 @@ public class ONeo4jImporter {
 					
 					try {				
 						// store the vertex on OrientDB 
-						Vertex myVertex = Odb.addVertex("class:" + OrientVertexClass, myNodeProperties);	
+						Vertex myVertex = oDb.addVertex("class:" + orientVertexClass, myNodeProperties);	
 											
 						//System.out.print(myVertex); //debug 
 					
-						OrientDBImportedVerticesCounter++;
+						orientDBImportedVerticesCounter++;
 						
-						value = 100.0 * (OrientDBImportedVerticesCounter / Neo4jTotalNodes);
-						logString = df.format(OrientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value) + "% done)";
-						System.out.print("\r  " + logString);		
+						value = 100.0 * (orientDBImportedVerticesCounter / neo4jTotalNodes);
+						keepLogString = df.format(orientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value) + "% done)";
+						System.out.print("\r  " + keepLogString);		
 						value =0;
 					
 					}catch (Exception e){
 						
-						ImportLogger.log( Level.SEVERE, "Found an error when trying to store node ('" + myNode + "') to OrientDB: " + e.getMessage() );
+						logString = "Found an error when trying to store node ('" + myNode + "') to OrientDB: " + e.getMessage();
+						importLogger.log( Level.SEVERE, logString);
 											
 					}
 					
 				}
 				
-				if (OrientDBImportedVerticesCounter==0){						
-					logString = df.format(OrientDBImportedVerticesCounter) + " OrientDB Vertices have been created";
-					System.out.print("\r  " + logString);		
-										
+				if (orientDBImportedVerticesCounter==0){					
+					keepLogString = df.format(orientDBImportedVerticesCounter) + " OrientDB Vertices have been created";
+					System.out.print("\r  " + keepLogString);												
 				}
 				
 				//prints number of created vertices in the log 
-				ImportLogger.log( Level.INFO, logString );
+				importLogger.log( Level.INFO, keepLogString );
 				
 				System.out.println ("\nDone");
 			}
 
-			ImportingNodesStopTime = System.currentTimeMillis();				
+			importingNodesStopTime = System.currentTimeMillis();				
 			//
 			
 			//creates an index on each OrientDB vertices class on Neo4jNodeID property - this will help in speeding up vertices lookup during relationships creation 		
-			InternalIndicesStartTime = System.currentTimeMillis();
+			internalIndicesStartTime = System.currentTimeMillis();
 			
 			logString = "Creating internal Indices on property 'Neo4jNodeID' on all OrientDB Vertices Classes...";	
 			
 			System.out.println();
 			System.out.println( logString );
 			
-			ImportLogger.log( Level.INFO, logString );	
+			importLogger.log( Level.INFO, logString );	
 			
-			Collection<OClass> ClassCollection = Odb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
+			Collection<OClass> ClassCollection = oDb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
 			
-			OrientDBVerticesClassCount = (double)ClassCollection.size();
+			orientDBVerticesClassCount = (double)ClassCollection.size();
 			
-			for (OClass ClassCollectionElement : ClassCollection) {
+			for (OClass classCollectionElement : ClassCollection) {
 				
-				//System.out.println(ClassCollectionElement); //debug 
+				//System.out.println(classCollectionElement); //debug 
 				
 				try {
 					
 					//first create the property 
-					Odb.getRawGraph().getMetadata().getSchema().getClass(ClassCollectionElement.getName()).createProperty("Neo4jNodeID",OType.LONG);
+					oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).createProperty("Neo4jNodeID",OType.LONG);
 						
 					//creates the index if the property creation was successfull
 					try {
 						
-						Odb.getRawGraph().getMetadata().getSchema().getClass(ClassCollectionElement.getName()).getProperty("Neo4jNodeID").createIndex(OClass.INDEX_TYPE.UNIQUE); 		
+						oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty("Neo4jNodeID").createIndex(OClass.INDEX_TYPE.UNIQUE); 		
 						
-						Neo4jInternalIndicesCounter++;
+						neo4jInternalIndicesCounter++;
 											
-						value = 100.0 * (Neo4jInternalIndicesCounter / OrientDBVerticesClassCount);
-						logString = df.format(Neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
-						System.out.print("\r  " + logString);			
+						value = 100.0 * (neo4jInternalIndicesCounter / orientDBVerticesClassCount);
+						keepLogString = df.format(neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
+						System.out.print("\r  " + keepLogString);			
 						value =0;
 						
 					}catch (Exception e){
-											
-						ImportLogger.log( Level.SEVERE, "Found an error when trying to create a UNIQUE Index in OrientDB on the 'Neo4jNodeID' Property of the vertices Class '" + ClassCollectionElement.getName() + "': " + e.getMessage() );
+						
+						logString = "Found an error when trying to create a UNIQUE Index in OrientDB on the 'Neo4jNodeID' Property of the vertices Class '" + classCollectionElement.getName() + "': " + e.getMessage();
+						importLogger.log( Level.SEVERE, logString );
 											
 					}
 				}catch (Exception e){
 					
-					ImportLogger.log( Level.SEVERE, "Found an error when trying to create the 'Neo4jNodeID' Property in OrientDB on the vertices Class '" + ClassCollectionElement.getName() + "': " + e.getMessage() );
+					logString = "Found an error when trying to create the 'Neo4jNodeID' Property in OrientDB on the vertices Class '" + classCollectionElement.getName() + "': " + e.getMessage();
+					importLogger.log( Level.SEVERE, logString );
 						
 				}
 
 			}		
 			
-			InternalIndicesStopTime = System.currentTimeMillis();
+			internalIndicesStopTime = System.currentTimeMillis();
 			
-			if (Neo4jInternalIndicesCounter==0){						
-				logString = df.format(Neo4jInternalIndicesCounter) + " OrientDB Indices have been created";
-				System.out.print("\r  " + logString);		
+			if (neo4jInternalIndicesCounter==0){						
+				keepLogString = df.format(neo4jInternalIndicesCounter) + " OrientDB Indices have been created";
+				System.out.print("\r  " + keepLogString);		
 										
 			}
 				
 			//prints number of created internal indices in the log 
-			ImportLogger.log( Level.INFO, logString );
+			importLogger.log( Level.INFO, keepLogString );
 						
 			System.out.println ("\nDone");
 			
@@ -491,8 +498,8 @@ public class ONeo4jImporter {
 			
 		// gets all relationships from Neo4j and creates the corresponding Edges in OrientDB 
 		
-		double ImportingRelsStartTime = 0L;
-		double ImportingRelsStopTime = 0L;
+		double importingRelsStartTime = 0L;
+		double importingRelsStopTime = 0L;
 		
 		if (migrateRels) {
 			
@@ -501,29 +508,29 @@ public class ONeo4jImporter {
 			System.out.println();
 			System.out.println( logString );
 			
-			ImportLogger.log( Level.INFO, logString );
+			importLogger.log( Level.INFO, logString );
 					
 			//counting Neo4j Relationships so that we can show a % on OrientDB Edges creation
-			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+			try (final Transaction tx = neo4jGraphDb.beginTx()) {
 					
-				Iterable<Relationship> Neo4jRelationships =  Neo4jGraphDb.getAllRelationships();	
+				Iterable<Relationship> neo4jRelationships =  neo4jGraphDb.getAllRelationships();	
 				
-				for (final Relationship myRelationship : Neo4jRelationships) {
-					Neo4jTotalRels++;
+				for (final Relationship myRelationship : neo4jRelationships) {
+					neo4jTotalRels++;
 				}
 				
 			}		
 			//
 			
-			ImportingRelsStartTime = System.currentTimeMillis();
+			importingRelsStartTime = System.currentTimeMillis();
 			
-			try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+			try (final Transaction tx = neo4jGraphDb.beginTx()) {
 					
-				Iterable<Relationship> Neo4jRelationships =  Neo4jGraphDb.getAllRelationships();	
+				Iterable<Relationship> neo4jRelationships =  neo4jGraphDb.getAllRelationships();	
 				
-				for (final Relationship myRelationship : Neo4jRelationships) {
+				for (final Relationship myRelationship : neo4jRelationships) {
 					
-					Neo4jRelCounter++;
+					neo4jRelCounter++;
 							
 					//System.out.println(myRelationship);				
 					
@@ -536,104 +543,106 @@ public class ONeo4jImporter {
 					myRelationshipProperties.put("Neo4jRelID", myRelationship.getId());
 									
 					//get the out node of this relationships					
-					Node Neo4jOutNode = myRelationship.getStartNode();
+					Node neo4jOutNode = myRelationship.getStartNode();
 
 					//get the in node of this relationships					
-					Node Neo4jInNode = myRelationship.getEndNode();
+					Node neo4jInNode = myRelationship.getEndNode();
 					
-					// so we have Neo4jOutNode - myRelationship -> Neo4jInNode										
+					// so we have neo4jOutNode - myRelationship -> neo4jInNode										
 					
 					//debug
-					//System.out.println("Neo:" + Neo4jOutNode +"-"+ myRelationshipType.name()  +"->"+ Neo4jInNode);					
+					//System.out.println("Neo:" + neo4jOutNode +"-"+ myRelationshipType.name()  +"->"+ neo4jInNode);					
 
 					//lookup the corresponding OUTVertex in OrientDB 
-					Iterable<Vertex> outVertex = Odb.getVertices("Neo4jNodeID", Neo4jOutNode.getId());		
+					Iterable<Vertex> outVertex = oDb.getVertices("Neo4jNodeID", neo4jOutNode.getId());		
 					for (final Vertex myOutVertex : outVertex) {				
 
 						//cast from Vertex to OrientVertex so that we can make use of more functionalities 				
 						OrientVertex myOutOrientVertex = (OrientVertex) myOutVertex;				
 							
 						//lookup the corresponding inVertex in OrientDB 
-						Iterable<Vertex> inVertex = Odb.getVertices("Neo4jNodeID", Neo4jInNode.getId());		
+						Iterable<Vertex> inVertex = oDb.getVertices("Neo4jNodeID", neo4jInNode.getId());		
 						for (final Vertex myInVertex : inVertex) {		
 						
 							OrientVertex myInOrientVertex = (OrientVertex) myInVertex;	
 
-							String OrientEdgeClass = myRelationshipType.name();
+							String orientEdgeClass = myRelationshipType.name();
 							
-							//System.out.println ("\n" + OrientEdgeClass);
+							//System.out.println ("\n" + orientEdgeClass);
 														
-							//if (OrientEdgeClass != null) {
-							//	if (OrientEdgeClass.startsWith(":")){
+							//if (orientEdgeClass != null) {
+							//	if (orientEdgeClass.startsWith(":")){
 							//		//remove :
-							//		OrientEdgeClass = OrientEdgeClass.substring(1);
+							//		orientEdgeClass = orientEdgeClass.substring(1);
 							//	}
 							//}
 							
 							//in neo4j we can have labels on nodes and relationship with the same name 
 							//to handle this case, we append an E_ to the relationship name in case the relationship name is the same of a vertex class 
-							Collection<OClass> CheckClassCollection = Odb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
-							for (OClass ClassCollectionElement : CheckClassCollection) {
+							Collection<OClass> checkClassCollection = oDb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
+							for (OClass classCollectionElement : checkClassCollection) {
 								
 								//debug 
-								//System.out.println ("\n" + OrientEdgeClass + " " + ClassCollectionElement.getName());
+								//System.out.println ("\n" + orientEdgeClass + " " + classCollectionElement.getName());
 								
-								if(OrientEdgeClass.equalsIgnoreCase(ClassCollectionElement.getName())){
+								if(orientEdgeClass.equalsIgnoreCase(classCollectionElement.getName())){
 									//we have already a label on a vertex with the same name, changes the edge class by adding an "E_" prefix
 																		
-									//System.out.println ("\n\nWARNING: Found a Neo4j Relationship ('" + OrientEdgeClass + "') with same name of a Neo4j node Label ('"+ ClassCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + OrientEdgeClass + "'\n");
+									//System.out.println ("\n\nWARNING: Found a Neo4j Relationship ('" + orientEdgeClass + "') with same name of a Neo4j node Label ('"+ classCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + orientEdgeClass + "'\n");
 									
-									ImportLogger.log( Level.WARNING, "Found a Neo4j Relationship ('" + OrientEdgeClass + "') with same name of a Neo4j node Label ('"+ ClassCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + OrientEdgeClass );
+									logString = "Found a Neo4j Relationship ('" + orientEdgeClass + "') with same name of a Neo4j node Label ('"+ classCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + orientEdgeClass;
+									importLogger.log( Level.WARNING, logString );
 									
-									OrientEdgeClass = "E_" + OrientEdgeClass;
+									orientEdgeClass = "E_" + orientEdgeClass;
 								}	
 							}						
 							//
 													
 							// Converting map myRelationshipProperties to an Object[], so that it can be passed to addEdge method below
 							// This will allow to create edges with a single create operation, instead of a create and update operation similar to the following:
-								//OrientEdge myOrientEdge = Odb.addEdge("class:" + OrientEdgeClass, myOutVertex, myInVertex, OrientEdgeClass);
+								//OrientEdge myOrientEdge = oDb.addEdge("class:" + orientEdgeClass, myOutVertex, myInVertex, orientEdgeClass);
 								//myOrientEdge.setProperties(myRelationshipProperties);								
-							Object[] EdgeProps = new Object[myRelationshipProperties.size()*2];
+							Object[] edgeProps = new Object[myRelationshipProperties.size()*2];
 							int i=0;
 							for(Map.Entry entry:myRelationshipProperties.entrySet()){
-							   EdgeProps[i++] = entry.getKey();
-							   EdgeProps[i++] = entry.getValue();
+							   edgeProps[i++] = entry.getKey();
+							   edgeProps[i++] = entry.getValue();
 							} 
 							//
 							
 							try{
-								OrientEdge myOrientEdge = myOutOrientVertex.addEdge(OrientEdgeClass, myInOrientVertex, EdgeProps);
+								OrientEdge myOrientEdge = myOutOrientVertex.addEdge(orientEdgeClass, myInOrientVertex, edgeProps);
 							
-								OrientDBImportedEdgesCounter++;
+								orientDBImportedEdgesCounter++;
 							
 								//debug 
 								//System.out.println("Orient:" + myOutOrientVertex.getProperty("Neo4jID") +"-"+ myRelationshipType.name()  +"->"+ myInOrientVertex.getProperty("Neo4jID"));
 								
-								value = 100 * ( OrientDBImportedEdgesCounter / Neo4jTotalRels );
-								logString = df.format(OrientDBImportedEdgesCounter) + " OrientDB Edges have been created (" + df.format(value) + "% done)";
-								System.out.print("\r  " + logString);
+								value = 100 * ( orientDBImportedEdgesCounter / neo4jTotalRels );
+								keepLogString = df.format(orientDBImportedEdgesCounter) + " OrientDB Edges have been created (" + df.format(value) + "% done)";
+								System.out.print("\r  " + keepLogString);
 								value = 0;
 								
 							} catch (Exception e) {
 								
-								ImportLogger.log( Level.SEVERE, "Found an error when trying to create an Edge in OrientDB. Correspinding Relationship in Neo4j is '" + myRelationship + "': " + e.getMessage() );
+								logString = "Found an error when trying to create an Edge in OrientDB. Correspinding Relationship in Neo4j is '" + myRelationship + "': " + e.getMessage();
+								importLogger.log( Level.SEVERE, logString );
 							}													
 						}					
 					}
 				}				
 			}
 			
-			ImportingRelsStopTime = System.currentTimeMillis();
+			importingRelsStopTime = System.currentTimeMillis();
 			
-			if (OrientDBImportedEdgesCounter==0){						
-				logString = df.format(OrientDBImportedEdgesCounter) + " OrientDB Edges have been created";
-				System.out.print("\r  " + logString);		
+			if (orientDBImportedEdgesCounter==0){						
+				keepLogString = df.format(orientDBImportedEdgesCounter) + " OrientDB Edges have been created";
+				System.out.print("\r  " + keepLogString);		
 										
 			}
 				
 			//prints number of created edges in the log 
-			ImportLogger.log( Level.INFO, logString );			
+			importLogger.log( Level.INFO, keepLogString );			
 			
 			System.out.println ("\nDone");
 		}		
@@ -641,7 +650,7 @@ public class ONeo4jImporter {
 		
 		//
 		logString = myProgramName + " - v." + OConstants.getVersion() + " - PHASE 2 completed!\n";
-		ImportLogger.log( Level.INFO, logString  );		
+		importLogger.log( Level.INFO, logString );		
 		//
 		
 		
@@ -653,10 +662,10 @@ public class ONeo4jImporter {
 		
 		
 		//
-		double ImportingSchemaStartTime = System.currentTimeMillis();
+		double importingSchemaStartTime = System.currentTimeMillis();
 		
-		String Neo4jPropKey="";				
-		Label Neo4jLabel = null;		
+		String neo4jPropKey = "";				
+		Label neo4jLabel = null;		
 		boolean propertyCreationSuccess = false;
 		//
 				
@@ -666,53 +675,53 @@ public class ONeo4jImporter {
 		System.out.println();
 		System.out.println( logString );
 		
-		ImportLogger.log( Level.INFO, logString );		
+		importLogger.log( Level.INFO, logString );		
 		
 		//counting Neo4j Constraints so that we can show a % on OrientDB Constraints creation
-		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+		try (final Transaction tx = neo4jGraphDb.beginTx()) {
 			
-			Schema Neo4jSchema = Neo4jGraphDb.schema();
+			Schema neo4jSchema = neo4jGraphDb.schema();
 			
-			Iterable<ConstraintDefinition> Neo4jConstraintDefinition =  Neo4jSchema.getConstraints();	
+			Iterable<ConstraintDefinition> Neo4jConstraintDefinition =  neo4jSchema.getConstraints();	
 			for (final ConstraintDefinition myNeo4jConstraintDefinition : Neo4jConstraintDefinition) {	
 				if("UNIQUENESS".equals(myNeo4jConstraintDefinition.getConstraintType().toString())){
-					Neo4jTotalUniqueConstraints++;
+					neo4jTotalUniqueConstraints++;
 				}
 			}
 		}
 		//
 				
-		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+		try (final Transaction tx = neo4jGraphDb.beginTx()) {
 			
-			Schema Neo4jSchema = Neo4jGraphDb.schema();
+			Schema neo4jSchema = neo4jGraphDb.schema();
 			
 			// getting all constraints and iterating
-			Iterable<ConstraintDefinition> Neo4jConstraintDefinition =  Neo4jSchema.getConstraints();	
+			Iterable<ConstraintDefinition> Neo4jConstraintDefinition =  neo4jSchema.getConstraints();	
 			for (final ConstraintDefinition myNeo4jConstraintDefinition : Neo4jConstraintDefinition) {	
 				
-				Neo4jConstraintsCounter++;
+				neo4jConstraintsCounter++;
 				
 				//determine the type of the constaints - different actions will need to be taken according to this type 
-				ConstraintType Neo4jConstraintType = myNeo4jConstraintDefinition.getConstraintType();
-				//System.out.println(Neo4jConstraintType); //Can be: NODE_PROPERTY_EXISTENCE, RELATIONSHIP_PROPERTY_EXISTENCE, UNIQUENESS (on nodes only)
+				ConstraintType neo4jConstraintType = myNeo4jConstraintDefinition.getConstraintType();
+				//System.out.println(neo4jConstraintType); //Can be: NODE_PROPERTY_EXISTENCE, RELATIONSHIP_PROPERTY_EXISTENCE, UNIQUENESS (on nodes only)
 				
 				//determine the class where the constraints will be added in OrientDB
 				//Neo4j allows constraints on both nodes and relationship. To get the OrientDB class, we have to separate the cases				
-				String OrientDBIndexClass = "";
+				String orientDBIndexClass = "";
 					
 				try {
 					//we can get the label with the method getLabel() only if this constraint is associated with a node 					
 					//this is associated with a node 
 					
-					Neo4jLabel = myNeo4jConstraintDefinition.getLabel();					
-					OrientDBIndexClass = Neo4jLabel.name();
+					neo4jLabel = myNeo4jConstraintDefinition.getLabel();					
+					orientDBIndexClass = neo4jLabel.name();
 					
-					//System.out.println("constraint label: " + OrientDBIndexClass);
+					//System.out.println("constraint label: " + orientDBIndexClass);
 					
-					//create class OrientDBIndexClass
+					//create class orientDBIndexClass
 					//there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
-					if(Odb.getRawGraph().getMetadata().getSchema().existsClass(OrientDBIndexClass) == false){
-						Odb.createVertexType(OrientDBIndexClass);						
+					if(oDb.getRawGraph().getMetadata().getSchema().existsClass(orientDBIndexClass) == false){
+						oDb.createVertexType(orientDBIndexClass);						
 					}
 					
 				} catch (IllegalStateException a) {
@@ -726,14 +735,14 @@ public class ONeo4jImporter {
 					
 					String myNeo4jConstraintRelationshipType = myNeo4jConstraintDefinition.getRelationshipType().name();
 					
-					OrientDBIndexClass = myNeo4jConstraintRelationshipType;
+					orientDBIndexClass = myNeo4jConstraintRelationshipType;
 					
-					//System.out.println("constraint rel type: " + OrientDBIndexClass);
+					//System.out.println("constraint rel type: " + orientDBIndexClass);
 					
-					//create class OrientDBIndexClass
+					//create class orientDBIndexClass
 					//there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
-					if(Odb.getRawGraph().getMetadata().getSchema().existsClass(OrientDBIndexClass) == false){
-						Odb.createEdgeType(OrientDBIndexClass);						
+					if(oDb.getRawGraph().getMetadata().getSchema().existsClass(orientDBIndexClass) == false){
+						oDb.createEdgeType(orientDBIndexClass);						
 					}
 					
 				} catch (IllegalStateException a) {
@@ -742,44 +751,45 @@ public class ONeo4jImporter {
 				}
 				//
 				
-				//we now know the type of this constraints and the class on which it is defined (OrientDBIndexClass)
+				//we now know the type of this constraints and the class on which it is defined (orientDBIndexClass)
 				
 				//determine the property key on which the constraint has been defined 
 				Iterable<String> myNeo4jConstraintPropertyKeys = myNeo4jConstraintDefinition.getPropertyKeys();
 				for (final String myNeo4jConstraintPropKey : myNeo4jConstraintPropertyKeys) {					
-					Neo4jPropKey = myNeo4jConstraintPropKey;
+					neo4jPropKey = myNeo4jConstraintPropKey;
 					
-					//System.out.println(Neo4jPropKey);				
+					//System.out.println(neo4jPropKey);				
 				}					
 								
 				//to import this constraint, we first have to create the corresponding property in OrientDB 				
-				propertyCreationSuccess = createOrientDBProperty( Neo4jLabel, OrientDBIndexClass, Neo4jPropKey, Neo4jGraphDb, Odb, Neo4jConstraintType.toString() );
+				propertyCreationSuccess = createOrientDBProperty( neo4jLabel, orientDBIndexClass, neo4jPropKey, neo4jGraphDb, oDb, neo4jConstraintType.toString() );
 				
-				// now that the property has been created, we need to take actions based on the Neo4jConstraintType 				
+				// now that the property has been created, we need to take actions based on the neo4jConstraintType 				
 				if (propertyCreationSuccess){									
 				
 					//taking actions depending on the type of the constraints 
-					if("UNIQUENESS".equals(Neo4jConstraintType.toString())){
+					if("UNIQUENESS".equals(neo4jConstraintType.toString())){
 												
 						try {
 							
 							//we map Neo4j constraints of type UNIQUENESS to UNIQUE indices in Neo4j 
-							OIndex OrientDBIndex = Odb.getRawGraph().getMetadata().getSchema().getClass(OrientDBIndexClass).getProperty(Neo4jPropKey).createIndex(OClass.INDEX_TYPE.UNIQUE); 				
+							OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass).getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.UNIQUE); 				
 							
 							//debug
 							//System.out.println("\nCreated index: " + OrientDBIndex);
 						
-							OrientDBImportedUniqueConstraintsCounter++;
-							OrientDBImportedConstraintsCounter++;
+							orientDBImportedUniqueConstraintsCounter++;
+							orientDBImportedConstraintsCounter++;
 							
-							value = 100 * ( OrientDBImportedUniqueConstraintsCounter / Neo4jTotalUniqueConstraints );
-							logString = df.format(OrientDBImportedUniqueConstraintsCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
-							System.out.print("\r  " + logString);
+							value = 100 * ( orientDBImportedUniqueConstraintsCounter / neo4jTotalUniqueConstraints );
+							keepLogString = df.format(orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created (" + df.format(value) + "% done)";
+							System.out.print("\r  " + keepLogString);
 							value = 0;							
 						
 						}catch (Exception e){
 							
-							ImportLogger.log( Level.SEVERE, "Found an error when trying to create a UNIQUE Index in OrientDB. Correspinding Property in Neo4j is '" + Neo4jPropKey + "' on node label '" + OrientDBIndexClass + "': " + e.getMessage() );
+							logString = "Found an error when trying to create a UNIQUE Index in OrientDB. Correspinding Property in Neo4j is '" + neo4jPropKey + "' on node label '" + orientDBIndexClass + "': " + e.getMessage();
+							importLogger.log( Level.SEVERE, logString );
 							
 						}						
 					}				
@@ -787,14 +797,14 @@ public class ONeo4jImporter {
 			}
 		}
 
-		if (OrientDBImportedUniqueConstraintsCounter==0){						
-			logString = df.format(OrientDBImportedUniqueConstraintsCounter) + " OrientDB Indices have been created";
-			System.out.print("\r  " + logString);		
+		if (orientDBImportedUniqueConstraintsCounter==0){						
+			keepLogString = df.format(orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created";
+			System.out.print("\r  " + keepLogString);		
 									
 		}
 			
 		//prints number of unique constraints in the log 
-		ImportLogger.log( Level.INFO, logString );	
+		importLogger.log( Level.INFO, keepLogString );	
 			
 		System.out.println ("\nDone");	
 		//
@@ -805,30 +815,30 @@ public class ONeo4jImporter {
 		System.out.println();
 		System.out.println( logString );
 		
-		ImportLogger.log( Level.INFO, logString );				
+		importLogger.log( Level.INFO, logString );				
         		
 		//counting Neo4j Indices so that we can show a % on OrientDB indices creation
-		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+		try (final Transaction tx = neo4jGraphDb.beginTx()) {
 			
-			Schema Neo4jSchema = Neo4jGraphDb.schema();
+			Schema neo4jSchema = neo4jGraphDb.schema();
 			
-			Iterable<IndexDefinition> Neo4jIndexDefinition =  Neo4jSchema.getIndexes();	
-			for (final IndexDefinition myNeo4jIndexDefinition : Neo4jIndexDefinition) {					
-				Neo4jTotalIndices++;
+			Iterable<IndexDefinition> neo4jIndexDefinition =  neo4jSchema.getIndexes();	
+			for (final IndexDefinition myNeo4jIndexDefinition : neo4jIndexDefinition) {					
+				neo4jTotalIndices++;
 			}
 		}
 		//
 		
-		try (final Transaction tx = Neo4jGraphDb.beginTx()) {
+		try (final Transaction tx = neo4jGraphDb.beginTx()) {
 			
-			Schema Neo4jSchema = Neo4jGraphDb.schema();
+			Schema neo4jSchema = neo4jGraphDb.schema();
 			
-			Iterable<IndexDefinition> Neo4jIndexDefinition =  Neo4jSchema.getIndexes();	
-			for (final IndexDefinition myNeo4jIndexDefinition : Neo4jIndexDefinition) {	
+			Iterable<IndexDefinition> neo4jIndexDefinition =  neo4jSchema.getIndexes();	
+			for (final IndexDefinition myNeo4jIndexDefinition : neo4jIndexDefinition) {	
 				
-				Neo4jIndicesCounter++;
+				neo4jIndicesCounter++;
 				
-				Neo4jLabel = myNeo4jIndexDefinition.getLabel();					
+				neo4jLabel = myNeo4jIndexDefinition.getLabel();					
 				
 				//the label this index is on (Neo4j indices are allowed on nodes only)				
 				String myNeo4jLabelOfIndex = myNeo4jIndexDefinition.getLabel().name();
@@ -839,20 +849,20 @@ public class ONeo4jImporter {
 				//if the index is created as a side effect of the creation of a uniqueness constraint, we handled the case already above
 				if (myNeo4jIndexDefinition.isConstraintIndex() == false){
 					
-					Neo4jNonConstraintsIndicesCounter++;
+					neo4jNonConstraintsIndicesCounter++;
 					
 					//debug
 					//System.out.println("non constraint index: on label " + myNeo4jLabelOfIndex);
 				
-					Neo4jPropKey="";
+					neo4jPropKey = "";
 					
 					//gets the property this index is on
 					Iterable<String> myNeo4jIndexPropertyKeys = myNeo4jIndexDefinition.getPropertyKeys();
 					for (final String myNeo4jIndexPropKey : myNeo4jIndexPropertyKeys) {					
 						
-						Neo4jPropKey = myNeo4jIndexPropKey;
+						neo4jPropKey = myNeo4jIndexPropKey;
 						
-						//System.out.println("on property: " + Neo4jPropKey);
+						//System.out.println("on property: " + neo4jPropKey);
 						
 					}
 					
@@ -861,33 +871,34 @@ public class ONeo4jImporter {
 					//create class myNeo4jLabelOfIndex
 					//there might be in fact cases where in neo4j the index as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
 								
-					if(Odb.getRawGraph().getMetadata().getSchema().existsClass(myNeo4jLabelOfIndex) == false){
-						Odb.createVertexType(myNeo4jLabelOfIndex);						
+					if(oDb.getRawGraph().getMetadata().getSchema().existsClass(myNeo4jLabelOfIndex) == false){
+						oDb.createVertexType(myNeo4jLabelOfIndex);						
 					}						
 					//
 					
 					//creates in OrientDB the property this index is defined on
-					propertyCreationSuccess = createOrientDBProperty( Neo4jLabel, myNeo4jLabelOfIndex, Neo4jPropKey, Neo4jGraphDb, Odb, "NOT UNIQUE" );
+					propertyCreationSuccess = createOrientDBProperty( neo4jLabel, myNeo4jLabelOfIndex, neo4jPropKey, neo4jGraphDb, oDb, "NOT UNIQUE" );
 					
 					if (propertyCreationSuccess){									
 						//index creation
 						try{
 							
 							//creates the index 
-							OIndex OrientDBIndex = Odb.getRawGraph().getMetadata().getSchema().getClass(myNeo4jLabelOfIndex).getProperty(Neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE); 
+							OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(myNeo4jLabelOfIndex).getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE); 
 														
-							//System.out.println("\nCreated index: " + OrientDBIndex + "." + Neo4jPropKey);
+							//System.out.println("\nCreated index: " + OrientDBIndex + "." + neo4jPropKey);
 							
-							OrientDBImportedIndicesCounter++;
+							orientDBImportedIndicesCounter++;
 							
-							value = 100 * ( OrientDBImportedIndicesCounter / (Neo4jTotalIndices - OrientDBImportedUniqueConstraintsCounter) );
-							logString = df.format(OrientDBImportedIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
-							System.out.print("\r  " + logString);
+							value = 100 * ( orientDBImportedIndicesCounter / (neo4jTotalIndices - orientDBImportedUniqueConstraintsCounter) );
+							keepLogString = df.format(orientDBImportedIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
+							System.out.print("\r  " + keepLogString);
 							value = 0;							
 					
 						}catch (Exception e){
 							
-							ImportLogger.log( Level.SEVERE, "Found an error when trying to create a NOTUNIQUE Index in OrientDB. Correspinding Property in Neo4j is '" + Neo4jPropKey + "' on node label '" + myNeo4jLabelOfIndex + "': " + e.getMessage() );
+							logString = "Found an error when trying to create a NOTUNIQUE Index in OrientDB. Correspinding Property in Neo4j is '" + neo4jPropKey + "' on node label '" + myNeo4jLabelOfIndex + "': " + e.getMessage();
+							importLogger.log( Level.SEVERE, logString );
 					
 						}
 						//
@@ -896,21 +907,21 @@ public class ONeo4jImporter {
 			}
 		}
 		
-		double ImportingSchemaStopTime = System.currentTimeMillis();
+		double importingSchemaStopTime = System.currentTimeMillis();
 		
-		if (OrientDBImportedIndicesCounter==0){						
-			logString = df.format(OrientDBImportedIndicesCounter) + " OrientDB Indices have been created";
-			System.out.print("\r  " + logString);		
+		if (orientDBImportedIndicesCounter==0){						
+			keepLogString = df.format(orientDBImportedIndicesCounter) + " OrientDB Indices have been created";
+			System.out.print("\r  " + keepLogString);		
 									
 		}
 			
 		//prints number of unique constraints in the log 
-		ImportLogger.log( Level.INFO, logString );	
+		importLogger.log( Level.INFO, keepLogString );	
 		
 		System.out.println ("\nDone");	
 		
 		logString =  myProgramName + " - v." + OConstants.getVersion() + " - PHASE 3 completed!\n";
-		ImportLogger.log( Level.INFO, logString );
+		importLogger.log( Level.INFO, logString );
 		//
 
 		
@@ -933,10 +944,10 @@ public class ONeo4jImporter {
 		System.out.println();
 		System.out.print( logString );
 		
-		ImportLogger.log( Level.INFO, logString );						
+		importLogger.log( Level.INFO, logString );						
 				
-		Odb.shutdown();
-		Ofactory.close();	
+		oDb.shutdown();
+		oFactory.close();	
 		
 		System.out.print( "\rShutting down OrientDB...Done" );		
 		//
@@ -947,9 +958,9 @@ public class ONeo4jImporter {
 		System.out.println();
 		System.out.print( logString );
 		
-		ImportLogger.log( Level.INFO, logString );			
+		importLogger.log( Level.INFO, logString );			
 
-        Neo4jGraphDb.shutdown();
+        neo4jGraphDb.shutdown();
 		
 		System.out.print( "\rShutting down Neo4j...Done" );
 		System.out.println();
@@ -960,20 +971,20 @@ public class ONeo4jImporter {
         double elapsedTime = (stopTime - startTime);
 		double elapsedTimeSeconds = elapsedTime / (1000);
 		
-		double InitializationElapsedTime = (InitializationStopTime - InitializationStartTime);
-		double InitializationElapsedTimeSeconds = InitializationElapsedTime / (1000);
+		double initializationElapsedTime = (initializationStopTime - initializationStartTime);
+		double initializationElapsedTimeSeconds = initializationElapsedTime / (1000);
 				
-		double ImportingNodesElapsedTime = ImportingNodesStopTime - ImportingNodesStartTime;		
-		double ImportingNodesElapsedTimeSeconds = ImportingNodesElapsedTime / (1000);
+		double importingNodesElapsedTime = importingNodesStopTime - importingNodesStartTime;		
+		double importingNodesElapsedTimeSeconds = importingNodesElapsedTime / (1000);
 		
-		double ImportingRelsElapsedTime = ImportingRelsStopTime - ImportingRelsStartTime;		
-		double ImportingRelsElapsedTimeSeconds = ImportingRelsElapsedTime / (1000);
+		double importingRelsElapsedTime = importingRelsStopTime - importingRelsStartTime;		
+		double importingRelsElapsedTimeSeconds = importingRelsElapsedTime / (1000);
 		
-		double ImportingSchemaElapsedTime = ImportingSchemaStopTime - ImportingSchemaStartTime;		
-		double ImportingSchemaElapsedTimeSeconds = ImportingSchemaElapsedTime / (1000);
+		double importingSchemaElapsedTime = importingSchemaStopTime - importingSchemaStartTime;		
+		double importingSchemaElapsedTimeSeconds = importingSchemaElapsedTime / (1000);
 		
-		double InternalIndicesElapsedTime = InternalIndicesStopTime - InternalIndicesStartTime;		
-		double InternalIndicesElapsedTimeSeconds = InternalIndicesElapsedTime / (1000);
+		double internalIndicesElapsedTime = internalIndicesStopTime - internalIndicesStartTime;		
+		double internalIndicesElapsedTimeSeconds = internalIndicesElapsedTime / (1000);
 		//
 		
 		//
@@ -982,52 +993,52 @@ public class ONeo4jImporter {
         System.out.println( "Import Summary:" );
 		System.out.println( "===============" );
 		System.out.println();
-		System.out.println( "- Found Neo4j Nodes                                                        : " + df.format(Neo4jNodeCounter));
-		System.out.println( "-- With at least one Label                                                 :  " + df.format((Neo4jNodeCounter - Neo4jNodeNoLabelCounter)));		
-		System.out.println( "--- With multiple Labels                                                   :   " + df.format(Neo4jNodeMultipleLabelsCounter));
-		System.out.println( "-- Without Labels                                                          :  " + df.format(Neo4jNodeNoLabelCounter));				
-		  System.out.print( "- Imported OrientDB Vertices                                               : " + df.format(OrientDBImportedVerticesCounter));
-		if (Neo4jNodeCounter>0){
-			value=(OrientDBImportedVerticesCounter/Neo4jNodeCounter)*100;			
+		System.out.println( "- Found Neo4j Nodes                                                        : " + df.format(neo4jNodeCounter));
+		System.out.println( "-- With at least one Label                                                 :  " + df.format((neo4jNodeCounter - neo4jNodeNoLabelCounter)));		
+		System.out.println( "--- With multiple Labels                                                   :   " + df.format(neo4jNodeMultipleLabelsCounter));
+		System.out.println( "-- Without Labels                                                          :  " + df.format(neo4jNodeNoLabelCounter));				
+		  System.out.print( "- Imported OrientDB Vertices                                               : " + df.format(orientDBImportedVerticesCounter));
+		if (neo4jNodeCounter>0){
+			value=(orientDBImportedVerticesCounter/neo4jNodeCounter)*100;			
 			System.out.print( " (" + df.format(value) + "%)");
 			value=0;
 		}
 		
 		System.out.println();
 		System.out.println();
-		System.out.println( "- Found Neo4j Relationships                                                : " + df.format(Neo4jRelCounter));
-		  System.out.print( "- Imported OrientDB Edges                                                  : " + df.format(OrientDBImportedEdgesCounter));
-		if(Neo4jRelCounter > 0){
-			value=(OrientDBImportedEdgesCounter/Neo4jRelCounter)*100;
+		System.out.println( "- Found Neo4j Relationships                                                : " + df.format(neo4jRelCounter));
+		  System.out.print( "- Imported OrientDB Edges                                                  : " + df.format(orientDBImportedEdgesCounter));
+		if(neo4jRelCounter > 0){
+			value=(orientDBImportedEdgesCounter/neo4jRelCounter)*100;
 			System.out.print (" (" + df.format(value) + "%)");
 			value=0;
 		}
 		
 		System.out.println();
 		System.out.println();
-		System.out.println( "- Found Neo4j Constraints                                                  : " + df.format(Neo4jConstraintsCounter));
-	      System.out.print( "- Imported OrientDB Constraints (Indices created)                          : " + df.format(OrientDBImportedConstraintsCounter));
-		if(Neo4jConstraintsCounter>0){
-			value = ( OrientDBImportedConstraintsCounter / Neo4jConstraintsCounter )*100;
+		System.out.println( "- Found Neo4j Constraints                                                  : " + df.format(neo4jConstraintsCounter));
+	      System.out.print( "- Imported OrientDB Constraints (UNIQUE Indices created)                   : " + df.format(orientDBImportedConstraintsCounter));
+		if(neo4jConstraintsCounter>0){
+			value = ( orientDBImportedConstraintsCounter / neo4jConstraintsCounter )*100;
 			System.out.print( " (" + df.format(value) + "%)");
 			value=0;
 		}		
 		
 		System.out.println();		
 		System.out.println();
-		System.out.println( "- Found Neo4j (non-constraint) Indices                                     : " + df.format(Neo4jNonConstraintsIndicesCounter));
-		  System.out.print( "- Imported OrientDB Indices                                                : " + df.format(OrientDBImportedIndicesCounter));
-		if(Neo4jNonConstraintsIndicesCounter>0){
-			value=(OrientDBImportedIndicesCounter/Neo4jNonConstraintsIndicesCounter)*100;
+		System.out.println( "- Found Neo4j (non-constraint) Indices                                     : " + df.format(neo4jNonConstraintsIndicesCounter));
+		  System.out.print( "- Imported OrientDB Indices                                                : " + df.format(orientDBImportedIndicesCounter));
+		if(neo4jNonConstraintsIndicesCounter>0){
+			value=(orientDBImportedIndicesCounter/neo4jNonConstraintsIndicesCounter)*100;
 			System.out.print( " (" + df.format(value) + "%)");	
 			value=0;			
 		}
 		
 		/*
 		System.out.println();
-		  System.out.print( "- Imported (in previous step) OrientDB indices                             : " + df.format(OrientDBImportedUniqueConstraintsCounter));
-		if(Neo4jIndicesCounter>0){
-			value = ( OrientDBImportedUniqueConstraintsCounter / Neo4jIndicesCounter )*100;
+		  System.out.print( "- Imported (in previous step) OrientDB indices                             : " + df.format(orientDBImportedUniqueConstraintsCounter));
+		if(neo4jIndicesCounter>0){
+			value = ( orientDBImportedUniqueConstraintsCounter / neo4jIndicesCounter )*100;
 			System.out.print( " (" + df.format(value) + "%)");
 			value=0;
 		}
@@ -1035,39 +1046,39 @@ public class ONeo4jImporter {
 
 		System.out.println();		
 		System.out.println();
-		System.out.println( "- Additional created Indices (on vertex properties 'Neo4jNodeID')          : " + df.format(Neo4jInternalIndicesCounter));
+		System.out.println( "- Additional created Indices (on vertex properties 'Neo4jNodeID')          : " + df.format(neo4jInternalIndicesCounter));
 
 		System.out.println();		
 		System.out.println( "- Total Import time:                                                       : " + df.format(elapsedTimeSeconds) + " seconds");		
 		
-		System.out.println( "-- Initialization time                                                     :  " + df.format(InitializationElapsedTimeSeconds) + " seconds");
-		  System.out.print( "-- Time to Import Nodes                                                    :  " + df.format(ImportingNodesElapsedTimeSeconds) + " seconds");
-		if(ImportingNodesElapsedTimeSeconds>0){
-			value=(OrientDBImportedVerticesCounter/ImportingNodesElapsedTimeSeconds);
+		System.out.println( "-- Initialization time                                                     :  " + df.format(initializationElapsedTimeSeconds) + " seconds");
+		  System.out.print( "-- Time to Import Nodes                                                    :  " + df.format(importingNodesElapsedTimeSeconds) + " seconds");
+		if(importingNodesElapsedTimeSeconds>0){
+			value=(orientDBImportedVerticesCounter/importingNodesElapsedTimeSeconds);
 			System.out.print( " (" + dfd.format(value) + " nodes/sec)");
 			value=0;
 		}		
 		
 		System.out.println();		
-		  System.out.print( "-- Time to Import Relationships                                            :  " + df.format(ImportingRelsElapsedTimeSeconds) + " seconds");
-		if(ImportingRelsElapsedTimeSeconds>0){
-			value=(OrientDBImportedEdgesCounter/ImportingRelsElapsedTimeSeconds);
+		  System.out.print( "-- Time to Import Relationships                                            :  " + df.format(importingRelsElapsedTimeSeconds) + " seconds");
+		if(importingRelsElapsedTimeSeconds>0){
+			value=(orientDBImportedEdgesCounter/importingRelsElapsedTimeSeconds);
 			System.out.print( " (" + dfd.format(value) + " rels/sec)");
 			value=0;
 		}			
 
 		System.out.println();		
-		  System.out.print( "-- Time to Import Constraints and Indices                                  :  " + df.format(ImportingSchemaElapsedTimeSeconds) + " seconds");
-		if(ImportingSchemaElapsedTimeSeconds>0){
-			value=( ( OrientDBImportedConstraintsCounter + OrientDBImportedIndicesCounter ) / ImportingSchemaElapsedTimeSeconds );
+		  System.out.print( "-- Time to Import Constraints and Indices                                  :  " + df.format(importingSchemaElapsedTimeSeconds) + " seconds");
+		if(importingSchemaElapsedTimeSeconds>0){
+			value=( ( orientDBImportedConstraintsCounter + orientDBImportedIndicesCounter ) / importingSchemaElapsedTimeSeconds );
 			System.out.print( " (" + dfd.format(value) + " indices/sec)");
 			value=0;		
 		}
 				
 		System.out.println();		
-		  System.out.print( "-- Time to create internal Indices (on vertex properties 'Neo4jNodeID')    :  " + df.format(InternalIndicesElapsedTimeSeconds) + " seconds");
-		if(InternalIndicesElapsedTimeSeconds>0){
-			value=( Neo4jInternalIndicesCounter / InternalIndicesElapsedTimeSeconds );
+		  System.out.print( "-- Time to create internal Indices (on vertex properties 'Neo4jNodeID')    :  " + df.format(internalIndicesElapsedTimeSeconds) + " seconds");
+		if(internalIndicesElapsedTimeSeconds>0){
+			value=( neo4jInternalIndicesCounter / internalIndicesElapsedTimeSeconds );
 			System.out.print( " (" + dfd.format(value) + " indices/sec)");
 			value=0;		
 		}		
@@ -1077,10 +1088,10 @@ public class ONeo4jImporter {
 
 		//				
 		logString =  myProgramName + " - v." + OConstants.getVersion() + " - PHASE 4 completed!\n";
-		ImportLogger.log( Level.INFO, logString  );
+		importLogger.log( Level.INFO, logString );
 		
 		logString =  myProgramName + " - v." + OConstants.getVersion() + " - Import completed!\n";
-		ImportLogger.log( Level.INFO, logString  );
+		importLogger.log( Level.INFO, logString );
 		//
 		
 		//
@@ -1109,24 +1120,27 @@ public class ONeo4jImporter {
 		//To do this we will use java instanceof, as there are no specific methods in the noe4j api to get the data type of a property		
 		//To be able to use instanceof, we first need to find a node that has that property 
 		
-		String Neo4jPropType = "";			
-		OType OrientOtype = null;       
+		//
+		String neo4jPropType = "";			
+		OType orientOtype = null;       
 		boolean foundNode = false; 
 		long debugCounter = 0L;
+		String logString = "";
+		//
 		
 		//find a node that has this property, then get the data type of this property		
 		try (final Transaction tx = myNeo4jGraphDb.beginTx()) {
 					
-			ResourceIterator<Node> Neo4jNodes = myNeo4jGraphDb.findNodes(myNeo4jLabel);				
+			ResourceIterator<Node> neo4jNodes = myNeo4jGraphDb.findNodes(myNeo4jLabel);				
 			try {
 
-				 while ( Neo4jNodes.hasNext() ) {
+				 while ( neo4jNodes.hasNext() ) {
 					
 					debugCounter++;
 					
 					try {
 						
-						Node myNode = Neo4jNodes.next();	
+						Node myNode = neo4jNodes.next();	
 						
 						//not all nodes with label myNeo4jLabel may have this property - even if we have a unique constraint on this property (it is unique in the nodes where the property exists). When we find a node with this property, we exit the loop				
 						if (myNode.hasProperty(myNeo4jPropKey)){
@@ -1139,20 +1153,21 @@ public class ONeo4jImporter {
 							Object PropertyValue = myNode.getProperty( myNeo4jPropKey, null );
 							
 							//get the Neo4j property data type 
-							Neo4jPropType = Neo4jPropType(PropertyValue);
+							neo4jPropType = getNeo4jPropType(PropertyValue);
 							
 							//map the Neo4j property type to an OrientDB property data type 
-							OrientOtype = MapNeo4jToOrientDBPropertyType (Neo4jPropType);
+							orientOtype = MapNeo4jToOrientDBPropertyType (neo4jPropType);
 							
 							//debug
-							//System.out.println("Property defined on this node: " + myNeo4jPropKey + " value: " + PropertyValue + " data type: " + Neo4jPropType); 
+							//System.out.println("Property defined on this node: " + myNeo4jPropKey + " value: " + PropertyValue + " data type: " + neo4jPropType); 
 							
 							break;
 						}						
 						
 					}catch (Exception e){	
 						
-						ImportLogger.log( Level.WARNING, e.toString() );
+						logString = e.toString();
+						importLogger.log( Level.WARNING, logString );
 						
 						break;
 					}
@@ -1161,7 +1176,7 @@ public class ONeo4jImporter {
 			
 			} finally {				
 				
-				Neo4jNodes.close();
+				neo4jNodes.close();
 				
 			}
 			
@@ -1172,25 +1187,27 @@ public class ONeo4jImporter {
 		
 		//However, there may be cases where the constraints has been defined, but no nodes have been created yet. In this case we cannot know the data type. We will use STRING as default 
 		if (foundNode==false){	
-			Neo4jPropType="Sting";		
-			OrientOtype	= OType.STRING;
+			neo4jPropType = "Sting";		
+			orientOtype	= OType.STRING;
 		}
 		
 		//debug 
-		//System.out.println("Creating OrientDB Property '" + myNeo4jPropKey + "' of type '" + OrientOtype + "' on Class '" + myOrientDBIndexClass + "' "); 
+		//System.out.println("Creating OrientDB Property '" + myNeo4jPropKey + "' of type '" + orientOtype + "' on Class '" + myOrientDBIndexClass + "' "); 
 					
 		try{
 				
-			OProperty OrientDBProperty = myOdb.getRawGraph().getMetadata().getSchema().getClass(myOrientDBIndexClass).createProperty(myNeo4jPropKey,OrientOtype);	
+			OProperty OrientDBProperty = myOdb.getRawGraph().getMetadata().getSchema().getClass(myOrientDBIndexClass).createProperty(myNeo4jPropKey,orientOtype);	
 			
 			if (foundNode==false){							
 				
-				ImportLogger.log( Level.INFO, "The Neo4j Property '" + myNeo4jPropKey + "' on the Neo4j Label '" + myNeo4jLabel.name() + "' associated to a Neo4j '" + myNeo4jConstraintType + "' constraint/index has been imported as STRING because there are no nodes in Neo4j that have this property, hence it was not possible to determine the type of this Neo4j Property" );
+				logString = "The Neo4j Property '" + myNeo4jPropKey + "' on the Neo4j Label '" + myNeo4jLabel.name() + "' associated to a Neo4j '" + myNeo4jConstraintType + "' constraint/index has been imported as STRING because there are no nodes in Neo4j that have this property, hence it was not possible to determine the type of this Neo4j Property";
+				importLogger.log( Level.INFO, logString );
 				
 				
 			}else{
-
-				ImportLogger.log( Level.INFO, "Created Property '" + myNeo4jPropKey + "' on the Class '" + myOrientDBIndexClass + "' with type '" + OrientOtype + "'" );
+				
+				logString = "Created Property '" + myNeo4jPropKey + "' on the Class '" + myOrientDBIndexClass + "' with type '" + orientOtype + "'";
+				importLogger.log( Level.INFO, logString );
 				
 			}
 			
@@ -1198,7 +1215,8 @@ public class ONeo4jImporter {
 			
 		}catch (Exception e){
 			
-			ImportLogger.log( Level.SEVERE, "Found an error when trying to create a Property in OrientDB. Correspinding Property in Neo4j is '" + myNeo4jPropKey + "' on node label '" + myOrientDBIndexClass + "': " + e.getMessage() );
+			logString = "Found an error when trying to create a Property in OrientDB. Correspinding Property in Neo4j is '" + myNeo4jPropKey + "' on node label '" + myOrientDBIndexClass + "': " + e.getMessage();
+			importLogger.log( Level.SEVERE, logString );
 			
 			return false;
 		
@@ -1237,7 +1255,7 @@ public class ONeo4jImporter {
 		
 	}
 
-	private static String Neo4jPropType (final Object myPropertyValue) {
+	private static String getNeo4jPropType (final Object myPropertyValue) {
 		
 		String myNeo4jPropType = "String";
 		
@@ -1277,8 +1295,7 @@ public class ONeo4jImporter {
 		
 	}
 	
-	private static final Logger ImportLogger = Logger.getLogger( "OrientDB.Neo4j.Importer" );
-
+	private static final Logger importLogger = Logger.getLogger( "OrientDB.Neo4j.Importer" );
 	
 }
 	

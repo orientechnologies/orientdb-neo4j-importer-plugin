@@ -19,14 +19,14 @@
 package com.orientechnologies.orient.neo4jimporter;
 
 /**
- * OrientDB's Neo4j Importer.
+ * OrientDB's Neo4j Importer - Settings Class
  *
  * @author Santo Leto
  */
  
 public class ONeo4jImporterSettings {
-  public String                             Neo4jLibPath;
-  public String                             Neo4jDbPath;  
-  public String                             OrientDbDir;
+  public String                             neo4jLibPath;
+  public String                             neo4jDbPath;  
+  public String                             orientDbDir;
   public boolean                            overwriteOrientDbDir = false;  
 }

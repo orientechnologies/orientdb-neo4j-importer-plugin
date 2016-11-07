@@ -64,31 +64,31 @@ public class ONeo4jImporterCommandLineParser {
 
     final ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.Neo4jDbPath = options.get(OPTION_NEO4J_DBDIR);
-    settings.OrientDbDir = options.get(OPTION_ORIENTDB_PATH);	
+    settings.neo4jDbPath = options.get(OPTION_NEO4J_DBDIR);
+    settings.orientDbDir = options.get(OPTION_ORIENTDB_PATH);	
     settings.overwriteOrientDbDir = options.get(OPTION_OVERWRITE_ORIENTDB_DIR) != null ? Boolean.parseBoolean(options.get(OPTION_OVERWRITE_ORIENTDB_DIR)) : false;
     
-	//checks on Neo4jDbPath
-    if (settings.Neo4jDbPath != null) {
-      if (settings.Neo4jDbPath.endsWith(File.separator)) {
-        settings.Neo4jDbPath = settings.Neo4jDbPath.substring(0, settings.Neo4jDbPath.length() - File.separator.length());
+	//checks on neo4jDbPath
+    if (settings.neo4jDbPath != null) {
+      if (settings.neo4jDbPath.endsWith(File.separator)) {
+        settings.neo4jDbPath = settings.neo4jDbPath.substring(0, settings.neo4jDbPath.length() - File.separator.length());
       }
-      File Neo4jDbPath = new File(settings.Neo4jDbPath);
-      if (!Neo4jDbPath.exists()) {
-        throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NOT_PATH, settings.Neo4jDbPath));
+      File neo4jDbPath = new File(settings.neo4jDbPath);
+      if (!neo4jDbPath.exists()) {
+        throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NOT_PATH, settings.neo4jDbPath));
       }
-      if (!Neo4jDbPath.canWrite()) {
-        throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NO_WRITE_PERMISSION, settings.Neo4jDbPath));
+      if (!neo4jDbPath.canWrite()) {
+        throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NO_WRITE_PERMISSION, settings.neo4jDbPath));
       }
-      if (!Neo4jDbPath.isDirectory()) {
-        throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NOT_DIRECTORY, settings.Neo4jDbPath));
+      if (!neo4jDbPath.isDirectory()) {
+        throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NOT_DIRECTORY, settings.neo4jDbPath));
       }
     }
 	
-	//checks on OrientDbDir
-	if (settings.OrientDbDir != null) {
-      if (settings.OrientDbDir.endsWith(File.separator)) {
-        settings.OrientDbDir = settings.OrientDbDir.substring(0, settings.OrientDbDir.length() - File.separator.length());
+	//checks on orientDbDir
+	if (settings.orientDbDir != null) {
+      if (settings.orientDbDir.endsWith(File.separator)) {
+        settings.orientDbDir = settings.orientDbDir.substring(0, settings.orientDbDir.length() - File.separator.length());
       }
     }
 	
