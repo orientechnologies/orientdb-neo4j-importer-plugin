@@ -22,6 +22,20 @@
         </license>
     </licenses>
 
+    <scm>
+        <connection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer.git</connection>
+        <developerConnection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer.git</developerConnection>
+        <url>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer.git</url>
+    </scm>
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/orientechnologies/orientdb-neo4j-importer/issues</url>
+    </issueManagement>
+    <ciManagement>
+        <system>jenkins</system>
+        <url>http://helios.orientdb.com/</url>
+    </ciManagement>
+
     <developers>
         <developer>
             <id>l.garulli</id>
