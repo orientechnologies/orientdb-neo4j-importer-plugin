@@ -15,13 +15,12 @@
  *  * limitations under the License.
  *  
  */
- 
+
 package com.orientechnologies.orient.neo4jimporter;
 
-import java.io.Console;
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is the parser of the command line arguments passed with the invocation of ONeo4jImporter. It contains a static method that -
@@ -29,26 +28,26 @@ import java.util.*;
  *
  * @author Santo Leto
  */
- 
-public class ONeo4jImporterCommandLineParser {
-    
-  public static final String OPTION_NEO4J_LIBDIR                                 = "neo4jlibdir";	
-  public static final String OPTION_NEO4J_DBDIR                                  = "neo4jdbdir";
-  public static final String OPTION_ORIENTDB_PATH                                = "odbdir";
-  public static final String OPTION_OVERWRITE_ORIENTDB_DIR                       = "o";  
-  
-  public final static String MAIN_OPTIONS                                        = OPTION_NEO4J_LIBDIR + OPTION_NEO4J_DBDIR + OPTION_ORIENTDB_PATH;  
 
-  static final String        COMMAND_LINE_PARSER_NEO4J_LIBDIR_PARAM_MANDATORY    = "Error: The Neo4j Lib Directory parameter '-neo4jlibdir' is mandatory.";
-  static final String        COMMAND_LINE_PARSER_NEO4J_DBDIR_PARAM_MANDATORY     = "Error: The Neo4j Database Directory parameter '-neo4jdbdir' is mandatory.";
-  static final String        COMMAND_LINE_PARSER_ORIENTDB_PATH_PARAM_MANDATORY   = "Error: The OrientDB Database Directory parameter '-orientdbdir' is mandatory.";
-  
-  static final String        COMMAND_LINE_PARSER_INVALID_OPTION                  = "Error: Invalid option '%s'";
-  static final String        COMMAND_LINE_PARSER_EXPECTED_VALUE                  = "Error: Expected value after argument '%s'";
-  
-  static final String        COMMAND_LINE_PARSER_NOT_PATH                        = "Error: The directory '%s' doesn't exist.";  
-  static final String        COMMAND_LINE_PARSER_NO_WRITE_PERMISSION             = "Error: You don't have write permissions on directory '%s'.";
-  static final String        COMMAND_LINE_PARSER_NOT_DIRECTORY                   = "Error: '%s' is not a directory.";
+public class ONeo4jImporterCommandLineParser {
+
+  public static final String OPTION_NEO4J_LIBDIR           = "neo4jlibdir";
+  public static final String OPTION_NEO4J_DBDIR            = "neo4jdbdir";
+  public static final String OPTION_ORIENTDB_PATH          = "odbdir";
+  public static final String OPTION_OVERWRITE_ORIENTDB_DIR = "o";
+
+  public final static String MAIN_OPTIONS = OPTION_NEO4J_LIBDIR + OPTION_NEO4J_DBDIR + OPTION_ORIENTDB_PATH;
+
+  static final String COMMAND_LINE_PARSER_NEO4J_LIBDIR_PARAM_MANDATORY  = "Error: The Neo4j Lib Directory parameter '-neo4jlibdir' is mandatory.";
+  static final String COMMAND_LINE_PARSER_NEO4J_DBDIR_PARAM_MANDATORY   = "Error: The Neo4j Database Directory parameter '-neo4jdbdir' is mandatory.";
+  static final String COMMAND_LINE_PARSER_ORIENTDB_PATH_PARAM_MANDATORY = "Error: The OrientDB Database Directory parameter '-orientdbdir' is mandatory.";
+
+  static final String COMMAND_LINE_PARSER_INVALID_OPTION = "Error: Invalid option '%s'";
+  static final String COMMAND_LINE_PARSER_EXPECTED_VALUE = "Error: Expected value after argument '%s'";
+
+  static final String COMMAND_LINE_PARSER_NOT_PATH            = "Error: The directory '%s' doesn't exist.";
+  static final String COMMAND_LINE_PARSER_NO_WRITE_PERMISSION = "Error: You don't have write permissions on directory '%s'.";
+  static final String COMMAND_LINE_PARSER_NOT_DIRECTORY       = "Error: '%s' is not a directory.";
 
   /**
    * builds a ONeo4jImporter object using the command line arguments
@@ -57,7 +56,7 @@ public class ONeo4jImporterCommandLineParser {
    * @return
    * @throws Exception
    */
-   
+
   public static ONeo4jImporter getNeo4jImporter(String[] args) throws Exception {
 
     final Map<String, String> options = checkOptions(readOptions(args));
@@ -65,10 +64,12 @@ public class ONeo4jImporterCommandLineParser {
     final ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
     settings.neo4jDbPath = options.get(OPTION_NEO4J_DBDIR);
-    settings.orientDbDir = options.get(OPTION_ORIENTDB_PATH);	
-    settings.overwriteOrientDbDir = options.get(OPTION_OVERWRITE_ORIENTDB_DIR) != null ? Boolean.parseBoolean(options.get(OPTION_OVERWRITE_ORIENTDB_DIR)) : false;
-    
-	//checks on neo4jDbPath
+    settings.orientDbDir = options.get(OPTION_ORIENTDB_PATH);
+    settings.overwriteOrientDbDir = options.get(OPTION_OVERWRITE_ORIENTDB_DIR) != null ?
+        Boolean.parseBoolean(options.get(OPTION_OVERWRITE_ORIENTDB_DIR)) :
+        false;
+
+    //checks on neo4jDbPath
     if (settings.neo4jDbPath != null) {
       if (settings.neo4jDbPath.endsWith(File.separator)) {
         settings.neo4jDbPath = settings.neo4jDbPath.substring(0, settings.neo4jDbPath.length() - File.separator.length());
@@ -84,16 +85,16 @@ public class ONeo4jImporterCommandLineParser {
         throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NOT_DIRECTORY, settings.neo4jDbPath));
       }
     }
-	
-	//checks on orientDbDir
-	if (settings.orientDbDir != null) {
+
+    //checks on orientDbDir
+    if (settings.orientDbDir != null) {
       if (settings.orientDbDir.endsWith(File.separator)) {
         settings.orientDbDir = settings.orientDbDir.substring(0, settings.orientDbDir.length() - File.separator.length());
       }
     }
-	
-	return new ONeo4jImporter(settings);
-	
+
+    return new ONeo4jImporter(settings);
+
   }
 
   private static Map<String, String> checkOptions(Map<String, String> options) throws IllegalArgumentException {
@@ -102,35 +103,21 @@ public class ONeo4jImporterCommandLineParser {
       throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NEO4J_DBDIR_PARAM_MANDATORY));
     }
 
-	if (options.get(OPTION_NEO4J_LIBDIR) == null) {
+    if (options.get(OPTION_NEO4J_LIBDIR) == null) {
       throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NEO4J_LIBDIR_PARAM_MANDATORY));
     }
-	
-	options = setDefaultIfNotPresent(options, OPTION_OVERWRITE_ORIENTDB_DIR, "false");	
 
-	String workingDir = System.getProperty("user.dir");
-		
-	File myFile = new File(workingDir);    
-	
-    String parentDir = myFile.getParent();	
-	String defOdbDir = myFile.getParent() + File.separator + "databases" + File.separator + "neo4j_import";
+    options = setDefaultIfNotPresent(options, OPTION_OVERWRITE_ORIENTDB_DIR, "false");
+
+    String workingDir = System.getProperty("user.dir");
+
+    File myFile = new File(workingDir);
+
+    String parentDir = myFile.getParent();
+    String defOdbDir = myFile.getParent() + File.separator + "databases" + File.separator + "neo4j_import";
     options = setDefaultIfNotPresent(options, OPTION_ORIENTDB_PATH, defOdbDir);
-	
+
     return options;
-  }
-  
-    private static Map<String, String> setDefaultIfNotPresent(Map<String, String> options, String option, String value)
-      throws IllegalArgumentException {
-		  
-		if (!options.containsKey(option)) {
-			
-		  System.out.println(String.format("WARNING: '%s' option not found. Defaulting to '%s'.", option, value));
-		  System.out.println();
-		  
-		  options.put(option, value);
-		}
-		
-		return options;
   }
 
   private static Map<String, String> readOptions(final String[] args) throws IllegalArgumentException {
@@ -166,6 +153,20 @@ public class ONeo4jImporterCommandLineParser {
 
         break;
       }
+    }
+
+    return options;
+  }
+
+  private static Map<String, String> setDefaultIfNotPresent(Map<String, String> options, String option, String value)
+      throws IllegalArgumentException {
+
+    if (!options.containsKey(option)) {
+
+      System.out.println(String.format("WARNING: '%s' option not found. Defaulting to '%s'.", option, value));
+      System.out.println();
+
+      options.put(option, value);
     }
 
     return options;

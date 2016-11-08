@@ -15,7 +15,7 @@
  *  * limitations under the License.
  *  
  */
- 
+
 package com.orientechnologies.orient.neo4jimporter;
 
 /**
@@ -23,10 +23,10 @@ package com.orientechnologies.orient.neo4jimporter;
  *
  * @author Santo Leto
  */
- 
+
 public class ONeo4jImporterSettings {
-  public String                             neo4jLibPath;
-  public String                             neo4jDbPath;  
-  public String                             orientDbDir;
-  public boolean                            overwriteOrientDbDir = false;  
+  public String neo4jLibPath;
+  public String neo4jDbPath;
+  public String orientDbDir;
+  public boolean overwriteOrientDbDir = false;
 }
