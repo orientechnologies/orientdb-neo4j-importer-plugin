@@ -44,6 +44,6 @@ set LOG_FILE=%ORIENTDB_HOME%\config\orientdb-neo4j-importer-log.properties
 set JAVA_MAX_DIRECT=-XX:MaxDirectMemorySize=4g
 set JAVA_OPTS_SCRIPT= %JAVA_MAX_DIRECT% -Djava.util.logging.config.file=%LOG_FILE%
 
-call %JAVA% -client -classpath "%NEO4JLIB%\*;%ORIENTDB_HOME%\lib\*" %JAVA_OPTS_SCRIPT% com.orientechnologies.orient.neo4jimporter.ONeo4jImporter %CMD_LINE_ARGS%
+call %JAVA% -client -classpath "%NEO4JLIB%\*;%ORIENTDB_HOME%\lib\*" %JAVA_OPTS_SCRIPT% com.orientechnologies.orient.neo4jimporter.ONeo4jImporterMain %CMD_LINE_ARGS%
 
 :end

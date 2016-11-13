@@ -19,27 +19,27 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
 
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.*;
+
 /**
  * Created by frank on 08/11/2016.
  */
 class ONeo4jImporterVerticesAndEdgesMigrator {
-  private String                 myProgramName;
-  private String                 keepLogString;
-  private boolean                migrateRels;
-  private boolean                migrateNodes;
-  private DecimalFormat          df;
-  private GraphDatabaseService   neo4jGraphDb;
-  private String                 orientVertexClass;
-  private OrientGraphNoTx        oDb;
-  private ONeo4jImporterCounters counters;
-  private double                 importingRelsStartTime;
-  private double                 importingRelsStopTime;
+  private final boolean                migrateRels;
+  private final boolean                migrateNodes;
+  private final DecimalFormat          df;
+  private final GraphDatabaseService   neo4jGraphDb;
+  private       String                 keepLogString;
+  private       String                 orientVertexClass;
+  private       OrientGraphNoTx        oDb;
+  private       ONeo4jImporterCounters counters;
+  private       double                 importingRelsStartTime;
+  private       double                 importingRelsStopTime;
 
-  public ONeo4jImporterVerticesAndEdgesMigrator(String myProgramName, String keepLogString, boolean migrateRels,
+  public ONeo4jImporterVerticesAndEdgesMigrator(String keepLogString, boolean migrateRels,
       boolean migrateNodes,
       DecimalFormat df,
       GraphDatabaseService neo4jGraphDb, String orientVertexClass, OrientGraphNoTx oDb, ONeo4jImporterCounters counters) {
-    this.myProgramName = myProgramName;
     this.keepLogString = keepLogString;
     this.migrateRels = migrateRels;
     this.migrateNodes = migrateNodes;
@@ -420,7 +420,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     //
 
     //
-    logString = myProgramName + " - v." + OConstants.getVersion() + " - PHASE 2 completed!\n";
+    logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 2 completed!\n";
     ONeo4jImporter.importLogger.log(Level.INFO, logString);
     //
     return this;

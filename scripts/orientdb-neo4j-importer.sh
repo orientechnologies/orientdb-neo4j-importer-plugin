@@ -63,4 +63,4 @@ done
 #fi
 
 exec "$JAVA" -client -cp "$NEO4JLIB/*:$ORIENTDB_HOME/lib/*" $JAVA_OPTS_SCRIPT  \
-    com.orientechnologies.orient.neo4jimporter.ONeo4jImporter $ARGS
+    com.orientechnologies.orient.neo4jimporter.ONeo4jImporterMain $ARGS

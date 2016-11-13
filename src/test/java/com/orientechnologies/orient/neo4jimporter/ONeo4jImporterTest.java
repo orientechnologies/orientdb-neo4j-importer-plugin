@@ -16,7 +16,7 @@ public class ONeo4jImporterTest {
     String[] args = new String[] {};
 
     //launch
-    ONeo4jImporter.main(args);
+    ONeo4jImporterMain.main(args);
 
     //open the generated Orient Grapgh and do assertions
 

@@ -15,11 +15,12 @@ import org.neo4j.graphdb.schema.Schema;
 import java.text.DecimalFormat;
 import java.util.logging.Level;
 
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.*;
+
 /**
  * Created by frank on 08/11/2016.
  */
 class ONeo4jImporterSchemaMigrator {
-  private String                 myProgramName;
   private String                 keepLogString;
   private DecimalFormat          df;
   private GraphDatabaseService   neo4jGraphDb;
@@ -28,10 +29,9 @@ class ONeo4jImporterSchemaMigrator {
   private double                 importingSchemaStartTime;
   private double                 importingSchemaStopTime;
 
-  public ONeo4jImporterSchemaMigrator(String myProgramName, String keepLogString, DecimalFormat df,
+  public ONeo4jImporterSchemaMigrator(String keepLogString, DecimalFormat df,
       GraphDatabaseService neo4jGraphDb,
       OrientGraphNoTx oDb, ONeo4jImporterCounters counters) {
-    this.myProgramName = myProgramName;
     this.keepLogString = keepLogString;
     this.df = df;
     this.neo4jGraphDb = neo4jGraphDb;
@@ -150,7 +150,8 @@ class ONeo4jImporterSchemaMigrator {
         }
 
         //to import this constraint, we first have to create the corresponding property in OrientDB
-        propertyCreationSuccess = ONeo4jImporter.createOrientDBProperty(neo4jLabel, orientDBIndexClass, neo4jPropKey, neo4jGraphDb, oDb,
+        propertyCreationSuccess = ONeo4jImporterUtils.createOrientDBProperty(neo4jLabel, orientDBIndexClass, neo4jPropKey, neo4jGraphDb,
+            oDb,
             neo4jConstraintType.toString());
 
         // now that the property has been created, we need to take actions based on the neo4jConstraintType
@@ -271,7 +272,8 @@ class ONeo4jImporterSchemaMigrator {
           //
 
           //creates in OrientDB the property this index is defined on
-          propertyCreationSuccess = ONeo4jImporter.createOrientDBProperty(neo4jLabel, myNeo4jLabelOfIndex, neo4jPropKey, neo4jGraphDb, oDb,
+          propertyCreationSuccess = ONeo4jImporterUtils.createOrientDBProperty(neo4jLabel, myNeo4jLabelOfIndex, neo4jPropKey,
+              neo4jGraphDb, oDb,
               "NOT UNIQUE");
 
           if (propertyCreationSuccess) {
@@ -321,7 +323,7 @@ class ONeo4jImporterSchemaMigrator {
 
     System.out.println("\nDone");
 
-    logString = myProgramName + " - v." + OConstants.getVersion() + " - PHASE 3 completed!\n";
+    logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 3 completed!\n";
     ONeo4jImporter.importLogger.log(Level.INFO, logString);
     //
 

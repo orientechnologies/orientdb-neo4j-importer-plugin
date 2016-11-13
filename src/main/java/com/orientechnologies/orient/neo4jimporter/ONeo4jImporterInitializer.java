@@ -11,22 +11,22 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import java.io.File;
 import java.util.logging.Level;
 
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.*;
+
 /**
  * Created by frank on 08/11/2016.
  */
 class ONeo4jImporterInitializer {
-  private String               myProgramName;
-  private String               neo4jDBPath;
-  private String               orientDbFolder;
-  private double               initializationStartTime;
-  private GraphDatabaseService neo4jGraphDb;
-  private OrientGraphFactory   oFactory;
-  private OrientGraphNoTx      oDb;
-  private String               orientVertexClass;
-  private double               initializationStopTime;
+  private final String               neo4jDBPath;
+  private final String               orientDbFolder;
+  private       double               initializationStartTime;
+  private       GraphDatabaseService neo4jGraphDb;
+  private       OrientGraphFactory   oFactory;
+  private       OrientGraphNoTx      oDb;
+  private       String               orientVertexClass;
+  private       double               initializationStopTime;
 
-  public ONeo4jImporterInitializer(String myProgramName, String neo4jDBPath, String orientDbFolder) {
-    this.myProgramName = myProgramName;
+  public ONeo4jImporterInitializer(String neo4jDBPath, String orientDbFolder) {
     this.neo4jDBPath = neo4jDBPath;
     this.orientDbFolder = orientDbFolder;
   }
@@ -74,7 +74,7 @@ class ONeo4jImporterInitializer {
     File DB_PATH = new File(neo4jDBPath);
 
     neo4jGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
-    ONeo4jImporter.registerNeo4jShutdownHook(neo4jGraphDb);
+    ONeo4jImporterUtils.registerNeo4jShutdownHook(neo4jGraphDb);
 
     logString = "Initializing Neo4j...Done";
 
@@ -113,7 +113,7 @@ class ONeo4jImporterInitializer {
     System.out.println("  '" + orientDbFolder + "'");
     //
 
-    logString = myProgramName + " - v." + OConstants.getVersion() + " - PHASE 1 completed!\n";
+    logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 1 completed!\n";
     ONeo4jImporter.importLogger.log(Level.INFO, logString);
 
     initializationStopTime = System.currentTimeMillis();
