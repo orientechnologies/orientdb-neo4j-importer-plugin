@@ -1,4 +1,4 @@
-# OrientDB’s Neo4j Importer
+# Neo4j to OrientDB Importer
 Neo4j importer for OrientDB
 
 ## Documentation
@@ -9,6 +9,8 @@ http://orientdb.com/docs/last/OrientDB-Neo4j-Importer.html
 ## Internals
 
 ### Tests
+
+_**Work in progress**_
 
 The test databases are created using the following queries:
 

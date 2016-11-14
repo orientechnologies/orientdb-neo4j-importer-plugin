@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
 
 
-    <name>OrientDB - Neo4j Importer</name>
+    <name>OrientDB - Neo4j to OrientDB Importer</name>
     <description>OrientDB NoSQL document graph dbms</description>
     <url>http://www.orientdb.com</url>
     <organization>

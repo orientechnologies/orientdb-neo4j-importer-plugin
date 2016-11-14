@@ -77,7 +77,7 @@ import java.util.logging.Logger;
 public class ONeo4jImporter {
 
   public static final Logger importLogger = Logger.getLogger("OrientDB.Neo4j.Importer");
-  public static final String PROGRAM_NAME = "OrientDB's Neo4j Importer";
+  public static final String PROGRAM_NAME = "Neo4j to OrientDB Importer";
   private final ONeo4jImporterSettings settings;
 
   public ONeo4jImporter(final ONeo4jImporterSettings settings) throws Exception {
@@ -136,6 +136,7 @@ public class ONeo4jImporter {
 
       }
     }
+	//
 
     //
     // PHASE 1 : INITIALIZATION
@@ -146,12 +147,12 @@ public class ONeo4jImporter {
     String orientVertexClass = initializer.getOrientVertexClass();
     OrientGraphNoTx oDb = initializer.getoDb();
     OrientGraphFactory oFactory = initializer.getoFactory();
-    ONeo4jImporterCounters counters = new ONeo4jImporterCounters();//
-    //
+    ONeo4jImporterCounters counters = new ONeo4jImporterCounters();
+    
+	//
     // PHASE 2 : MIGRATION OF VERTICES AND EDGES
     //
 
-    //
     ONeo4jImporterVerticesAndEdgesMigrator verticesAndEngesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(
         keepLogString, migrateRels,
         migrateNodes, df, neo4jGraphDb, orientVertexClass, oDb, counters).invoke();
@@ -161,7 +162,6 @@ public class ONeo4jImporter {
     // PHASE 3 : SCHEMA MIGRATION
     //
 
-    //
     ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df,
         neo4jGraphDb, oDb, counters).invoke();
 
@@ -169,17 +169,13 @@ public class ONeo4jImporter {
     // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO
     //
 
-    //
     stopServers(neo4jGraphDb, oDb, oFactory);
 
-    //
     printSummary(startTime, df, dfd, counters, initializer,
         verticesAndEngesImporter, schemaMigrator);
 
-    //
     returnCode = 0;
     return returnCode;
-    //
 
   }
 
@@ -196,7 +192,6 @@ public class ONeo4jImporter {
     oFactory.close();
 
     System.out.print("\rShutting down OrientDB...Done");
-    //
 
     //
     logString = "Shutting down Neo4j...";
@@ -241,7 +236,6 @@ public class ONeo4jImporter {
 
     double internalIndicesElapsedTime = counters.internalIndicesStopTime - counters.internalIndicesStartTime;
     double internalIndicesElapsedTimeSeconds = internalIndicesElapsedTime / (1000);
-    //
 
     //
     System.out.println();
