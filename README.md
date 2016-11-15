@@ -1,5 +1,4 @@
 # Neo4j to OrientDB Importer
-Neo4j importer for OrientDB
 
 ## Documentation
 

@@ -10,21 +10,23 @@ import org.junit.Test;
 public class ONeo4jImporterTest {
 
   @Test
-  public void shouldImportNodesOnlyDb() throws Exception {
+  public void shouldImportEmptyDb() throws Exception {
 
-    //provide right params
-    String[] args = new String[] {};
+    //String[] args = new String[] {
+	//	"-neo4jdbdir" , "neo4jdbs/databases/graphdb_empty_db", 
+	//	"-neo4jlibdir", "D:/neo4j/neo4j-community-3.0.6/lib", 
+	//	"-odbdir", "target/migrated_databases/graphdb_empty_db"};
 
     //launch
-    ONeo4jImporterMain.main(args);
+    //ONeo4jImporterMain.main(args);
 
-    //open the generated Orient Grapgh and do assertions
+    //open the generated Orient Graph and do assertions
+    //ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_empty_db");
+    //db.open("admin", "admin");
 
-    ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:./target/onlyNodes");
-
-    db.open("admin", "admin");
-
-    Assertions.assertThat(db.getMetadata().getSchema().getClass("class_created")).isNotNull();
+    //Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
 
   }
 }
