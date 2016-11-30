@@ -12,21 +12,22 @@ public class ONeo4jImporterTest {
   @Test
   public void shouldImportEmptyDb() throws Exception {
 
-    //String[] args = new String[] {
-	//	"-neo4jdbdir" , "neo4jdbs/databases/graphdb_empty_db", 
-	//	"-neo4jlibdir", "D:/neo4j/neo4j-community-3.0.6/lib", 
-	//	"-odbdir", "target/migrated_databases/graphdb_empty_db"};
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    //launch
-    //ONeo4jImporterMain.main(args);
+    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only";
+    settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only";
+    settings.overwriteOrientDbDir = true;
 
-    //open the generated Orient Graph and do assertions
-    //ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_empty_db");
-    //db.open("admin", "admin");
+    ONeo4jImporter importer = new ONeo4jImporter(settings);
 
-    //Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
+    importer.execute();
+
+    ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_nodes_only");
+    db.open("admin", "admin");
+
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
 
   }
 }
