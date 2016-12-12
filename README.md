@@ -9,8 +9,6 @@ http://orientdb.com/docs/last/OrientDB-Neo4j-Importer.html
 
 ### Tests
 
-_**Work in progress**_
-
 The test databases are created using the following queries:
 
 #### graphdb\_empty\_db
@@ -56,7 +54,7 @@ foreach(x in range(6,10) | create ( {p_boolean:true, other_property: "string-"+x
 
 ```
 foreach(x in range(1,10) | create (:NodeLabelA {p_number:x, other_property: "NodeLabelA-"+x}))
-foreach(x in range(1,10) | create (:NodeLABELA {p_string:"string_value_" + x, other_property: "NodeLabelB-"+x}))
+foreach(x in range(1,10) | create (:NodeLABELA {p_string:"string_value_" + x, other_property: "NodeLABELA-"+x}))
 foreach(x in range(1,5)  | create (:NodeLabelC {p_boolean:false, other_property: "NodeLabelC-"+x}))
 foreach(x in range(6,10) | create ( {p_boolean:true, other_property: "string-"+x}))
 ```
