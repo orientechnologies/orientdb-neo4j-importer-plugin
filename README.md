@@ -59,3 +59,11 @@ foreach(x in range(1,5)  | create (:NodeLabelC {p_boolean:false, other_property:
 foreach(x in range(6,10) | create ( {p_boolean:true, other_property: "string-"+x}))
 ```
 
+
+#### graphdb_nodes_only_multiple_labels
+
+```
+foreach(x in range(1,10) | create (:NodeLabelA:NodeLabelB {p_number:x, other_property: "NodeLabelA-NodeLabelB-"+x}))
+foreach(x in range(1,10) | create (:NodeLabelC:NodeLabelD {p_string:"string_value_" + x, other_property: "NodeLabelC-NodeLabelD"+x}))
+foreach(x in range(1,10) | create (:NodeLabelE {p_boolean:true, other_property: "NodeLabelC-"+x}))
+```
