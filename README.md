@@ -65,5 +65,22 @@ foreach(x in range(6,10) | create ( {p_boolean:true, other_property: "string-"+x
 ```
 foreach(x in range(1,10) | create (:NodeLabelA:NodeLabelB {p_number:x, other_property: "NodeLabelA-NodeLabelB-"+x}))
 foreach(x in range(1,10) | create (:NodeLabelC:NodeLabelD {p_string:"string_value_" + x, other_property: "NodeLabelC-NodeLabelD"+x}))
-foreach(x in range(1,10) | create (:NodeLabelE {p_boolean:true, other_property: "NodeLabelC-"+x}))
+foreach(x in range(1,10) | create (:NodeLabelE {p_boolean:true, other_property: "NodeLabelE-"+x}))
+```
+
+#### graphdb_multiple_labels_and_constraints
+
+```
+CREATE CONSTRAINT ON (n:NodeLabelA) ASSERT n.p_number        IS UNIQUE
+CREATE CONSTRAINT ON (n:NodeLabelB) ASSERT n.p_number        IS UNIQUE
+CREATE CONSTRAINT ON (n:NodeLabelC) ASSERT n.p_string        IS UNIQUE
+CREATE CONSTRAINT ON (n:NodeLabelE) ASSERT n.other_property  IS UNIQUE
+
+foreach(x in range(1,10) | create (:NodeLabelA:NodeLabelB {p_number:x, other_property: "NodeLabelA-NodeLabelB-"+x}))
+
+foreach(x in range(11,20) | create (:NodeLabelB {p_number:x, other_property: "NodeLabelB-"+x}))
+
+foreach(x in range(1,10) | create (:NodeLabelC:NodeLabelD {p_string:"string_value_" + x, other_property: "NodeLabelC-NodeLabelD"+x}))
+
+foreach(x in range(1,10) | create (:NodeLabelE {p_boolean:true, other_property: "NodeLabelE-"+x}))
 ```
