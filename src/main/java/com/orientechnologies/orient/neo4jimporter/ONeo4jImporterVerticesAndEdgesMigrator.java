@@ -116,8 +116,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
               counters.neo4jNodeMultipleLabelsCounter++;
 
-              //System.out.println("\nWARNING: Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass + ") will be used as Class when importing this node in OrientDB");
-
               logString = "Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass
                   + ") will be used as Class when importing this node in OrientDB";
               ONeo4jImporter.importLogger.log(Level.WARNING, logString);
@@ -126,15 +124,13 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
           }
 
-          // if q=0 the neo4j node has no label because q is incremented in the for cicly of the nodeLabels itarable
+          // if q=0 the neo4j node has no label because q is incremented in the for cycle of the nodeLabels iterable
           if (q == 0) {
 
             counters.neo4jNodeNoLabelCounter++;
 
             // set generic class for OrientDB
             orientVertexClass = "GenericClassNeo4jConversion";
-
-            //System.out.println("\nWARNING: Found node ('" + myNode + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB");
 
             logString = "Found node ('" + myNode
                 + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB";
@@ -231,14 +227,14 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           } catch (Exception e) {
 
             logString =
-                "Found an error when trying to create a UNIQUE Index in OrientDB on the 'Neo4jNodeID' Property of the vertices Class '"
+                "Found an error when trying to create a UNIQUE Index in OrientDB on the 'Neo4jNodeID' Property of the vertex Class '"
                     + classCollectionElement.getName() + "': " + e.getMessage();
             ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
 
           }
         } catch (Exception e) {
 
-          logString = "Found an error when trying to create the 'Neo4jNodeID' Property in OrientDB on the vertices Class '"
+          logString = "Found an error when trying to create the 'Neo4jNodeID' Property in OrientDB on the vertex Class '"
               + classCollectionElement.getName() + "': " + e.getMessage();
           ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
 
@@ -398,7 +394,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
               } catch (Exception e) {
 
-                logString = "Found an error when trying to create an Edge in OrientDB. Correspinding Relationship in Neo4j is '"
+                logString = "Found an error when trying to create an Edge in OrientDB. Corresponding Relationship in Neo4j is '"
                     + myRelationship + "': " + e.getMessage();
                 ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
               }
