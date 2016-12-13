@@ -27,6 +27,7 @@ import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.*;
 class ONeo4jImporterVerticesAndEdgesMigrator {
   private final boolean                migrateRels;
   private final boolean                migrateNodes;
+  private final boolean                relSampleOnly;  
   private final DecimalFormat          df;
   private final GraphDatabaseService   neo4jGraphDb;
   private       String                 keepLogString;
@@ -39,10 +40,11 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
   public ONeo4jImporterVerticesAndEdgesMigrator(String keepLogString, boolean migrateRels,
       boolean migrateNodes,
       DecimalFormat df,
-      GraphDatabaseService neo4jGraphDb, String orientVertexClass, OrientGraphNoTx oDb, ONeo4jImporterCounters counters) {
+      GraphDatabaseService neo4jGraphDb, String orientVertexClass, OrientGraphNoTx oDb, ONeo4jImporterCounters counters, boolean relSampleOnly) {
     this.keepLogString = keepLogString;
-    this.migrateRels = migrateRels;
+    this.migrateRels = migrateRels;	
     this.migrateNodes = migrateNodes;
+	this.relSampleOnly = relSampleOnly;
     this.df = df;
     this.neo4jGraphDb = neo4jGraphDb;
     this.orientVertexClass = orientVertexClass;
@@ -115,7 +117,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           if (q >= 2) {
 
              counters.neo4jNodeMultipleLabelsCounter++;
-
+			 
              logString = "Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass
                   + ") will be used as Class when importing this node in OrientDB";
              ONeo4jImporter.importLogger.log(Level.FINE, logString);
@@ -152,7 +154,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             //System.out.print(myVertex); //debug
 
             counters.orientDBImportedVerticesCounter++;
-
+			
             value = 100.0 * (counters.orientDBImportedVerticesCounter / counters.neo4jTotalNodes);
             keepLogString =
                 df.format(counters.orientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value)
@@ -291,6 +293,12 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         for (final Relationship myRelationship : neo4jRelationships) {
 
           counters.neo4jRelCounter++;
+		  
+		//if (relSampleOnly){			  
+		//	  if(counters.neo4jRelCounter == 1001){
+		//		  break;
+		//}			  
+		//}
 
           //System.out.println(myRelationship);
 
