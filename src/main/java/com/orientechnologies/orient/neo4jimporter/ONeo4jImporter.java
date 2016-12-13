@@ -93,8 +93,9 @@ public class ONeo4jImporter {
     double startTime = System.currentTimeMillis();
     double value;
 
-    boolean migrateRels = true;
-    boolean migrateNodes = true;
+    boolean migrateRels = true;  //set to false only during debug
+    boolean migrateNodes = true; //set to false only during debug
+	boolean relSampleOnly = false; //set to true only during debug
 
     DecimalFormat df = new DecimalFormat("#");
     DecimalFormat dfd = new DecimalFormat("#.##");
@@ -155,7 +156,7 @@ public class ONeo4jImporter {
 
     ONeo4jImporterVerticesAndEdgesMigrator verticesAndEngesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(
         keepLogString, migrateRels,
-        migrateNodes, df, neo4jGraphDb, orientVertexClass, oDb, counters).invoke();
+        migrateNodes, df, neo4jGraphDb, orientVertexClass, oDb, counters, relSampleOnly).invoke();
     keepLogString = verticesAndEngesImporter.getKeepLogString();
 
     //
@@ -285,6 +286,16 @@ public class ONeo4jImporter {
       System.out.print(" (" + df.format(value) + "%)");
       value = 0;
     }
+	System.out.println();
+    System.out.print("- NOT UNIQUE Indices created due to failure in creating UNIQUE Indices     : " + df.format(
+        counters.orientDBImportedNotUniqueWorkaroundCounter));
+    if (counters.neo4jConstraintsCounter > 0) {
+      value = (counters.orientDBImportedNotUniqueWorkaroundCounter / counters.neo4jConstraintsCounter) * 100;
+      System.out.print(" (" + df.format(value) + "%)");
+      value = 0;
+    }
+
+	
 
     System.out.println();
     System.out.println();
@@ -297,16 +308,6 @@ public class ONeo4jImporter {
       System.out.print(" (" + df.format(value) + "%)");
       value = 0;
     }
-
-		/*
-    System.out.println();
-		  System.out.print( "- Imported (in previous step) OrientDB indices                             : " + df.format(orientDBImportedUniqueConstraintsCounter));
-		if(neo4jIndicesCounter>0){
-			value = ( orientDBImportedUniqueConstraintsCounter / neo4jIndicesCounter )*100;
-			System.out.print( " (" + df.format(value) + "%)");
-			value=0;
-		}
-		*/
 
     System.out.println();
     System.out.println();
