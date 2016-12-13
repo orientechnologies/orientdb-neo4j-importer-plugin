@@ -8,7 +8,7 @@ import org.junit.Test;
  * Created by frank on 08/11/2016.
  */
 public class ONeo4jImporterTest {
-
+	
   @Test
   public void shouldImportEmptyDb() throws Exception {
 
@@ -144,5 +144,32 @@ public class ONeo4jImporterTest {
 	db.close();
 	
   }    
+  
+  @Test
+  public void shouldImportNodesOnlyMultipleLabelsDb() throws Exception {
+
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
+
+    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_multiple_labels";
+    settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_multiple_labels";
+    settings.overwriteOrientDbDir = true;
+
+    ONeo4jImporter importer = new ONeo4jImporter(settings);
+
+    importer.execute();
+
+    ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_nodes_only_multiple_labels");
+    db.open("admin", "admin");
+	
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelE")).isNotNull();
+	
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNull();
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelD")).isNull();
+    
+	db.close();
+	
+  }  
   
 }
