@@ -354,14 +354,17 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
                 if (orientEdgeClass.equalsIgnoreCase(classCollectionElement.getName())) {
                   //we have already a label on a vertex with the same name, changes the edge class by adding an "E_" prefix
-
-                  //System.out.println ("\n\nWARNING: Found a Neo4j Relationship ('" + orientEdgeClass + "') with same name of a Neo4j node Label ('"+ classCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + orientEdgeClass + "'\n");
-
-                  logString = "Found a Neo4j Relationship ('" + orientEdgeClass + "') with same name of a Neo4j node Label ('"
-                      + classCollectionElement.getName() + "'). Importing this relationship in OrientDB as 'E_" + orientEdgeClass;
-                  ONeo4jImporter.importLogger.log(Level.WARNING, logString);
-
-                  orientEdgeClass = "E_" + orientEdgeClass;
+					
+					//prints just one warning per relationship type (fix for github issue #1)
+					if(oDb.getRawGraph().getMetadata().getSchema().existsClass("E_" + orientEdgeClass) == false){
+					
+						logString = "Found a Neo4j Relationship Type ('" + orientEdgeClass + "') with same name of a Neo4j node Label ('"
+							+ classCollectionElement.getName() + "'). Importing in OrientDB relationships of this type as 'E_" + orientEdgeClass;
+						ONeo4jImporter.importLogger.log(Level.WARNING, logString);					
+						
+					}
+					
+					orientEdgeClass = "E_" + orientEdgeClass;
                 }
               }
               //
