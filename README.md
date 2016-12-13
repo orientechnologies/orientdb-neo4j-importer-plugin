@@ -77,10 +77,7 @@ CREATE CONSTRAINT ON (n:NodeLabelC) ASSERT n.p_string        IS UNIQUE
 CREATE CONSTRAINT ON (n:NodeLabelE) ASSERT n.other_property  IS UNIQUE
 
 foreach(x in range(1,10) | create (:NodeLabelA:NodeLabelB {p_number:x, other_property: "NodeLabelA-NodeLabelB-"+x}))
-
 foreach(x in range(11,20) | create (:NodeLabelB {p_number:x, other_property: "NodeLabelB-"+x}))
-
 foreach(x in range(1,10) | create (:NodeLabelC:NodeLabelD {p_string:"string_value_" + x, other_property: "NodeLabelC-NodeLabelD"+x}))
-
 foreach(x in range(1,10) | create (:NodeLabelE {p_boolean:true, other_property: "NodeLabelE-"+x}))
 ```
