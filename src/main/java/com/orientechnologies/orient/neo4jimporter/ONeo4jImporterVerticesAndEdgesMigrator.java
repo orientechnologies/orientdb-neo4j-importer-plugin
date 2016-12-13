@@ -104,26 +104,24 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           int q = 0;
           for (final Label myLabel : nodeLabels) {
             q++;
-
-            orientVertexClass = myLabel.name();
-
-            //takes only the first label, in case of multi labels
-            String[] parts = orientVertexClass.split(":");
-
-            orientVertexClass = parts[0];
-
-            if (parts.length >= 2) {
-
-              counters.neo4jNodeMultipleLabelsCounter++;
-
-              logString = "Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass
-                  + ") will be used as Class when importing this node in OrientDB";
-              ONeo4jImporter.importLogger.log(Level.WARNING, logString);
-
-            }
+			
+			//takes only the first label, in case of multi labels
+			if (q == 1){
+				orientVertexClass = myLabel.name();							
+			}
 
           }
+		  
+          if (q >= 2) {
 
+             counters.neo4jNodeMultipleLabelsCounter++;
+
+             logString = "Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass
+                  + ") will be used as Class when importing this node in OrientDB";
+             ONeo4jImporter.importLogger.log(Level.FINE, logString);
+
+          }
+		  
           // if q=0 the neo4j node has no label because q is incremented in the for cycle of the nodeLabels iterable
           if (q == 0) {
 
@@ -134,7 +132,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
             logString = "Found node ('" + myNode
                 + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB";
-            ONeo4jImporter.importLogger.log(Level.WARNING, logString);
+            ONeo4jImporter.importLogger.log(Level.FINE, logString);
 
           }
           //
