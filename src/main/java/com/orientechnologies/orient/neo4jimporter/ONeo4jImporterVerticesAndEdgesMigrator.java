@@ -66,7 +66,9 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
   public ONeo4jImporterVerticesAndEdgesMigrator invoke() {
     String logString;
-    double value;//gets all nodes from Neo4j and creates corresponding Vertices in OrientDB
+    double value;
+	boolean hasMultipleLabels = false;
+	//gets all nodes from Neo4j and creates corresponding Vertices in OrientDB
     if (migrateNodes) {
 
       logString = "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB...";
@@ -101,21 +103,36 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           //System.out.println(myNode); //debug
 
           final Iterable<Label> nodeLabels = myNode.getLabels();
+		  
+		  //
+		  int i=0;
+		  for (final Label myLabel : nodeLabels) {
+			i++;
+		  }
+		  String[] multipleLabelsArray;
+          multipleLabelsArray = new String[i];
+		  //
 
           //determines the class to use in OrientDB, starting from the original Neo4j label. First thing we check if this node has multiple labels
-          int q = 0;
+          int q = 0;		  		    
+		  String multipleLabelClass = "MultipleLabelNeo4jConversion";
           for (final Label myLabel : nodeLabels) {
             q++;
 			
-			//takes only the first label, in case of multi labels
 			if (q == 1){
 				orientVertexClass = myLabel.name();							
+				
 			}
+			multipleLabelsArray[q-1] = myLabel.name();
 
           }
 		  
           if (q >= 2) {
-
+			 
+			 hasMultipleLabels = true;
+			 
+			 orientVertexClass = multipleLabelClass;
+			 
              counters.neo4jNodeMultipleLabelsCounter++;
 			 
              logString = "Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass
@@ -144,6 +161,9 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
           //stores also the original neo4j nodeId in the property map - we will use it when creating the corresponding OrientDB vertex
           myNodeProperties.put("Neo4jNodeID", myNode.getId());
+		  
+		  //store also the original labels
+		  myNodeProperties.put("Neo4jLabelList", multipleLabelsArray);
 
           //System.out.println (myNodeProperties); //debug
 
@@ -217,7 +237,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
             counters.neo4jInternalIndicesCounter++;
 
-            value = 100.0 * (counters.neo4jInternalIndicesCounter / counters.orientDBVerticesClassCount);
+            value = 100.0 * (counters.neo4jInternalIndicesCounter / (counters.orientDBVerticesClassCount*2));
             keepLogString =
                 df.format(counters.neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
                     + "% done)";
@@ -239,6 +259,46 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
 
         }
+		
+		// index on property Neo4jLabelList		
+			try {
+
+			  //first create the property
+			  oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).createProperty("Neo4jLabelList",
+				  OType.EMBEDDEDLIST, OType.STRING);
+
+			  //creates the index if the property creation was successfull
+			  try {
+
+				oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty(
+					"Neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
+
+				counters.neo4jInternalIndicesCounter++;
+
+				value = 100.0 * (counters.neo4jInternalIndicesCounter / (counters.orientDBVerticesClassCount*2));
+				keepLogString =
+					df.format(counters.neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
+						+ "% done)";
+				System.out.print("\r  " + keepLogString);
+				value = 0;
+
+			  } catch (Exception e) {
+
+				logString =
+					"Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'Neo4jLabelList' Property of the vertex Class '"
+						+ classCollectionElement.getName() + "': " + e.getMessage();
+				ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+
+			  }
+			} catch (Exception e) {
+
+			  logString = "Found an error when trying to create the 'Neo4jLabelList' Property in OrientDB on the vertex Class '"
+				  + classCollectionElement.getName() + "': " + e.getMessage();
+			  ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+
+			}		
+		
+		//
 
       }
 

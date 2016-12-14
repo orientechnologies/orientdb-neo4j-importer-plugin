@@ -245,15 +245,15 @@ public class ONeo4jImporter {
     System.out.println("===============");
     System.out.println();
     System.out.println(
-        "- Found Neo4j Nodes                                                        : " + df.format(counters.neo4jNodeCounter));
-    System.out.println("-- With at least one Label                                                 :  " + df.format(
+        "- Found Neo4j Nodes                                                                           : " + df.format(counters.neo4jNodeCounter));
+    System.out.println("-- With at least one Label                                                                    :  " + df.format(
         (counters.neo4jNodeCounter - counters.neo4jNodeNoLabelCounter)));
-    System.out.println("--- With multiple Labels                                                   :   " + df.format(
+    System.out.println("--- With multiple Labels                                                                      :   " + df.format(
         counters.neo4jNodeMultipleLabelsCounter));
     System.out.println(
-        "-- Without Labels                                                          :  " + df.format(
+        "-- Without Labels                                                                             :  " + df.format(
             counters.neo4jNodeNoLabelCounter));
-    System.out.print("- Imported OrientDB Vertices                                               : " + df.format(
+    System.out.print("- Imported OrientDB Vertices                                                                  : " + df.format(
         counters.orientDBImportedVerticesCounter));
     if (counters.neo4jNodeCounter > 0) {
       value = (counters.orientDBImportedVerticesCounter / counters.neo4jNodeCounter) * 100;
@@ -264,9 +264,9 @@ public class ONeo4jImporter {
     System.out.println();
     System.out.println();
     System.out.println(
-        "- Found Neo4j Relationships                                                : " + df.format(counters.neo4jRelCounter));
+        "- Found Neo4j Relationships                                                                   : " + df.format(counters.neo4jRelCounter));
     System.out.print(
-        "- Imported OrientDB Edges                                                  : " + df.format(
+        "- Imported OrientDB Edges                                                                     : " + df.format(
             counters.orientDBImportedEdgesCounter));
     if (counters.neo4jRelCounter > 0) {
       value = (counters.orientDBImportedEdgesCounter / counters.neo4jRelCounter) * 100;
@@ -277,9 +277,9 @@ public class ONeo4jImporter {
     System.out.println();
     System.out.println();
     System.out.println(
-        "- Found Neo4j Constraints                                                  : " + df.format(
+        "- Found Neo4j Constraints                                                                     : " + df.format(
             counters.neo4jConstraintsCounter));
-    System.out.print("- Imported OrientDB Constraints (UNIQUE Indices created)                   : " + df.format(
+    System.out.print("- Imported OrientDB Constraints (UNIQUE Indices created)                                      : " + df.format(
         counters.orientDBImportedConstraintsCounter));
     if (counters.neo4jConstraintsCounter > 0) {
       value = (counters.orientDBImportedConstraintsCounter / counters.neo4jConstraintsCounter) * 100;
@@ -287,7 +287,7 @@ public class ONeo4jImporter {
       value = 0;
     }
 	System.out.println();
-    System.out.print("- NOT UNIQUE Indices created due to failure in creating UNIQUE Indices     : " + df.format(
+    System.out.print("- NOT UNIQUE Indices created due to failure in creating UNIQUE Indices                        : " + df.format(
         counters.orientDBImportedNotUniqueWorkaroundCounter));
     if (counters.neo4jConstraintsCounter > 0) {
       value = (counters.orientDBImportedNotUniqueWorkaroundCounter / counters.neo4jConstraintsCounter) * 100;
@@ -299,9 +299,9 @@ public class ONeo4jImporter {
 
     System.out.println();
     System.out.println();
-    System.out.println("- Found Neo4j (non-constraint) Indices                                     : " + df.format(
+    System.out.println("- Found Neo4j (non-constraint) Indices                                                        : " + df.format(
         counters.neo4jNonConstraintsIndicesCounter));
-    System.out.print("- Imported OrientDB Indices                                                : " + df.format(
+    System.out.print("- Imported OrientDB Indices                                                                   : " + df.format(
         counters.orientDBImportedIndicesCounter));
     if (counters.neo4jNonConstraintsIndicesCounter > 0) {
       value = (counters.orientDBImportedIndicesCounter / counters.neo4jNonConstraintsIndicesCounter) * 100;
@@ -312,17 +312,17 @@ public class ONeo4jImporter {
     System.out.println();
     System.out.println();
     System.out.println(
-        "- Additional created Indices (on vertex properties 'Neo4jNodeID')          : " + df.format(
+        "- Additional created Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')          : " + df.format(
             counters.neo4jInternalIndicesCounter));
 
     System.out.println();
     System.out.println(
-        "- Total Import time:                                                       : " + df.format(elapsedTimeSeconds)
+        "- Total Import time:                                                                          : " + df.format(elapsedTimeSeconds)
             + " seconds");
 
-    System.out.println("-- Initialization time                                                     :  " + df.format(
+    System.out.println("-- Initialization time                                                                        :  " + df.format(
         initializationElapsedTimeSeconds) + " seconds");
-    System.out.print("-- Time to Import Nodes                                                    :  " + df.format(
+    System.out.print("-- Time to Import Nodes                                                                       :  " + df.format(
         importingNodesElapsedTimeSeconds) + " seconds");
     if (importingNodesElapsedTimeSeconds > 0) {
       value = (counters.orientDBImportedVerticesCounter / importingNodesElapsedTimeSeconds);
@@ -331,7 +331,7 @@ public class ONeo4jImporter {
     }
 
     System.out.println();
-    System.out.print("-- Time to Import Relationships                                            :  " + df.format(
+    System.out.print("-- Time to Import Relationships                                                               :  " + df.format(
         importingRelsElapsedTimeSeconds) + " seconds");
     if (importingRelsElapsedTimeSeconds > 0) {
       value = (counters.orientDBImportedEdgesCounter / importingRelsElapsedTimeSeconds);
@@ -340,7 +340,7 @@ public class ONeo4jImporter {
     }
 
     System.out.println();
-    System.out.print("-- Time to Import Constraints and Indices                                  :  " + df.format(
+    System.out.print("-- Time to Import Constraints and Indices                                                     :  " + df.format(
         importingSchemaElapsedTimeSeconds) + " seconds");
     if (importingSchemaElapsedTimeSeconds > 0) {
       value = ((counters.orientDBImportedConstraintsCounter + counters.orientDBImportedIndicesCounter)
@@ -349,8 +349,8 @@ public class ONeo4jImporter {
       value = 0;
     }
 
-    System.out.println();
-    System.out.print("-- Time to create internal Indices (on vertex properties 'Neo4jNodeID')    :  " + df.format(
+    System.out.println();	
+	System.out.print("-- Time to create internal Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')    :  " + df.format(    
         internalIndicesElapsedTimeSeconds) + " seconds");
     if (internalIndicesElapsedTimeSeconds > 0) {
       value = (counters.neo4jInternalIndicesCounter / internalIndicesElapsedTimeSeconds);
