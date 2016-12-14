@@ -164,16 +164,18 @@ public class ONeo4jImporterTest {
     ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_nodes_only_multiple_labels");
     db.open("admin", "admin");
 	
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
-    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelE")).isNotNull();
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion")).isNotNull();    
 	
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNull();
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelD")).isNull();
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
+    //Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelE")).isNotNull();
 	
-	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelA").count());	
-	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelC").count());	
-	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelE").count());	
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNull();
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelD")).isNull();
+	
+	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelA").count());	
+	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelC").count());	
+	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelE").count());	
     
 	db.close();
 	
@@ -195,17 +197,19 @@ public class ONeo4jImporterTest {
     ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_multiple_labels_and_constraints");
     db.open("admin", "admin");
 	
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
-    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();	
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelE")).isNotNull();
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion")).isNotNull();    
+		
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
+    //Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();	
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelE")).isNotNull();
 	
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelD")).isNull();
+	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelD")).isNull();
 	
-    assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelA").count());
-	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelB").count());
-	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelC").count());
-	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelE").count());
+    //assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelA").count());
+	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelB").count());
+	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelC").count());
+	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelE").count());
 
 	db.close();
 	
