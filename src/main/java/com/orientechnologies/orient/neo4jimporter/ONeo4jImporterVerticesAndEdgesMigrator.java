@@ -208,7 +208,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       //creates an index on each OrientDB vertices class on Neo4jNodeID property - this will help in speeding up vertices lookup during relationships creation
       counters.internalIndicesStartTime = System.currentTimeMillis();
 
-      logString = "Creating internal Indices on property 'Neo4jNodeID' on all OrientDB Vertices Classes...";
+      logString = "Creating internal Indices on properties 'Neo4jNodeID' & 'Neo4jLabelList' on all OrientDB Vertices Classes...";
 
       System.out.println();
       System.out.println(logString);
