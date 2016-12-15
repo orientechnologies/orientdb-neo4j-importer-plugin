@@ -6,9 +6,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-
 /**
  * Created by frank on 08/11/2016.
+ *
+ * Tests are documented in the README.md
+ * Reminder: when nodes are migrated, two internal properties and two indices are created declaredProperties=2
+ * Ideas for other tests:
+ * - graphdb_label_case_and_constraints
+ * - test with edges 
  */
 public class ONeo4jImporterTest {
 
@@ -28,12 +33,19 @@ public class ONeo4jImporterTest {
     ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_empty_db");
     db.open("admin", "admin");
 	
-	//asserts here
+	//no vertices classes, no edge classes, 0 vertices, 0 edges 		
+	assertEquals(0, db.getMetadata().getSchema().getClass("V").getSubclasses().size());
+	assertEquals(0, db.getMetadata().getSchema().getClass("E").getSubclasses().size());
+	
+	assertEquals(0, db.getMetadata().getSchema().getClass("V").count());
+	assertEquals(0, db.getMetadata().getSchema().getClass("E").count());	
+	//
 	
 	db.close();	
 
   }
-
+  
+  
   @Test
   public void shouldImportUniqueConstraintsOnlyDb() throws Exception {
 
@@ -50,11 +62,30 @@ public class ONeo4jImporterTest {
     ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_unique_constraints_only");
     db.open("admin", "admin");
 	
-	//asserts here
+	//0 vertices, 0 edges, class NodeLabelA, class NodeLabelB, class NodeLabelC, 3 properties, 3 unique indexes	
+	assertEquals(0, db.getMetadata().getSchema().getClass("V").count());
+	assertEquals(0, db.getMetadata().getSchema().getClass("E").count());
+
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
+	
+	assertEquals(1, db.getMetadata().getSchema().getClass("NodeLabelA").declaredProperties().size());
+	assertEquals(1, db.getMetadata().getSchema().getClass("NodeLabelB").declaredProperties().size());	
+	assertEquals(1, db.getMetadata().getSchema().getClass("NodeLabelC").declaredProperties().size());
+	
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelA").existsProperty("p_number"));
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelB").existsProperty("p_string"));
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelC").existsProperty("p_boolean"));
+
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelA").areIndexed("p_number"));
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelB").areIndexed("p_string"));
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelC").areIndexed("p_boolean"));
+	//
 	
 	db.close();	
 
-  }  
+  }    
   
   @Test
   public void shouldImportNodesOnlyDb() throws Exception {
@@ -76,9 +107,17 @@ public class ONeo4jImporterTest {
     Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
     Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
 	
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelA").declaredProperties().size());
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelB").declaredProperties().size());	
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelC").declaredProperties().size());
+	
+	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelA").count());
+	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelB").count());
+	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelC").count());
+	
 	db.close();
 	
-  }  
+  }    
   
   @Test
   public void shouldImportNodesOnlyNoLabelsDb() throws Exception {
@@ -96,11 +135,17 @@ public class ONeo4jImporterTest {
     ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_nodes_only_no_labels");
     db.open("admin", "admin");
 	
-	//asserts here
+	assertEquals(1, db.getMetadata().getSchema().getClass("V").getSubclasses().size());
+	assertEquals(0, db.getMetadata().getSchema().getClass("E").getSubclasses().size());	
+	
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("GenericClassNeo4jConversion")).isNotNull();
+	assertEquals(2, db.getMetadata().getSchema().getClass("GenericClassNeo4jConversion").declaredProperties().size());				
+	
+	assertEquals(30, db.getMetadata().getSchema().getClass("V").count());
 	
 	db.close();
 
-  }  
+  }
 
   @Test
   public void shouldImportNodesOnlyMixedLabelsNoLabelsDb() throws Exception {
@@ -120,11 +165,16 @@ public class ONeo4jImporterTest {
 
     Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
     Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("GenericClassNeo4jConversion")).isNotNull();
+	
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelA").declaredProperties().size());	
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelC").declaredProperties().size());		
+	assertEquals(2, db.getMetadata().getSchema().getClass("GenericClassNeo4jConversion").declaredProperties().size());			
 	
 	db.close();
 	
-  }    
-
+  }      
+  
   @Test
   public void shouldImportNodesOnlyLabelCaseDb() throws Exception {
 
@@ -143,10 +193,15 @@ public class ONeo4jImporterTest {
 	
 	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
     Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("GenericClassNeo4jConversion")).isNotNull();	
+	
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelA").declaredProperties().size());	
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelC").declaredProperties().size());		
+	assertEquals(2, db.getMetadata().getSchema().getClass("GenericClassNeo4jConversion").declaredProperties().size());		
     
 	db.close();
 	
-  } 	   
+  }
   
   @Test
   public void shouldImportNodesOnlyMultipleLabelsDb() throws Exception {
@@ -164,23 +219,23 @@ public class ONeo4jImporterTest {
     ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_nodes_only_multiple_labels");
     db.open("admin", "admin");
 	
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion")).isNotNull();    
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion")).isNotNull();   	
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNull();    
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNull();    	
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNull();
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelD")).isNull();	
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelE")).isNotNull();
 	
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
-    //Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelE")).isNotNull();
-	
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNull();
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelD")).isNull();
-	
-	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelA").count());	
-	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelC").count());	
-	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelE").count());	
+	assertEquals(2, db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion").declaredProperties().size());		
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelE").declaredProperties().size());		
+		
+	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelE").count());
+	assertEquals(20, db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion").count());
     
 	db.close();
 	
-  }
-
+  }  
+	 
   @Test
   public void shouldImportMultipleLabelsAndConstraintsDb() throws Exception {
 
@@ -197,23 +252,29 @@ public class ONeo4jImporterTest {
     ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_multiple_labels_and_constraints");
     db.open("admin", "admin");
 	
-	Assertions.assertThat(db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion")).isNotNull();    
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion")).isNotNull();   		
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNull();    
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNull();	
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelD")).isNull();		
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelE")).isNotNull();
+	
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelB").existsProperty("p_number"));
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelE").existsProperty("other_property"));	
+	assertEquals(true, db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion").existsProperty("p_number"));
+	assertEquals(true, db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion").existsProperty("p_string"));
+	
+	assertEquals(4, db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion").declaredProperties().size());		
+	assertEquals(3, db.getMetadata().getSchema().getClass("NodeLabelB").declaredProperties().size());			
+	assertEquals(3, db.getMetadata().getSchema().getClass("NodeLabelE").declaredProperties().size());				
 		
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
-    //Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();	
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelE")).isNotNull();
+    assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelB").count());
+	assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelE").count());
+	assertEquals(20, db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion").count());
 	
-	//Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelD")).isNull();
-	
-    //assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelA").count());
-	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelB").count());
-	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelC").count());
-	//assertEquals(10, db.getMetadata().getSchema().getClass("NodeLabelE").count());
-
 	db.close();
 	
-  }  
+  }    
   
   
 }
