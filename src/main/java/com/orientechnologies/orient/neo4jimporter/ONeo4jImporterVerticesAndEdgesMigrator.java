@@ -233,7 +233,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           try {
 
             oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty(
-                "Neo4jNodeID").createIndex(OClass.INDEX_TYPE.UNIQUE);
+                "Neo4jNodeID").createIndex(OClass.INDEX_TYPE.UNIQUE_HASH_INDEX);
 
             counters.neo4jInternalIndicesCounter++;
 
@@ -271,7 +271,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 			  try {
 
 				oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty(
-					"Neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
+					"Neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
 
 				counters.neo4jInternalIndicesCounter++;
 
