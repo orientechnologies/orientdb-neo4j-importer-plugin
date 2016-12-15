@@ -52,7 +52,9 @@ import java.util.logging.Logger;
  *
  * General details to keep in mind:
  * - In case a node in Neo4j has no Label, it will be imported in OrientDB in the Class "GenericClassNeo4jConversion"
+ * - In case a node in Neo4j has multiple labels, it will be imported in the class "MultipleLabelNeo4jConversion"
  * - Original Neo4j IDs are stored as properties in the imported OrientDB vertices and edges ('Neo4jNodeID' for vertices and 'Neo4jRelID' for edges). Such properties can be (manually) removed at the end of the import, if not needed
+ * - List of original labels are stored as properties in the imported OrientDB vertices (property: 'Neo4jLabelList'). A not unique index is created on this property. This will allow to query by label even on nodes migrated into the Class MultipleLabelNeo4jConversion, with a query like: SELECT FROM V WHERE @class = 'MultipleLabelNeo4jConversion' AND Neo4jLabelList CONTAINS 'your_label_here'
  * - During the import, an index is created on the property 'Neo4jNodeID' for all imported vertices Labels (Classes in OrientDB). This is to speed up vertices lookup during edge creation. The created indices can be (manually) removed at the end of the import, if not needed
  * - In case a Neo4j Relationship has the same name of a Neo4j Label, e.g. "RelationshipName", the script will import into OrientDB that relationship in the class "E_RelationshipName" (i.e. prefixing the Neo4j relationship type with an "E_")
  * - During the creation of properties in OrientDB, Neo4j Char data type is mapped to a String data type
@@ -68,7 +70,7 @@ import java.util.logging.Logger;
  * Limitations:
  * - Currently only `local` migrations are allowed
  * - Schema limitations:
- * -- In case a node in Neo4j has multiple labels, only the first label is imported in OrientDB
+ * -- In case a node in Neo4j has multiple labels, it will be imported in the class 'MultipleLabelNeo4jConversion'
  * -- Neo4j Nodes with same label but different case, e.g. LABEL and LAbel will be aggregated into a single OrientDB vertex class
  * -- Neo4j Relationship with same name but different case, e.g. relaTIONship and RELATIONSHIP will be aggregated into a single edge class
  * -- Migration of Neo4j "existence" constraints (available only in Neo4j Enterprise) is not implemented
