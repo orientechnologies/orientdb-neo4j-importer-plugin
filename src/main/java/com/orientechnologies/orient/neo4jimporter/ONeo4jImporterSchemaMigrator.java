@@ -3,7 +3,9 @@ package com.orientechnologies.orient.neo4jimporter;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
+import com.tinkerpop.blueprints.Vertex;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -112,7 +114,25 @@ class ONeo4jImporterSchemaMigrator {
           //create class orientDBIndexClass
           //there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
           if (oDb.getRawGraph().getMetadata().getSchema().existsClass(orientDBIndexClass) == false) {
-            oDb.createVertexType(orientDBIndexClass);
+            
+			//cheks if this labels has been imported in the MultipleLabelNeo4jConversion label			
+			//If yes:
+			//1. the vertex class is not created as part of the schema migration 
+			//2. its indices (and corresponding properties) are created in MultipleLabelNeo4jConversion			
+			String sqlQuery = "SELECT @rid FROM V WHERE @class = 'MultipleLabelNeo4jConversion' AND Neo4jLabelList CONTAINS '" + orientDBIndexClass + "' LIMIT 1";
+						
+			int u = 0;			
+			for (Vertex v : (Iterable<Vertex>) oDb.command(
+					new OCommandSQL(sqlQuery)).execute()) {
+				u++;
+				//System.out.println("\n\n\nfound it: " + orientDBIndexClass + " " + v); //debug
+				orientDBIndexClass = "MultipleLabelNeo4jConversion";				
+			}
+			
+			if (u == 0) {			
+				//System.out.println("\n\n\ndid not find it: " + orientDBIndexClass); //debug 
+				oDb.createVertexType(orientDBIndexClass);
+			}
           }
 		  
 		  isConstraintsOnNode = true;
