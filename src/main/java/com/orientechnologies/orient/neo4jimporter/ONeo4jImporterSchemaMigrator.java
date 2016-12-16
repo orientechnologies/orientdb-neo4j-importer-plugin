@@ -3,6 +3,7 @@ package com.orientechnologies.orient.neo4jimporter;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.Vertex;
@@ -132,6 +133,41 @@ class ONeo4jImporterSchemaMigrator {
 			if (u == 0) {			
 				//System.out.println("\n\n\ndid not find it: " + orientDBIndexClass); //debug 
 				oDb.createVertexType(orientDBIndexClass);
+				
+				// in order to improve record lookup when filtering on Neo4j labels all classes must have the Neo4jLabelList properties and an index on it
+				// when classes are created during nodes migration, this property is created automatically
+				// here we need to create it for those additional classes that are created (empty) during schema migration
+				
+				// index on property Neo4jLabelList		
+				try {
+
+				  //first create the property
+				  oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass).createProperty("Neo4jLabelList",
+					  OType.EMBEDDEDLIST, OType.STRING);
+
+				  //creates the index if the property creation was successfull
+				  try {
+
+					oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass).getProperty(
+						"Neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
+
+				  } catch (Exception e) {
+
+					logString =
+						"Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'Neo4jLabelList' Property of the vertex Class '"
+							+ orientDBIndexClass + "': " + e.getMessage();
+					ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+
+				  }
+				} catch (Exception e) {
+
+				  logString = "Found an error when trying to create the 'Neo4jLabelList' Property in OrientDB on the vertex Class '"
+					  + orientDBIndexClass + "': " + e.getMessage();
+				  ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+
+				}				
+				//				
+				
 			}
           }
 		  
