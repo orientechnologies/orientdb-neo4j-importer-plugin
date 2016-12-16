@@ -70,9 +70,9 @@ public class ONeo4jImporterTest {
     Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
     Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelC")).isNotNull();
 	
-	assertEquals(1, db.getMetadata().getSchema().getClass("NodeLabelA").declaredProperties().size());
-	assertEquals(1, db.getMetadata().getSchema().getClass("NodeLabelB").declaredProperties().size());	
-	assertEquals(1, db.getMetadata().getSchema().getClass("NodeLabelC").declaredProperties().size());
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelA").declaredProperties().size());
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelB").declaredProperties().size());	
+	assertEquals(2, db.getMetadata().getSchema().getClass("NodeLabelC").declaredProperties().size());
 	
 	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelA").existsProperty("p_number"));
 	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelB").existsProperty("p_string"));
@@ -275,6 +275,5 @@ public class ONeo4jImporterTest {
 	db.close();
 	
   }    
-  
-  
+   
 }
