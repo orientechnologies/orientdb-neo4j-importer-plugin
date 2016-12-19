@@ -40,9 +40,6 @@ import java.util.logging.Logger;
  *
  * Author: Santo Leto
  *
- * Start:
- * - java -XX:MaxDirectMemorySize=2g -classpath "path_to_neo4j/lib/*;path_to_orientdb/lib/*;../" -Djava.util.logging.config.file=../log/orientdb-neo4j-importer-logs.properties com.orientechnologies.orient.ONeo4jImporter -neo4jlibdir="path_to_neo4j/lib" -neo4jdbdir="path_to_neo4j\data\databases\graph.db"
- *
  * Description:
  * - This program migrates a Neo4j database into an OrientDB database. The migration consists of several phases:
  * -- Phase 1: Initialization of Neo4j and OrientDB Servers
