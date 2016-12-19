@@ -11,15 +11,11 @@
 
     <files>
         <file>
-            <source>${basedir}/../LICENSE</source>
+            <source>${basedir}/LICENSE</source>
             <fileMode>444</fileMode>
         </file>
         <file>
-            <source>${basedir}/../history.txt</source>
-            <fileMode>444</fileMode>
-        </file>
-        <file>
-            <source>${basedir}/../readme.txt</source>
+            <source>${basedir}/history.txt</source>
             <fileMode>444</fileMode>
         </file>
     </files>
