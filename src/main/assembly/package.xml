@@ -11,11 +11,11 @@
 
     <files>
         <file>
-            <source>${basedir}/LICENSE-neo4j-importer</source>
+            <source>${basedir}/LICENSE-orientdb-neo4j-importer</source>
             <fileMode>444</fileMode>
         </file>
         <file>
-            <source>${basedir}/history-neo4j-importer.txt</source>
+            <source>${basedir}/history-orientdb-neo4j-importer.txt</source>
             <fileMode>444</fileMode>
         </file>
     </files>
