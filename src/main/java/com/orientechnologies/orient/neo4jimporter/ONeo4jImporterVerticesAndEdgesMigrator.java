@@ -354,12 +354,12 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
           counters.neo4jRelCounter++;
 		  
-		//if (relSampleOnly){			  
-		//	  if(counters.neo4jRelCounter == 1001){
-		//		  break;
-		//}			  
-		//}
-
+		  if (counters.neo4jRelCounter == 1001){			  
+			if(relSampleOnly){
+				break;
+			}
+		  }		  
+		
           //System.out.println(myRelationship);
 
           RelationshipType myRelationshipType = myRelationship.getType();
