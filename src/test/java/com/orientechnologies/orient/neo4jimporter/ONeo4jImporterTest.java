@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
  * Tests are documented in the README.md
  * Reminder: when nodes are migrated, two internal properties and two indices are created declaredProperties=2
  * Ideas for other tests:
- * - graphdb_label_case_and_constraints
  * - test with edges 
  */
 public class ONeo4jImporterTest {
@@ -202,6 +201,38 @@ public class ONeo4jImporterTest {
 	db.close();
 	
   }
+  
+  @Test
+  public void shouldImportNodesOnlyLabelCaseConstraintsDb() throws Exception {
+
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
+
+    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_label_case_test_constraints";
+    settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_label_case_test_constraints";
+    settings.overwriteOrientDbDir = true;
+
+    ONeo4jImporter importer = new ONeo4jImporter(settings);
+
+    importer.execute();
+
+    ODatabaseDocumentTx db = new ODatabaseDocumentTx("plocal:target/migrated_databases/graphdb_nodes_only_label_case_test_constraints");
+    db.open("admin", "admin");
+	
+	Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelA")).isNotNull();    
+    Assertions.assertThat(db.getMetadata().getSchema().getClass("NodeLabelB")).isNotNull();
+		
+	assertEquals(3, db.getMetadata().getSchema().getClass("NodeLabelA").declaredProperties().size());	
+	assertEquals(3, db.getMetadata().getSchema().getClass("NodeLabelB").declaredProperties().size());	
+
+	assertEquals(20, db.getMetadata().getSchema().getClass("NodeLabelA").count());	
+	assertEquals(20, db.getMetadata().getSchema().getClass("NodeLabelB").count());		
+	
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelA").existsProperty("p_number"));
+	assertEquals(true, db.getMetadata().getSchema().getClass("NodeLabelB").existsProperty("p_number"));
+	    
+	db.close();
+	
+  }  
   
   @Test
   public void shouldImportNodesOnlyMultipleLabelsDb() throws Exception {
