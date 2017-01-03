@@ -7,19 +7,14 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.*;
 
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
 
-import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.*;
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
 /**
  * Created by frank on 08/11/2016.
@@ -27,7 +22,7 @@ import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.*;
 class ONeo4jImporterVerticesAndEdgesMigrator {
   private final boolean                migrateRels;
   private final boolean                migrateNodes;
-  private final boolean                relSampleOnly;  
+  private final boolean                relSampleOnly;
   private final DecimalFormat          df;
   private final GraphDatabaseService   neo4jGraphDb;
   private       String                 keepLogString;
@@ -37,14 +32,13 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
   private       double                 importingRelsStartTime;
   private       double                 importingRelsStopTime;
 
-  public ONeo4jImporterVerticesAndEdgesMigrator(String keepLogString, boolean migrateRels,
-      boolean migrateNodes,
-      DecimalFormat df,
-      GraphDatabaseService neo4jGraphDb, String orientVertexClass, OrientGraphNoTx oDb, ONeo4jImporterCounters counters, boolean relSampleOnly) {
+  public ONeo4jImporterVerticesAndEdgesMigrator(String keepLogString, boolean migrateRels, boolean migrateNodes, DecimalFormat df,
+      GraphDatabaseService neo4jGraphDb, String orientVertexClass, OrientGraphNoTx oDb, ONeo4jImporterCounters counters,
+      boolean relSampleOnly) {
     this.keepLogString = keepLogString;
-    this.migrateRels = migrateRels;	
+    this.migrateRels = migrateRels;
     this.migrateNodes = migrateNodes;
-	this.relSampleOnly = relSampleOnly;
+    this.relSampleOnly = relSampleOnly;
     this.df = df;
     this.neo4jGraphDb = neo4jGraphDb;
     this.orientVertexClass = orientVertexClass;
@@ -67,8 +61,9 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
   public ONeo4jImporterVerticesAndEdgesMigrator invoke() {
     String logString;
     double value;
-	boolean hasMultipleLabels = false;
-	//gets all nodes from Neo4j and creates corresponding Vertices in OrientDB
+    boolean hasMultipleLabels = false;
+
+    //gets all nodes from Neo4j and creates corresponding Vertices in OrientDB
     if (migrateNodes) {
 
       logString = "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB...";
@@ -103,44 +98,44 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           //System.out.println(myNode); //debug
 
           final Iterable<Label> nodeLabels = myNode.getLabels();
-		  
-		  //
-		  int i=0;
-		  for (final Label myLabel : nodeLabels) {
-			i++;
-		  }
-		  String[] multipleLabelsArray;
+
+          //
+          int i = 0;
+          for (final Label myLabel : nodeLabels) {
+            i++;
+          }
+          String[] multipleLabelsArray;
           multipleLabelsArray = new String[i];
-		  //
+          //
 
           //determines the class to use in OrientDB, starting from the original Neo4j label. First thing we check if this node has multiple labels
-          int q = 0;		  		    
-		  String multipleLabelClass = "MultipleLabelNeo4jConversion";
+          int q = 0;
+          String multipleLabelClass = "MultipleLabelNeo4jConversion";
           for (final Label myLabel : nodeLabels) {
             q++;
-			
-			if (q == 1){
-				orientVertexClass = myLabel.name();							
-				
-			}
-			multipleLabelsArray[q-1] = myLabel.name();
+
+            if (q == 1) {
+              orientVertexClass = myLabel.name();
+
+            }
+            multipleLabelsArray[q - 1] = myLabel.name();
 
           }
-		  
+
           if (q >= 2) {
-			 
-			 hasMultipleLabels = true;
-			 
-			 orientVertexClass = multipleLabelClass;
-			 
-             counters.neo4jNodeMultipleLabelsCounter++;
-			 
-             logString = "Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass
-                  + ") will be used as Class when importing this node in OrientDB";
-             ONeo4jImporter.importLogger.log(Level.FINE, logString);
+
+            hasMultipleLabels = true;
+
+            orientVertexClass = multipleLabelClass;
+
+            counters.neo4jNodeMultipleLabelsCounter++;
+
+            logString = "Found node ('" + myNode + "') with multiple labels. Only the first (" + orientVertexClass
+                + ") will be used as Class when importing this node in OrientDB";
+            ONeo4jImporter.importLogger.log(Level.FINE, logString);
 
           }
-		  
+
           // if q=0 the neo4j node has no label because q is incremented in the for cycle of the nodeLabels iterable
           if (q == 0) {
 
@@ -161,9 +156,9 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
           //stores also the original neo4j nodeId in the property map - we will use it when creating the corresponding OrientDB vertex
           myNodeProperties.put("Neo4jNodeID", myNode.getId());
-		  
-		  //store also the original labels
-		  myNodeProperties.put("Neo4jLabelList", multipleLabelsArray);
+
+          //store also the original labels
+          myNodeProperties.put("Neo4jLabelList", multipleLabelsArray);
 
           //System.out.println (myNodeProperties); //debug
 
@@ -174,7 +169,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             //System.out.print(myVertex); //debug
 
             counters.orientDBImportedVerticesCounter++;
-			
+
             value = 100.0 * (counters.orientDBImportedVerticesCounter / counters.neo4jTotalNodes);
             keepLogString =
                 df.format(counters.orientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value)
@@ -226,18 +221,18 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         try {
 
           //first create the property
-          oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).createProperty("Neo4jNodeID",
-              OType.LONG);
+          oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName())
+              .createProperty("Neo4jNodeID", OType.LONG);
 
           //creates the index if the property creation was successfull
           try {
 
-            oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty(
-                "Neo4jNodeID").createIndex(OClass.INDEX_TYPE.UNIQUE_HASH_INDEX);
+            oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty("Neo4jNodeID")
+                .createIndex(OClass.INDEX_TYPE.UNIQUE_HASH_INDEX);
 
             counters.neo4jInternalIndicesCounter++;
 
-            value = 100.0 * (counters.neo4jInternalIndicesCounter / (counters.orientDBVerticesClassCount*2));
+            value = 100.0 * (counters.neo4jInternalIndicesCounter / (counters.orientDBVerticesClassCount * 2));
             keepLogString =
                 df.format(counters.neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
                     + "% done)";
@@ -259,46 +254,46 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
 
         }
-		
-		// index on property Neo4jLabelList		
-			try {
 
-			  //first create the property
-			  oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).createProperty("Neo4jLabelList",
-				  OType.EMBEDDEDLIST, OType.STRING);
+        // index on property Neo4jLabelList
+        try {
 
-			  //creates the index if the property creation was successfull
-			  try {
+          //first create the property
+          oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName())
+              .createProperty("Neo4jLabelList", OType.EMBEDDEDLIST, OType.STRING);
 
-				oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty(
-					"Neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
+          //creates the index if the property creation was successfull
+          try {
 
-				counters.neo4jInternalIndicesCounter++;
+            oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty("Neo4jLabelList")
+                .createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
 
-				value = 100.0 * (counters.neo4jInternalIndicesCounter / (counters.orientDBVerticesClassCount*2));
-				keepLogString =
-					df.format(counters.neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
-						+ "% done)";
-				System.out.print("\r  " + keepLogString);
-				value = 0;
+            counters.neo4jInternalIndicesCounter++;
 
-			  } catch (Exception e) {
+            value = 100.0 * (counters.neo4jInternalIndicesCounter / (counters.orientDBVerticesClassCount * 2));
+            keepLogString =
+                df.format(counters.neo4jInternalIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
+                    + "% done)";
+            System.out.print("\r  " + keepLogString);
+            value = 0;
 
-				logString =
-					"Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'Neo4jLabelList' Property of the vertex Class '"
-						+ classCollectionElement.getName() + "': " + e.getMessage();
-				ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+          } catch (Exception e) {
 
-			  }
-			} catch (Exception e) {
+            logString =
+                "Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'Neo4jLabelList' Property of the vertex Class '"
+                    + classCollectionElement.getName() + "': " + e.getMessage();
+            ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
 
-			  logString = "Found an error when trying to create the 'Neo4jLabelList' Property in OrientDB on the vertex Class '"
-				  + classCollectionElement.getName() + "': " + e.getMessage();
-			  ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+          }
+        } catch (Exception e) {
 
-			}		
-		
-		//
+          logString = "Found an error when trying to create the 'Neo4jLabelList' Property in OrientDB on the vertex Class '"
+              + classCollectionElement.getName() + "': " + e.getMessage();
+          ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+
+        }
+
+        //
 
       }
 
@@ -353,13 +348,13 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         for (final Relationship myRelationship : neo4jRelationships) {
 
           counters.neo4jRelCounter++;
-		  
-		  if (counters.neo4jRelCounter == 1001){			  
-			if(relSampleOnly){
-				break;
-			}
-		  }		  
-		
+
+          if (counters.neo4jRelCounter == 1001) {
+            if (relSampleOnly) {
+              break;
+            }
+          }
+
           //System.out.println(myRelationship);
 
           RelationshipType myRelationshipType = myRelationship.getType();
@@ -407,8 +402,8 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
               //in neo4j we can have labels on nodes and relationship with the same name
               //to handle this case, we append an E_ to the relationship name in case the relationship name is the same of a vertex class
-              Collection<OClass> checkClassCollection = oDb.getRawGraph().getMetadata().getSchema().getClass(
-                  "V").getAllSubclasses();
+              Collection<OClass> checkClassCollection = oDb.getRawGraph().getMetadata().getSchema().getClass("V")
+                  .getAllSubclasses();
               for (OClass classCollectionElement : checkClassCollection) {
 
                 //debug
@@ -416,17 +411,19 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
                 if (orientEdgeClass.equalsIgnoreCase(classCollectionElement.getName())) {
                   //we have already a label on a vertex with the same name, changes the edge class by adding an "E_" prefix
-					
-					//prints just one warning per relationship type (fix for github issue #1)
-					if(oDb.getRawGraph().getMetadata().getSchema().existsClass("E_" + orientEdgeClass) == false){
-					
-						logString = "Found a Neo4j Relationship Type ('" + orientEdgeClass + "') with same name of a Neo4j node Label ('"
-							+ classCollectionElement.getName() + "'). Importing in OrientDB relationships of this type as 'E_" + orientEdgeClass;
-						ONeo4jImporter.importLogger.log(Level.WARNING, logString);					
-						
-					}
-					
-					orientEdgeClass = "E_" + orientEdgeClass;
+
+                  //prints just one warning per relationship type (fix for github issue #1)
+                  if (oDb.getRawGraph().getMetadata().getSchema().existsClass("E_" + orientEdgeClass) == false) {
+
+                    logString =
+                        "Found a Neo4j Relationship Type ('" + orientEdgeClass + "') with same name of a Neo4j node Label ('"
+                            + classCollectionElement.getName() + "'). Importing in OrientDB relationships of this type as 'E_"
+                            + orientEdgeClass;
+                    ONeo4jImporter.importLogger.log(Level.WARNING, logString);
+
+                  }
+
+                  orientEdgeClass = "E_" + orientEdgeClass;
                 }
               }
               //

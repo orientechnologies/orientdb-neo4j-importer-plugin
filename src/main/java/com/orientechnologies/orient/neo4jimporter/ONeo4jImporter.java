@@ -20,15 +20,9 @@ package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.common.io.OFileUtils;
 import com.orientechnologies.orient.core.OConstants;
-import com.orientechnologies.orient.core.metadata.schema.OProperty;
-import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.graphdb.Transaction;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -37,40 +31,40 @@ import java.util.logging.Logger;
 
 /**
  * The main class of the ONeo4jImporter. It is instantiated from the ONeo4jImporterCommandLineParser
- *
+ * <p>
  * Author: Santo Leto
- *
- * Description:
- * - This program migrates a Neo4j database into an OrientDB database. The migration consists of several phases:
- * -- Phase 1: Initialization of Neo4j and OrientDB Servers
- * -- Phase 2: Migration of vertices and edges
- * -- Phase 3: Schema migration
- * -- Phase 4: Shutdown of the server and summary info
- *
- * General details to keep in mind:
- * - In case a node in Neo4j has no Label, it will be imported in OrientDB in the Class "GenericClassNeo4jConversion"
- * - In case a node in Neo4j has multiple labels, it will be imported in the class "MultipleLabelNeo4jConversion"
- * - Original Neo4j IDs are stored as properties in the imported OrientDB vertices and edges ('Neo4jNodeID' for vertices and 'Neo4jRelID' for edges). Such properties can be (manually) removed at the end of the import, if not needed
- * - List of original labels are stored as properties in the imported OrientDB vertices (property: 'Neo4jLabelList'). A not unique index is created on this property. This will allow to query by label even on nodes migrated into the Class MultipleLabelNeo4jConversion, with a query like: SELECT FROM V WHERE @class = 'MultipleLabelNeo4jConversion' AND Neo4jLabelList CONTAINS 'your_label_here'
- * - During the import, an index is created on the property 'Neo4jNodeID' for all imported vertices Labels (Classes in OrientDB). This is to speed up vertices lookup during edge creation. The created indices can be (manually) removed at the end of the import, if not needed
- * - In case a Neo4j Relationship has the same name of a Neo4j Label, e.g. "RelationshipName", the script will import into OrientDB that relationship in the class "E_RelationshipName" (i.e. prefixing the Neo4j relationship type with an "E_")
- * - During the creation of properties in OrientDB, Neo4j Char data type is mapped to a String data type
- *
- * Schema details to keep in mind:
- * - If in Neo4j there are no constraints or indices, the imported OrientDB database is schemaless
- * - If in Neo4j there are constraints or indices, the imported OrientDB database is schema-hybrid (with some properties defined). In particular, for any constraints and indices:
- * - The Neo4j property where the constraint or index is defined on is determined, and, using java 'instanceof' we determine the data type of this property (there's no way, in fact, to get the data type via the Neo4j API)
- * - Once we know the data type, we map it to an orientdb data type and we create a property with the corresponding data type
- * - If a Neo4j unique constraint is found, a corresponding unique index is created in OrientDB
- * - If a Neo4j index is found, a corresponding (notunique) OrientDB index is created
- *
- * Limitations:
- * - Currently only `local` migrations are allowed
- * - Schema limitations:
- * -- In case a node in Neo4j has multiple labels, it will be imported in the class 'MultipleLabelNeo4jConversion'
- * -- Neo4j Nodes with same label but different case, e.g. LABEL and LAbel will be aggregated into a single OrientDB vertex class
- * -- Neo4j Relationship with same name but different case, e.g. relaTIONship and RELATIONSHIP will be aggregated into a single edge class
- * -- Migration of Neo4j "existence" constraints (available only in Neo4j Enterprise) is not implemented
+ * <p>
+ * Description: - This program migrates a Neo4j database into an OrientDB database. The migration consists of several phases: --
+ * Phase 1: Initialization of Neo4j and OrientDB Servers -- Phase 2: Migration of vertices and edges -- Phase 3: Schema migration --
+ * Phase 4: Shutdown of the server and summary info
+ * <p>
+ * General details to keep in mind: - In case a node in Neo4j has no Label, it will be imported in OrientDB in the Class
+ * "GenericClassNeo4jConversion" - In case a node in Neo4j has multiple labels, it will be imported in the class
+ * "MultipleLabelNeo4jConversion" - Original Neo4j IDs are stored as properties in the imported OrientDB vertices and edges
+ * ('Neo4jNodeID' for vertices and 'Neo4jRelID' for edges). Such properties can be (manually) removed at the end of the import, if
+ * not needed - List of original labels are stored as properties in the imported OrientDB vertices (property: 'Neo4jLabelList'). A
+ * not unique index is created on this property. This will allow to query by label even on nodes migrated into the Class
+ * MultipleLabelNeo4jConversion, with a query like: SELECT FROM V WHERE @class = 'MultipleLabelNeo4jConversion' AND Neo4jLabelList
+ * CONTAINS 'your_label_here' - During the import, an index is created on the property 'Neo4jNodeID' for all imported vertices
+ * Labels (Classes in OrientDB). This is to speed up vertices lookup during edge creation. The created indices can be (manually)
+ * removed at the end of the import, if not needed - In case a Neo4j Relationship has the same name of a Neo4j Label, e.g.
+ * "RelationshipName", the script will import into OrientDB that relationship in the class "E_RelationshipName" (i.e. prefixing the
+ * Neo4j relationship type with an "E_") - During the creation of properties in OrientDB, Neo4j Char data type is mapped to a String
+ * data type
+ * <p>
+ * Schema details to keep in mind: - If in Neo4j there are no constraints or indices, the imported OrientDB database is schemaless -
+ * If in Neo4j there are constraints or indices, the imported OrientDB database is schema-hybrid (with some properties defined). In
+ * particular, for any constraints and indices: - The Neo4j property where the constraint or index is defined on is determined, and,
+ * using java 'instanceof' we determine the data type of this property (there's no way, in fact, to get the data type via the Neo4j
+ * API) - Once we know the data type, we map it to an orientdb data type and we create a property with the corresponding data type -
+ * If a Neo4j unique constraint is found, a corresponding unique index is created in OrientDB - If a Neo4j index is found, a
+ * corresponding (notunique) OrientDB index is created
+ * <p>
+ * Limitations: - Currently only `local` migrations are allowed - Schema limitations: -- In case a node in Neo4j has multiple
+ * labels, it will be imported in the class 'MultipleLabelNeo4jConversion' -- Neo4j Nodes with same label but different case, e.g.
+ * LABEL and LAbel will be aggregated into a single OrientDB vertex class -- Neo4j Relationship with same name but different case,
+ * e.g. relaTIONship and RELATIONSHIP will be aggregated into a single edge class -- Migration of Neo4j "existence" constraints
+ * (available only in Neo4j Enterprise) is not implemented
  */
 
 public class ONeo4jImporter {
@@ -94,7 +88,7 @@ public class ONeo4jImporter {
 
     boolean migrateRels = true;  //set to false only during debug
     boolean migrateNodes = true; //set to false only during debug
-	boolean relSampleOnly = false; //set to true only during debug
+    boolean relSampleOnly = false; //set to true only during debug
 
     DecimalFormat df = new DecimalFormat("#");
     DecimalFormat dfd = new DecimalFormat("#.##");
@@ -136,7 +130,7 @@ public class ONeo4jImporter {
 
       }
     }
-	//
+    //
 
     //
     // PHASE 1 : INITIALIZATION
@@ -148,22 +142,21 @@ public class ONeo4jImporter {
     OrientGraphNoTx oDb = initializer.getoDb();
     OrientGraphFactory oFactory = initializer.getoFactory();
     ONeo4jImporterCounters counters = new ONeo4jImporterCounters();
-    
-	//
+
+    //
     // PHASE 2 : MIGRATION OF VERTICES AND EDGES
     //
 
-    ONeo4jImporterVerticesAndEdgesMigrator verticesAndEngesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(
-        keepLogString, migrateRels,
-        migrateNodes, df, neo4jGraphDb, orientVertexClass, oDb, counters, relSampleOnly).invoke();
+    ONeo4jImporterVerticesAndEdgesMigrator verticesAndEngesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(keepLogString,
+        migrateRels, migrateNodes, df, neo4jGraphDb, orientVertexClass, oDb, counters, relSampleOnly).invoke();
     keepLogString = verticesAndEngesImporter.getKeepLogString();
 
     //
     // PHASE 3 : SCHEMA MIGRATION
     //
 
-    ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df,
-        neo4jGraphDb, oDb, counters).invoke();
+    ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, neo4jGraphDb, oDb, counters)
+        .invoke();
 
     //
     // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO
@@ -171,8 +164,7 @@ public class ONeo4jImporter {
 
     stopServers(neo4jGraphDb, oDb, oFactory);
 
-    printSummary(startTime, df, dfd, counters, initializer,
-        verticesAndEngesImporter, schemaMigrator);
+    printSummary(startTime, df, dfd, counters, initializer, verticesAndEngesImporter, schemaMigrator);
 
     returnCode = 0;
     return returnCode;
@@ -208,13 +200,8 @@ public class ONeo4jImporter {
     //
   }
 
-  private void printSummary(
-      double startTime,
-      DecimalFormat df,
-      DecimalFormat dfd,
-      ONeo4jImporterCounters counters,
-      ONeo4jImporterInitializer initializer,
-      ONeo4jImporterVerticesAndEdgesMigrator migrator,
+  private void printSummary(double startTime, DecimalFormat df, DecimalFormat dfd, ONeo4jImporterCounters counters,
+      ONeo4jImporterInitializer initializer, ONeo4jImporterVerticesAndEdgesMigrator migrator,
       ONeo4jImporterSchemaMigrator schemaMigrator) {
     double value;
     String logString;
@@ -243,17 +230,16 @@ public class ONeo4jImporter {
     System.out.println("Import Summary:");
     System.out.println("===============");
     System.out.println();
-    System.out.println(
-        "- Found Neo4j Nodes                                                                           : " + df.format(counters.neo4jNodeCounter));
-    System.out.println("-- With at least one Label                                                                    :  " + df.format(
-        (counters.neo4jNodeCounter - counters.neo4jNodeNoLabelCounter)));
-    System.out.println("--- With multiple Labels                                                                      :   " + df.format(
-        counters.neo4jNodeMultipleLabelsCounter));
-    System.out.println(
-        "-- Without Labels                                                                             :  " + df.format(
-            counters.neo4jNodeNoLabelCounter));
-    System.out.print("- Imported OrientDB Vertices                                                                  : " + df.format(
-        counters.orientDBImportedVerticesCounter));
+    System.out.println("- Found Neo4j Nodes                                                                           : " + df
+        .format(counters.neo4jNodeCounter));
+    System.out.println("-- With at least one Label                                                                    :  " + df
+        .format((counters.neo4jNodeCounter - counters.neo4jNodeNoLabelCounter)));
+    System.out.println("--- With multiple Labels                                                                      :   " + df
+        .format(counters.neo4jNodeMultipleLabelsCounter));
+    System.out.println("-- Without Labels                                                                             :  " + df
+        .format(counters.neo4jNodeNoLabelCounter));
+    System.out.print("- Imported OrientDB Vertices                                                                  : " + df
+        .format(counters.orientDBImportedVerticesCounter));
     if (counters.neo4jNodeCounter > 0) {
       value = (counters.orientDBImportedVerticesCounter / counters.neo4jNodeCounter) * 100;
       System.out.print(" (" + df.format(value) + "%)");
@@ -262,11 +248,10 @@ public class ONeo4jImporter {
 
     System.out.println();
     System.out.println();
-    System.out.println(
-        "- Found Neo4j Relationships                                                                   : " + df.format(counters.neo4jRelCounter));
-    System.out.print(
-        "- Imported OrientDB Edges                                                                     : " + df.format(
-            counters.orientDBImportedEdgesCounter));
+    System.out.println("- Found Neo4j Relationships                                                                   : " + df
+        .format(counters.neo4jRelCounter));
+    System.out.print("- Imported OrientDB Edges                                                                     : " + df
+        .format(counters.orientDBImportedEdgesCounter));
     if (counters.neo4jRelCounter > 0) {
       value = (counters.orientDBImportedEdgesCounter / counters.neo4jRelCounter) * 100;
       System.out.print(" (" + df.format(value) + "%)");
@@ -275,33 +260,30 @@ public class ONeo4jImporter {
 
     System.out.println();
     System.out.println();
-    System.out.println(
-        "- Found Neo4j Constraints                                                                     : " + df.format(
-            counters.neo4jConstraintsCounter));
-    System.out.print("- Imported OrientDB Constraints (UNIQUE Indices created)                                      : " + df.format(
-        counters.orientDBImportedConstraintsCounter));
+    System.out.println("- Found Neo4j Constraints                                                                     : " + df
+        .format(counters.neo4jConstraintsCounter));
+    System.out.print("- Imported OrientDB Constraints (UNIQUE Indices created)                                      : " + df
+        .format(counters.orientDBImportedConstraintsCounter));
     if (counters.neo4jConstraintsCounter > 0) {
       value = (counters.orientDBImportedConstraintsCounter / counters.neo4jConstraintsCounter) * 100;
       System.out.print(" (" + df.format(value) + "%)");
       value = 0;
     }
-	System.out.println();
-    System.out.print("- NOT UNIQUE Indices created due to failure in creating UNIQUE Indices                        : " + df.format(
-        counters.orientDBImportedNotUniqueWorkaroundCounter));
+    System.out.println();
+    System.out.print("- NOT UNIQUE Indices created due to failure in creating UNIQUE Indices                        : " + df
+        .format(counters.orientDBImportedNotUniqueWorkaroundCounter));
     if (counters.neo4jConstraintsCounter > 0) {
       value = (counters.orientDBImportedNotUniqueWorkaroundCounter / counters.neo4jConstraintsCounter) * 100;
       System.out.print(" (" + df.format(value) + "%)");
       value = 0;
     }
 
-	
-
     System.out.println();
     System.out.println();
-    System.out.println("- Found Neo4j (non-constraint) Indices                                                        : " + df.format(
-        counters.neo4jNonConstraintsIndicesCounter));
-    System.out.print("- Imported OrientDB Indices                                                                   : " + df.format(
-        counters.orientDBImportedIndicesCounter));
+    System.out.println("- Found Neo4j (non-constraint) Indices                                                        : " + df
+        .format(counters.neo4jNonConstraintsIndicesCounter));
+    System.out.print("- Imported OrientDB Indices                                                                   : " + df
+        .format(counters.orientDBImportedIndicesCounter));
     if (counters.neo4jNonConstraintsIndicesCounter > 0) {
       value = (counters.orientDBImportedIndicesCounter / counters.neo4jNonConstraintsIndicesCounter) * 100;
       System.out.print(" (" + df.format(value) + "%)");
@@ -310,19 +292,17 @@ public class ONeo4jImporter {
 
     System.out.println();
     System.out.println();
-    System.out.println(
-        "- Additional created Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')          : " + df.format(
-            counters.neo4jInternalIndicesCounter));
+    System.out.println("- Additional created Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')          : " + df
+        .format(counters.neo4jInternalIndicesCounter));
 
     System.out.println();
-    System.out.println(
-        "- Total Import time:                                                                          : " + df.format(elapsedTimeSeconds)
-            + " seconds");
+    System.out.println("- Total Import time:                                                                          : " + df
+        .format(elapsedTimeSeconds) + " seconds");
 
-    System.out.println("-- Initialization time                                                                        :  " + df.format(
-        initializationElapsedTimeSeconds) + " seconds");
-    System.out.print("-- Time to Import Nodes                                                                       :  " + df.format(
-        importingNodesElapsedTimeSeconds) + " seconds");
+    System.out.println("-- Initialization time                                                                        :  " + df
+        .format(initializationElapsedTimeSeconds) + " seconds");
+    System.out.print("-- Time to Import Nodes                                                                       :  " + df
+        .format(importingNodesElapsedTimeSeconds) + " seconds");
     if (importingNodesElapsedTimeSeconds > 0) {
       value = (counters.orientDBImportedVerticesCounter / importingNodesElapsedTimeSeconds);
       System.out.print(" (" + dfd.format(value) + " nodes/sec)");
@@ -330,8 +310,8 @@ public class ONeo4jImporter {
     }
 
     System.out.println();
-    System.out.print("-- Time to Import Relationships                                                               :  " + df.format(
-        importingRelsElapsedTimeSeconds) + " seconds");
+    System.out.print("-- Time to Import Relationships                                                               :  " + df
+        .format(importingRelsElapsedTimeSeconds) + " seconds");
     if (importingRelsElapsedTimeSeconds > 0) {
       value = (counters.orientDBImportedEdgesCounter / importingRelsElapsedTimeSeconds);
       System.out.print(" (" + dfd.format(value) + " rels/sec)");
@@ -339,8 +319,8 @@ public class ONeo4jImporter {
     }
 
     System.out.println();
-    System.out.print("-- Time to Import Constraints and Indices                                                     :  " + df.format(
-        importingSchemaElapsedTimeSeconds) + " seconds");
+    System.out.print("-- Time to Import Constraints and Indices                                                     :  " + df
+        .format(importingSchemaElapsedTimeSeconds) + " seconds");
     if (importingSchemaElapsedTimeSeconds > 0) {
       value = ((counters.orientDBImportedConstraintsCounter + counters.orientDBImportedIndicesCounter)
           / importingSchemaElapsedTimeSeconds);
@@ -348,9 +328,9 @@ public class ONeo4jImporter {
       value = 0;
     }
 
-    System.out.println();	
-	System.out.print("-- Time to create internal Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')    :  " + df.format(    
-        internalIndicesElapsedTimeSeconds) + " seconds");
+    System.out.println();
+    System.out.print("-- Time to create internal Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')    :  " + df
+        .format(internalIndicesElapsedTimeSeconds) + " seconds");
     if (internalIndicesElapsedTimeSeconds > 0) {
       value = (counters.neo4jInternalIndicesCounter / internalIndicesElapsedTimeSeconds);
       System.out.print(" (" + dfd.format(value) + " indices/sec)");

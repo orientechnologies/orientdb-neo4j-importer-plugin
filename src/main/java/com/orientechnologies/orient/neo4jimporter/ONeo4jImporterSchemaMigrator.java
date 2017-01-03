@@ -3,9 +3,7 @@ package com.orientechnologies.orient.neo4jimporter;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
-import com.tinkerpop.blueprints.Vertex;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Transaction;
@@ -17,7 +15,7 @@ import org.neo4j.graphdb.schema.Schema;
 import java.text.DecimalFormat;
 import java.util.logging.Level;
 
-import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.*;
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
 /**
  * Created by frank on 08/11/2016.
@@ -31,8 +29,7 @@ class ONeo4jImporterSchemaMigrator {
   private double                 importingSchemaStartTime;
   private double                 importingSchemaStopTime;
 
-  public ONeo4jImporterSchemaMigrator(String keepLogString, DecimalFormat df,
-      GraphDatabaseService neo4jGraphDb,
+  public ONeo4jImporterSchemaMigrator(String keepLogString, DecimalFormat df, GraphDatabaseService neo4jGraphDb,
       OrientGraphNoTx oDb, ONeo4jImporterCounters counters) {
     this.keepLogString = keepLogString;
     this.df = df;
@@ -55,9 +52,9 @@ class ONeo4jImporterSchemaMigrator {
     importingSchemaStartTime = System.currentTimeMillis();
 
     String neo4jPropKey = "";
-	Boolean isConstraintsOnNode = false;
-	Boolean isConstraintsOnRelationship = false;
-	
+    Boolean isConstraintsOnNode = false;
+    Boolean isConstraintsOnRelationship = false;
+
     Label neo4jLabel = null;
     boolean propertyCreationSuccess = false;
     //
@@ -77,21 +74,21 @@ class ONeo4jImporterSchemaMigrator {
 
       Iterable<ConstraintDefinition> Neo4jConstraintDefinition = neo4jSchema.getConstraints();
       for (final ConstraintDefinition myNeo4jConstraintDefinition : Neo4jConstraintDefinition) {
-		  
-		counters.neo4jTotalConstraints++;
-		
+
+        counters.neo4jTotalConstraints++;
+
         if ("UNIQUENESS".equals(myNeo4jConstraintDefinition.getConstraintType().toString())) {
           counters.neo4jTotalUniqueConstraints++;
         }
-		
-		if ("NODE_PROPERTY_EXISTENCE".equals(myNeo4jConstraintDefinition.getConstraintType().toString())) {
+
+        if ("NODE_PROPERTY_EXISTENCE".equals(myNeo4jConstraintDefinition.getConstraintType().toString())) {
           counters.neo4jTotalNodePropertyExistenceConstraints++;
         }
-		
-		if ("RELATIONSHIP_PROPERTY_EXISTENCE".equals(myNeo4jConstraintDefinition.getConstraintType().toString())) {
+
+        if ("RELATIONSHIP_PROPERTY_EXISTENCE".equals(myNeo4jConstraintDefinition.getConstraintType().toString())) {
           counters.neo4jTotalRelPropertyExistenceConstraints++;
         }
-		
+
       }
     }
     //
@@ -125,12 +122,12 @@ class ONeo4jImporterSchemaMigrator {
 
           //create class orientDBIndexClass
           //there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
-          if (oDb.getRawGraph().getMetadata().getSchema().existsClass(orientDBIndexClass) == false) {			  
-				orientDBIndexClass = ONeo4jImporterUtils.checkVertexClassCreation(orientDBIndexClass, oDb);							
+          if (oDb.getRawGraph().getMetadata().getSchema().existsClass(orientDBIndexClass) == false) {
+            orientDBIndexClass = ONeo4jImporterUtils.checkVertexClassCreation(orientDBIndexClass, oDb);
           }
-		  
-		  isConstraintsOnNode = true;
-		  isConstraintsOnRelationship = false;
+
+          isConstraintsOnNode = true;
+          isConstraintsOnRelationship = false;
 
         } catch (IllegalStateException a) {
           //otherwise it is associated with a relationship
@@ -152,9 +149,9 @@ class ONeo4jImporterSchemaMigrator {
           if (oDb.getRawGraph().getMetadata().getSchema().existsClass(orientDBIndexClass) == false) {
             oDb.createEdgeType(orientDBIndexClass);
           }
-		  
-		  isConstraintsOnNode = false;
-		  isConstraintsOnRelationship = true;
+
+          isConstraintsOnNode = false;
+          isConstraintsOnRelationship = true;
 
         } catch (IllegalStateException a) {
           //otherwise it is associated with a node
@@ -173,91 +170,92 @@ class ONeo4jImporterSchemaMigrator {
         }
 
         //to import this constraint, we first have to create the corresponding property in OrientDB
-        propertyCreationSuccess = ONeo4jImporterUtils.createOrientDBProperty(neo4jLabel, orientDBIndexClass, neo4jPropKey, neo4jGraphDb,
-            oDb,
-            neo4jConstraintType.toString());
+        propertyCreationSuccess = ONeo4jImporterUtils
+            .createOrientDBProperty(neo4jLabel, orientDBIndexClass, neo4jPropKey, neo4jGraphDb, oDb,
+                neo4jConstraintType.toString());
 
         // now that the property has been created, we need to take actions based on the neo4jConstraintType
         if (propertyCreationSuccess) {
 
           //taking actions depending on the type of the constraints
           if ("UNIQUENESS".equals(neo4jConstraintType.toString())) {
-			  
-			counters.neo4jUniqueConstraintsCounter++;
+
+            counters.neo4jUniqueConstraintsCounter++;
 
             try {
-			
-			  //unique constratins can be only on nodes. with this check we avoid odd things in very odd situations that may happen
-			  if (isConstraintsOnNode) {
-				  
-				  //we check that orientDBIndexClass is a vertex class; with this check we avoid odd things in very odd situations that may happen, e.g. node labels = rel types.  nodes with multiple types (that are imported in a single class). In such case it may happen that it try to create an index on the class, but that class does not exist as vertex class (because all nodes were imported into another class - but it exists as edge class)
-				  if (oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass).isSubClassOf(oDb.getRawGraph().getMetadata().getSchema().getClass("V"))){			  
-			  
-					  //we map Neo4j constraints of type UNIQUENESS to UNIQUE indices in Neo4j
-					  OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass).getProperty(
-						  neo4jPropKey).createIndex(OClass.INDEX_TYPE.UNIQUE);
 
-					  //debug
-					  //System.out.println("\nCreated index: " + OrientDBIndex);
+              //unique constratins can be only on nodes. with this check we avoid odd things in very odd situations that may happen
+              if (isConstraintsOnNode) {
 
-					  counters.orientDBImportedUniqueConstraintsCounter++;
-					  counters.orientDBImportedConstraintsCounter++;
-					  
-				  }
-			  
-			  }
+                //we check that orientDBIndexClass is a vertex class; with this check we avoid odd things in very odd situations that may happen, e.g. node labels = rel types.  nodes with multiple types (that are imported in a single class). In such case it may happen that it try to create an index on the class, but that class does not exist as vertex class (because all nodes were imported into another class - but it exists as edge class)
+                if (oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass)
+                    .isSubClassOf(oDb.getRawGraph().getMetadata().getSchema().getClass("V"))) {
+
+                  //we map Neo4j constraints of type UNIQUENESS to UNIQUE indices in Neo4j
+                  OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass)
+                      .getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.UNIQUE);
+
+                  //debug
+                  //System.out.println("\nCreated index: " + OrientDBIndex);
+
+                  counters.orientDBImportedUniqueConstraintsCounter++;
+                  counters.orientDBImportedConstraintsCounter++;
+
+                }
+
+              }
 
             } catch (Exception e) {
 
               logString = "Found an error when trying to create a UNIQUE Index in OrientDB. Correspinding Property in Neo4j is '"
                   + neo4jPropKey + "' on node label '" + orientDBIndexClass + "': " + e.getMessage();
               ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
-			  
-			  //github issue #3 - tries to create a not unique index as workaround
-			  try{
-				  
-				logString = "Trying to create a NOT UNIQUE Index as workaround...";
-				ONeo4jImporter.importLogger.log(Level.INFO, logString);  
-				  
-				OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass).getProperty(
-						  neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
-						  
-				counters.orientDBImportedNotUniqueWorkaroundCounter++;
-				
-			  } catch (Exception ex) {
-				  
-			  }
-			  //		  
+
+              //github issue #3 - tries to create a not unique index as workaround
+              try {
+
+                logString = "Trying to create a NOT UNIQUE Index as workaround...";
+                ONeo4jImporter.importLogger.log(Level.INFO, logString);
+
+                OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass)
+                    .getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
+
+                counters.orientDBImportedNotUniqueWorkaroundCounter++;
+
+              } catch (Exception ex) {
+
+              }
+              //
             }
           }
-		  
-		  if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintType.toString())) {
-		  }
-		  
-		  if ("RELATIONSHIP_PROPERTY_EXISTENCE ".equals(neo4jConstraintType.toString())) {
-		  }
-		  //
-		  
+
+          if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintType.toString())) {
+          }
+
+          if ("RELATIONSHIP_PROPERTY_EXISTENCE ".equals(neo4jConstraintType.toString())) {
+          }
+          //
+
         }
-				
-		  //print progress		  
-		  value = 100 * (counters.neo4jConstraintsCounter / counters.neo4jTotalConstraints);
-		  
-		  if ("UNIQUENESS".equals(neo4jConstraintType.toString())) {			
-			keepLogString =
-			  df.format(counters.orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created";
-		  }
-		  if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintType.toString())) {
-		  }
-		  
-		  if ("RELATIONSHIP_PROPERTY_EXISTENCE ".equals(neo4jConstraintType.toString())) {
-		  }
-		  
-		  keepLogString = keepLogString + " (" + df.format(value) + "% done)";
-		  System.out.print("\r  " + keepLogString);
-		  value = 0;
-		  //	
-		
+
+        //print progress
+        value = 100 * (counters.neo4jConstraintsCounter / counters.neo4jTotalConstraints);
+
+        if ("UNIQUENESS".equals(neo4jConstraintType.toString())) {
+          keepLogString =
+              df.format(counters.orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created";
+        }
+        if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintType.toString())) {
+        }
+
+        if ("RELATIONSHIP_PROPERTY_EXISTENCE ".equals(neo4jConstraintType.toString())) {
+        }
+
+        keepLogString = keepLogString + " (" + df.format(value) + "% done)";
+        System.out.print("\r  " + keepLogString);
+        value = 0;
+        //
+
       }
     }
 
@@ -334,23 +332,22 @@ class ONeo4jImporterSchemaMigrator {
 
           //create class myNeo4jLabelOfIndex
           //there might be in fact cases where in neo4j the index as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
-          if (oDb.getRawGraph().getMetadata().getSchema().existsClass(myNeo4jLabelOfIndex) == false) {            
-			myNeo4jLabelOfIndex = ONeo4jImporterUtils.checkVertexClassCreation(myNeo4jLabelOfIndex, oDb);	
+          if (oDb.getRawGraph().getMetadata().getSchema().existsClass(myNeo4jLabelOfIndex) == false) {
+            myNeo4jLabelOfIndex = ONeo4jImporterUtils.checkVertexClassCreation(myNeo4jLabelOfIndex, oDb);
           }
           //
 
           //creates in OrientDB the property this index is defined on
-          propertyCreationSuccess = ONeo4jImporterUtils.createOrientDBProperty(neo4jLabel, myNeo4jLabelOfIndex, neo4jPropKey,
-              neo4jGraphDb, oDb,
-              "NOT UNIQUE");
+          propertyCreationSuccess = ONeo4jImporterUtils
+              .createOrientDBProperty(neo4jLabel, myNeo4jLabelOfIndex, neo4jPropKey, neo4jGraphDb, oDb, "NOT UNIQUE");
 
           if (propertyCreationSuccess) {
             //index creation
             try {
 
               //creates the index
-              OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(myNeo4jLabelOfIndex).getProperty(
-                  neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
+              OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(myNeo4jLabelOfIndex)
+                  .getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
 
               //System.out.println("\nCreated index: " + OrientDBIndex + "." + neo4jPropKey);
 
@@ -358,25 +355,24 @@ class ONeo4jImporterSchemaMigrator {
 
             } catch (Exception e) {
 
-              logString =
-                  "Found an error when trying to create a NOTUNIQUE Index in OrientDB. Correspinding Property in Neo4j is '"
-                      + neo4jPropKey + "' on node label '" + myNeo4jLabelOfIndex + "': " + e.getMessage();
+              logString = "Found an error when trying to create a NOTUNIQUE Index in OrientDB. Correspinding Property in Neo4j is '"
+                  + neo4jPropKey + "' on node label '" + myNeo4jLabelOfIndex + "': " + e.getMessage();
               ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
 
             }
             //
           }
-		  
-		  //print progress
-		  value = 100 * (counters.neo4jNonConstraintsIndicesCounter / (counters.neo4jTotalIndices
-			  - counters.neo4jTotalUniqueConstraints));
-		  keepLogString =
-			  df.format(counters.orientDBImportedIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
-				  + "% done)";
-		  System.out.print("\r  " + keepLogString);
-		  value = 0;
-		  //
-		  
+
+          //print progress
+          value = 100 * (counters.neo4jNonConstraintsIndicesCounter / (counters.neo4jTotalIndices
+              - counters.neo4jTotalUniqueConstraints));
+          keepLogString =
+              df.format(counters.orientDBImportedIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
+                  + "% done)";
+          System.out.print("\r  " + keepLogString);
+          value = 0;
+          //
+
         }
       }
     }

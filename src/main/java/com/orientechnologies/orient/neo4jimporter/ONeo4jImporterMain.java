@@ -2,7 +2,7 @@ package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.core.OConstants;
 
-import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.*;
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
 /**
  * Created by frank on 13/11/2016.
