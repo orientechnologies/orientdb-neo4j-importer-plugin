@@ -6,12 +6,7 @@ import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.graphdb.Transaction;
-
+import org.neo4j.graphdb.*;
 
 import java.util.logging.Level;
 
@@ -19,68 +14,69 @@ import java.util.logging.Level;
  * Created by frank on 13/11/2016.
  */
 public class ONeo4jImporterUtils {
-	
+
   public static String checkVertexClassCreation(String myOrientDBIndexClass, OrientGraphNoTx myOdb) {
-	
-	String myLogString = "";
-	
-	//cheks if this labels has been imported in the MultipleLabelNeo4jConversion label			
-	//If yes:
-	//1. the vertex class is not created as part of the schema migration 
-	//2. its indices (and corresponding properties) are created in MultipleLabelNeo4jConversion			
-	String sqlQuery = "SELECT @rid FROM V WHERE @class = 'MultipleLabelNeo4jConversion' AND Neo4jLabelList CONTAINS '" + myOrientDBIndexClass + "' LIMIT 1";
-				
-	int u = 0;			
-	for (Vertex v : (Iterable<Vertex>) myOdb.command(
-			new OCommandSQL(sqlQuery)).execute()) {
-		u++;
-		//System.out.println("\n\n\nfound it: " + myOrientDBIndexClass + " " + v); //debug
-		myOrientDBIndexClass = "MultipleLabelNeo4jConversion";				
-	}
-	
-	if (u == 0) {			
-		//System.out.println("\n\n\ndid not find it: " + myOrientDBIndexClass); //debug 
-		myOdb.createVertexType(myOrientDBIndexClass);
-		
-		// in order to improve record lookup when filtering on Neo4j labels all classes must have the Neo4jLabelList properties and an index on it
-		// when classes are created during nodes migration, this property is created automatically
-		// here we need to create it for those additional classes that are created (empty) during schema migration
-		
-		// index on property Neo4jLabelList		
-		try {
 
-		  //first create the property
-		  myOdb.getRawGraph().getMetadata().getSchema().getClass(myOrientDBIndexClass).createProperty("Neo4jLabelList",
-			  OType.EMBEDDEDLIST, OType.STRING);
+    String myLogString = "";
 
-		  //creates the index if the property creation was successfull
-		  try {
+    //cheks if this labels has been imported in the MultipleLabelNeo4jConversion label
+    //If yes:
+    //1. the vertex class is not created as part of the schema migration
+    //2. its indices (and corresponding properties) are created in MultipleLabelNeo4jConversion
+    String sqlQuery =
+        "SELECT @rid FROM V WHERE @class = 'MultipleLabelNeo4jConversion' AND Neo4jLabelList CONTAINS '" + myOrientDBIndexClass
+            + "' LIMIT 1";
 
-			myOdb.getRawGraph().getMetadata().getSchema().getClass(myOrientDBIndexClass).getProperty(
-				"Neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
+    int u = 0;
+    for (Vertex v : (Iterable<Vertex>) myOdb.command(new OCommandSQL(sqlQuery)).execute()) {
+      u++;
+      //System.out.println("\n\n\nfound it: " + myOrientDBIndexClass + " " + v); //debug
+      myOrientDBIndexClass = "MultipleLabelNeo4jConversion";
+    }
 
-		  } catch (Exception e) {
+    if (u == 0) {
+      //System.out.println("\n\n\ndid not find it: " + myOrientDBIndexClass); //debug
+      myOdb.createVertexType(myOrientDBIndexClass);
 
-			myLogString =
-				"Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'Neo4jLabelList' Property of the vertex Class '"
-					+ myOrientDBIndexClass + "': " + e.getMessage();
-			ONeo4jImporter.importLogger.log(Level.SEVERE, myLogString);
+      // in order to improve record lookup when filtering on Neo4j labels all classes must have the Neo4jLabelList properties and an index on it
+      // when classes are created during nodes migration, this property is created automatically
+      // here we need to create it for those additional classes that are created (empty) during schema migration
 
-		  }
-		} catch (Exception e) {
+      // index on property Neo4jLabelList
+      try {
 
-		  myLogString = "Found an error when trying to create the 'Neo4jLabelList' Property in OrientDB on the vertex Class '"
-			  + myOrientDBIndexClass + "': " + e.getMessage();
-		  ONeo4jImporter.importLogger.log(Level.SEVERE, myLogString);
+        //first create the property
+        myOdb.getRawGraph().getMetadata().getSchema().getClass(myOrientDBIndexClass)
+            .createProperty("Neo4jLabelList", OType.EMBEDDEDLIST, OType.STRING);
 
-		}				
-		//				  
-	}
-	
-	return myOrientDBIndexClass;
-	  
+        //creates the index if the property creation was successfull
+        try {
+
+          myOdb.getRawGraph().getMetadata().getSchema().getClass(myOrientDBIndexClass).getProperty("Neo4jLabelList")
+              .createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
+
+        } catch (Exception e) {
+
+          myLogString =
+              "Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'Neo4jLabelList' Property of the vertex Class '"
+                  + myOrientDBIndexClass + "': " + e.getMessage();
+          ONeo4jImporter.importLogger.log(Level.SEVERE, myLogString);
+
+        }
+      } catch (Exception e) {
+
+        myLogString = "Found an error when trying to create the 'Neo4jLabelList' Property in OrientDB on the vertex Class '"
+            + myOrientDBIndexClass + "': " + e.getMessage();
+        ONeo4jImporter.importLogger.log(Level.SEVERE, myLogString);
+
+      }
+      //
+    }
+
+    return myOrientDBIndexClass;
+
   }
-	
+
   public static boolean createOrientDBProperty(final Label myNeo4jLabel, final String myOrientDBIndexClass,
       final String myNeo4jPropKey, final GraphDatabaseService myNeo4jGraphDb, OrientGraphNoTx myOdb,
       final String myNeo4jConstraintType) {
@@ -160,8 +156,8 @@ public class ONeo4jImporterUtils {
 
     try {
 
-      OProperty OrientDBProperty = myOdb.getRawGraph().getMetadata().getSchema().getClass(myOrientDBIndexClass).createProperty(
-          myNeo4jPropKey, orientOtype);
+      OProperty OrientDBProperty = myOdb.getRawGraph().getMetadata().getSchema().getClass(myOrientDBIndexClass)
+          .createProperty(myNeo4jPropKey, orientOtype);
 
       if (foundNode == false) {
 

@@ -11,7 +11,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import java.io.File;
 import java.util.logging.Level;
 
-import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.*;
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
 /**
  * Created by frank on 08/11/2016.
@@ -56,7 +56,7 @@ class ONeo4jImporterInitializer {
   }
 
   public ONeo4jImporterInitializer invoke() {
-    String logString;//
+    String logString;
 
     initializationStartTime = System.currentTimeMillis();
 

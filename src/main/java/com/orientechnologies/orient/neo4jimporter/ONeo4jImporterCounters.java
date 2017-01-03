@@ -23,11 +23,11 @@ public class ONeo4jImporterCounters {
   double neo4jTotalNodes                            = 0L;
   double neo4jTotalRels                             = 0L;
   double neo4jTotalUniqueConstraints                = 0L;
-  double neo4jTotalConstraints                      = 0L;  
-  double neo4jTotalNodePropertyExistenceConstraints = 0L;  
-  double neo4jTotalRelPropertyExistenceConstraints  = 0L;    
+  double neo4jTotalConstraints                      = 0L;
+  double neo4jTotalNodePropertyExistenceConstraints = 0L;
+  double neo4jTotalRelPropertyExistenceConstraints  = 0L;
   double neo4jTotalIndices                          = 0L;
-  
+
   double importingNodesStartTime    = 0L;
   double importingNodesStopTime     = 0L;
   double internalIndicesStartTime   = 0L;
