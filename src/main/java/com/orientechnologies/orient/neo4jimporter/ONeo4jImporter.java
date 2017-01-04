@@ -31,40 +31,8 @@ import java.util.logging.Logger;
 
 /**
  * The main class of the ONeo4jImporter. It is instantiated from the ONeo4jImporterCommandLineParser
- * <p>
- * Author: Santo Leto
- * <p>
- * Description: - This program migrates a Neo4j database into an OrientDB database. The migration consists of several phases: --
- * Phase 1: Initialization of Neo4j and OrientDB Servers -- Phase 2: Migration of vertices and edges -- Phase 3: Schema migration --
- * Phase 4: Shutdown of the server and summary info
- * <p>
- * General details to keep in mind: - In case a node in Neo4j has no Label, it will be imported in OrientDB in the Class
- * "GenericClassNeo4jConversion" - In case a node in Neo4j has multiple labels, it will be imported in the class
- * "MultipleLabelNeo4jConversion" - Original Neo4j IDs are stored as properties in the imported OrientDB vertices and edges
- * ('Neo4jNodeID' for vertices and 'Neo4jRelID' for edges). Such properties can be (manually) removed at the end of the import, if
- * not needed - List of original labels are stored as properties in the imported OrientDB vertices (property: 'Neo4jLabelList'). A
- * not unique index is created on this property. This will allow to query by label even on nodes migrated into the Class
- * MultipleLabelNeo4jConversion, with a query like: SELECT FROM V WHERE @class = 'MultipleLabelNeo4jConversion' AND Neo4jLabelList
- * CONTAINS 'your_label_here' - During the import, an index is created on the property 'Neo4jNodeID' for all imported vertices
- * Labels (Classes in OrientDB). This is to speed up vertices lookup during edge creation. The created indices can be (manually)
- * removed at the end of the import, if not needed - In case a Neo4j Relationship has the same name of a Neo4j Label, e.g.
- * "RelationshipName", the script will import into OrientDB that relationship in the class "E_RelationshipName" (i.e. prefixing the
- * Neo4j relationship type with an "E_") - During the creation of properties in OrientDB, Neo4j Char data type is mapped to a String
- * data type
- * <p>
- * Schema details to keep in mind: - If in Neo4j there are no constraints or indices, the imported OrientDB database is schemaless -
- * If in Neo4j there are constraints or indices, the imported OrientDB database is schema-hybrid (with some properties defined). In
- * particular, for any constraints and indices: - The Neo4j property where the constraint or index is defined on is determined, and,
- * using java 'instanceof' we determine the data type of this property (there's no way, in fact, to get the data type via the Neo4j
- * API) - Once we know the data type, we map it to an orientdb data type and we create a property with the corresponding data type -
- * If a Neo4j unique constraint is found, a corresponding unique index is created in OrientDB - If a Neo4j index is found, a
- * corresponding (notunique) OrientDB index is created
- * <p>
- * Limitations: - Currently only `local` migrations are allowed - Schema limitations: -- In case a node in Neo4j has multiple
- * labels, it will be imported in the class 'MultipleLabelNeo4jConversion' -- Neo4j Nodes with same label but different case, e.g.
- * LABEL and LAbel will be aggregated into a single OrientDB vertex class -- Neo4j Relationship with same name but different case,
- * e.g. relaTIONship and RELATIONSHIP will be aggregated into a single edge class -- Migration of Neo4j "existence" constraints
- * (available only in Neo4j Enterprise) is not implemented
+ *
+ * @author Santo Leto
  */
 
 public class ONeo4jImporter {
