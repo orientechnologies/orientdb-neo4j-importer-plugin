@@ -47,6 +47,8 @@ class ONeo4jImporterSchemaMigrator {
   }
 
   public ONeo4jImporterSchemaMigrator invoke() {
+
+    //
     String logString;
     double value;
     importingSchemaStartTime = System.currentTimeMillis();
@@ -57,7 +59,30 @@ class ONeo4jImporterSchemaMigrator {
 
     Label neo4jLabel = null;
     boolean propertyCreationSuccess = false;
+
+    boolean indexWorkaround = true;
     //
+
+    // index workaround
+    if (indexWorkaround) {
+      if (oDb.getRawGraph().getMetadata().getSchema().existsClass("MultipleLabelNeo4jConversion")) {
+        if (oDb.getRawGraph().getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion").existsProperty("Neo4jLabelList")) {
+          if (oDb.getRawGraph().getMetadata().getIndexManager().existsIndex("MultipleLabelNeo4jConversion.Neo4jLabelList")) {
+
+            logString = "Rebuilding Index MultipleLabelNeo4jConversion.Neo4jLabelList. Please wait...";
+
+            System.out.println();
+            System.out.println(logString);
+
+            ONeo4jImporter.importLogger.log(Level.INFO, logString);
+
+            oDb.getRawGraph().getMetadata().getIndexManager()
+                .getClassIndex("MultipleLabelNeo4jConversion", "MultipleLabelNeo4jConversion.Neo4jLabelList").rebuild();
+          }
+        }
+      }
+    }
+    // end index workaround
 
     //
     logString = "Getting Constraints from Neo4j and creating corresponding ones in OrientDB...";
