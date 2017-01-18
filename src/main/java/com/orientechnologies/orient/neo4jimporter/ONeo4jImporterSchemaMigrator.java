@@ -72,12 +72,24 @@ class ONeo4jImporterSchemaMigrator {
             logString = "Rebuilding Index MultipleLabelNeo4jConversion.Neo4jLabelList. Please wait...";
 
             System.out.println();
-            System.out.println(logString);
+            System.out.print(logString);
 
-            ONeo4jImporter.importLogger.log(Level.INFO, logString);
+            try{
 
-            oDb.getRawGraph().getMetadata().getIndexManager()
+              oDb.getRawGraph().getMetadata().getIndexManager()
                 .getClassIndex("MultipleLabelNeo4jConversion", "MultipleLabelNeo4jConversion.Neo4jLabelList").rebuild();
+
+              System.out.print("\r" + logString + "Done\n");
+
+            } catch (Exception e) {
+
+              System.out.print("\r" + logString + "Failed\n");
+
+              logString =
+                "Found an error when trying to rebuild the index 'MultipleLabelNeo4jConversion.Neo4jLabelList': " + e.getMessage();
+              ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+
+            }
           }
         }
       }
