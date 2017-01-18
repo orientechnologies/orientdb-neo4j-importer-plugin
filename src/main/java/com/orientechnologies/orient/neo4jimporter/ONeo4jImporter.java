@@ -66,13 +66,14 @@ public class ONeo4jImporter {
     importLogger.log(Level.INFO, logString);
 
     // parameters (from command line)
-    boolean overwriteOrientDBDir = settings.overwriteOrientDbDir;
     String neo4jLibPath = settings.neo4jLibPath; //actually unused right now - but important to start the program from the command line
     String neo4jDBPath = settings.neo4jDbPath;
     String orientDbFolder = settings.orientDbDir;
+    boolean overwriteOrientDBDir = settings.overwriteOrientDbDir;
+    boolean neo4jRelIdIndex = settings.createIndexOnNeo4jRelID;
     //
 
-    // check existance of orientDbFolder and takes action accordingly to option overwriteOrientDBDir
+    // check existence of orientDbFolder and takes action accordingly to option overwriteOrientDBDir
     final File f = new File(orientDbFolder);
     if (f.exists()) {
       if (overwriteOrientDBDir) {
@@ -116,7 +117,7 @@ public class ONeo4jImporter {
     //
 
     ONeo4jImporterVerticesAndEdgesMigrator verticesAndEngesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(keepLogString,
-        migrateRels, migrateNodes, df, neo4jGraphDb, orientVertexClass, oDb, counters, relSampleOnly).invoke();
+        migrateRels, migrateNodes, df, neo4jGraphDb, orientVertexClass, oDb, counters, relSampleOnly, neo4jRelIdIndex).invoke();
     keepLogString = verticesAndEngesImporter.getKeepLogString();
 
     //
@@ -132,7 +133,7 @@ public class ONeo4jImporter {
 
     stopServers(neo4jGraphDb, oDb, oFactory);
 
-    printSummary(startTime, df, dfd, counters, initializer, verticesAndEngesImporter, schemaMigrator);
+    printSummary(startTime, df, dfd, counters, initializer, verticesAndEngesImporter, schemaMigrator, neo4jRelIdIndex);
 
     returnCode = 0;
     return returnCode;
@@ -170,9 +171,11 @@ public class ONeo4jImporter {
 
   private void printSummary(double startTime, DecimalFormat df, DecimalFormat dfd, ONeo4jImporterCounters counters,
       ONeo4jImporterInitializer initializer, ONeo4jImporterVerticesAndEdgesMigrator migrator,
-      ONeo4jImporterSchemaMigrator schemaMigrator) {
+      ONeo4jImporterSchemaMigrator schemaMigrator, boolean neo4jRelIdIndex) {
+
     double value;
     String logString;
+
     double stopTime = System.currentTimeMillis();
     double elapsedTime = (stopTime - startTime);
     double elapsedTimeSeconds = elapsedTime / (1000);
@@ -189,8 +192,13 @@ public class ONeo4jImporter {
     double importingSchemaElapsedTime = schemaMigrator.getImportingSchemaStopTime() - schemaMigrator.getImportingSchemaStartTime();
     double importingSchemaElapsedTimeSeconds = importingSchemaElapsedTime / (1000);
 
-    double internalIndicesElapsedTime = counters.internalIndicesStopTime - counters.internalIndicesStartTime;
-    double internalIndicesElapsedTimeSeconds = internalIndicesElapsedTime / (1000);
+    double internalVertexIndicesElapsedTime = counters.internalVertexIndicesStopTime - counters.internalVertexIndicesStartTime;
+    double internalVertexIndicesElapsedTimeSeconds = internalVertexIndicesElapsedTime / (1000);
+
+    double internalEdgeIndicesElapsedTime = counters.internalEdgeIndicesStopTime - counters.internalEdgeIndicesStartTime;
+    double internalEdgeIndicesElapsedTimeSeconds = internalEdgeIndicesElapsedTime / (1000);
+
+    double neo4jTotalInternalIndicesCounter = counters.neo4jInternalVertexIndicesCounter + counters.neo4jInternalEdgeIndicesCounter;
 
     //
     System.out.println();
@@ -260,8 +268,12 @@ public class ONeo4jImporter {
 
     System.out.println();
     System.out.println();
-    System.out.println("- Additional created Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')          : " + df
-        .format(counters.neo4jInternalIndicesCounter));
+
+    //System.out.println("- Additional created Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')          : " + df
+    //    .format(counters.neo4jInternalIndicesCounter));
+
+    System.out.println("- Additional internal Indices created                                                         : " + df
+        .format(neo4jTotalInternalIndicesCounter));
 
     System.out.println();
     System.out.println("- Total Import time:                                                                          : " + df
@@ -297,12 +309,22 @@ public class ONeo4jImporter {
     }
 
     System.out.println();
-    System.out.print("-- Time to create internal Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')    :  " + df
-        .format(internalIndicesElapsedTimeSeconds) + " seconds");
-    if (internalIndicesElapsedTimeSeconds > 0) {
-      value = (counters.neo4jInternalIndicesCounter / internalIndicesElapsedTimeSeconds);
+    System.out.print("-- Time to Create Internal Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')    :  " + df
+        .format(internalVertexIndicesElapsedTimeSeconds) + " seconds");
+    if (internalVertexIndicesElapsedTimeSeconds > 0) {
+      value = (counters.neo4jInternalVertexIndicesCounter / internalVertexIndicesElapsedTimeSeconds);
       System.out.print(" (" + dfd.format(value) + " indices/sec)");
       value = 0;
+    }
+
+    if (neo4jRelIdIndex) {
+      System.out.println();
+      System.out.print("-- Time to Create Internal Indices (on edge property 'Neo4jRelID')                            :  " + df.format(internalEdgeIndicesElapsedTimeSeconds) + " seconds");
+      if (internalEdgeIndicesElapsedTimeSeconds > 0) {
+        value = (counters.neo4jInternalEdgeIndicesCounter / internalEdgeIndicesElapsedTimeSeconds);
+        System.out.print(" (" + dfd.format(value) + " indices/sec)");
+        value = 0;
+      }
     }
 
     System.out.println("\n");
