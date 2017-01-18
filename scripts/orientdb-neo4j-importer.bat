@@ -41,7 +41,7 @@ goto setArgs
 :doneSetArgs
 set LOG_FILE=%ORIENTDB_HOME%\config\orientdb-neo4j-importer-log.properties
 
-set JAVA_MAX_DIRECT=-XX:MaxDirectMemorySize=4g
+set JAVA_MAX_DIRECT=-XX:MaxDirectMemorySize=512g rem raised in v.2.2.15 from 4g. It does not mean that it allocates 512g, but it can avoid OOM 
 set JAVA_OPTS_SCRIPT= %JAVA_MAX_DIRECT% -Djava.util.logging.config.file=%LOG_FILE%
 
 call %JAVA% -client -classpath "%NEO4JLIB%\*;%ORIENTDB_HOME%\lib\*" %JAVA_OPTS_SCRIPT% com.orientechnologies.orient.neo4jimporter.ONeo4jImporterMain %CMD_LINE_ARGS%

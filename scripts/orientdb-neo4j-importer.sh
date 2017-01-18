@@ -29,7 +29,7 @@ fi
 export JAVA
 
 LOG_FILE=$ORIENTDB_HOME/config/orientdb-neo4j-importer-log.properties
-JAVA_MAX_DIRECT="-XX:MaxDirectMemorySize=4g"
+JAVA_MAX_DIRECT="-XX:MaxDirectMemorySize=512g" #raised in v.2.2.15 from 4g. It does not mean that it allocates 512g, but it can avoid OOM 
 JAVA_OPTS_SCRIPT="$JAVA_MAX_DIRECT -Djava.util.logging.config.file=$LOG_FILE"
 
 ARGS='';
