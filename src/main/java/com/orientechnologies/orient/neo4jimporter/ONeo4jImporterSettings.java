@@ -25,8 +25,9 @@ package com.orientechnologies.orient.neo4jimporter;
  */
 
 public class ONeo4jImporterSettings {
-  public String neo4jLibPath;
-  public String neo4jDbPath;
-  public String orientDbDir;
+  public String  neo4jLibPath;
+  public String  neo4jDbPath;
+  public String  orientDbDir;
   public boolean overwriteOrientDbDir = false;
+  public boolean createIndexOnNeo4jRelID = false;
 }

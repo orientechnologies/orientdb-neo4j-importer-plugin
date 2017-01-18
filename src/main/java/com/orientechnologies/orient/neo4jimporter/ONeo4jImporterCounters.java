@@ -18,7 +18,8 @@ public class ONeo4jImporterCounters {
   double orientDBImportedNotUniqueWorkaroundCounter = 0L;
   double neo4jIndicesCounter                        = 0L;
   double neo4jNonConstraintsIndicesCounter          = 0L;
-  double neo4jInternalIndicesCounter                = 0L;
+  double neo4jInternalVertexIndicesCounter          = 0L;
+  double neo4jInternalEdgeIndicesCounter            = 0L;
   double orientDBImportedIndicesCounter             = 0L;
   double neo4jTotalNodes                            = 0L;
   double neo4jTotalRels                             = 0L;
@@ -28,10 +29,12 @@ public class ONeo4jImporterCounters {
   double neo4jTotalRelPropertyExistenceConstraints  = 0L;
   double neo4jTotalIndices                          = 0L;
 
-  double importingNodesStartTime    = 0L;
-  double importingNodesStopTime     = 0L;
-  double internalIndicesStartTime   = 0L;
-  double orientDBVerticesClassCount = 0L;
-  double internalIndicesStopTime    = 0L;
-
+  double importingNodesStartTime        = 0L;
+  double importingNodesStopTime         = 0L;
+  double internalVertexIndicesStartTime = 0L;
+  double orientDBVerticesClassCount     = 0L;
+  double internalVertexIndicesStopTime  = 0L;
+  double internalEdgeIndicesStartTime   = 0L;
+  double orientDBEdgeClassesCount       = 0L;
+  double internalEdgeIndicesStopTime    = 0L;
 }

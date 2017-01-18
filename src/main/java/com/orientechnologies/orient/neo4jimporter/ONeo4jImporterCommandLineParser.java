@@ -35,6 +35,7 @@ public class ONeo4jImporterCommandLineParser {
   public static final String OPTION_NEO4J_DBDIR            = "neo4jdbdir";
   public static final String OPTION_ORIENTDB_PATH          = "odbdir";
   public static final String OPTION_OVERWRITE_ORIENTDB_DIR = "o";
+  public static final String CREATE_INDEX_ON_NEO4JRELID    = "i";
 
   public final static String MAIN_OPTIONS = OPTION_NEO4J_LIBDIR + OPTION_NEO4J_DBDIR + OPTION_ORIENTDB_PATH;
 
@@ -69,6 +70,9 @@ public class ONeo4jImporterCommandLineParser {
     settings.orientDbDir = options.get(OPTION_ORIENTDB_PATH);
     settings.overwriteOrientDbDir = options.get(OPTION_OVERWRITE_ORIENTDB_DIR) != null ?
         Boolean.parseBoolean(options.get(OPTION_OVERWRITE_ORIENTDB_DIR)) :
+        false;
+    settings.createIndexOnNeo4jRelID =  options.get(CREATE_INDEX_ON_NEO4JRELID) != null ?
+        Boolean.parseBoolean(options.get(CREATE_INDEX_ON_NEO4JRELID)) :
         false;
 
     //checks on neo4jDbPath
@@ -110,6 +114,7 @@ public class ONeo4jImporterCommandLineParser {
     }
 
     options = setDefaultIfNotPresent(options, OPTION_OVERWRITE_ORIENTDB_DIR, "false");
+    options = setDefaultIfNotPresent(options, CREATE_INDEX_ON_NEO4JRELID, "false");
 
     String workingDir = System.getProperty("user.dir");
 

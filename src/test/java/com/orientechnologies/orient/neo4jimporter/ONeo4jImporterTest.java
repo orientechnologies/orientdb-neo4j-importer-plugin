@@ -10,7 +10,9 @@ import static org.junit.Assert.assertEquals;
  * Created by frank on 08/11/2016.
  * <p>
  * Tests are documented in the README.md
- * Reminder: when nodes are migrated, two internal properties and two indices are created declaredProperties=2
+ * Reminder:
+ *    when nodes are migrated, for each vertex class, two internal properties and two indices are created declaredProperties=2
+ *    when edges are migrated, for each edge class, an internal property and an index are created declaredProperties=1
  * Ideas for other tests:
  * - test with edges
  */
@@ -24,6 +26,7 @@ public class ONeo4jImporterTest {
     settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_empty_db";
     settings.orientDbDir = "target/migrated_databases/graphdb_empty_db";
     settings.overwriteOrientDbDir = true;
+    settings.createIndexOnNeo4jRelID = true;
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -52,6 +55,7 @@ public class ONeo4jImporterTest {
     settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_unique_constraints_only";
     settings.orientDbDir = "target/migrated_databases/graphdb_unique_constraints_only";
     settings.overwriteOrientDbDir = true;
+    settings.createIndexOnNeo4jRelID = true;
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -93,6 +97,7 @@ public class ONeo4jImporterTest {
     settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only";
     settings.overwriteOrientDbDir = true;
+    settings.createIndexOnNeo4jRelID = true;
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -125,6 +130,7 @@ public class ONeo4jImporterTest {
     settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_no_labels";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_no_labels";
     settings.overwriteOrientDbDir = true;
+    settings.createIndexOnNeo4jRelID = true;
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -153,6 +159,7 @@ public class ONeo4jImporterTest {
     settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_mixed_labels_and_no_labels";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_mixed_labels_and_no_labels";
     settings.overwriteOrientDbDir = true;
+    settings.createIndexOnNeo4jRelID = true;
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -182,6 +189,7 @@ public class ONeo4jImporterTest {
     settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_label_case_test";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_label_case_test";
     settings.overwriteOrientDbDir = true;
+    settings.createIndexOnNeo4jRelID = true;
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -210,6 +218,7 @@ public class ONeo4jImporterTest {
     settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_label_case_test_constraints";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_label_case_test_constraints";
     settings.overwriteOrientDbDir = true;
+    settings.createIndexOnNeo4jRelID = true;
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -243,6 +252,7 @@ public class ONeo4jImporterTest {
     settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_multiple_labels";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_multiple_labels";
     settings.overwriteOrientDbDir = true;
+    settings.createIndexOnNeo4jRelID = true;
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -276,6 +286,7 @@ public class ONeo4jImporterTest {
     settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_multiple_labels_and_constraints";
     settings.orientDbDir = "target/migrated_databases/graphdb_multiple_labels_and_constraints";
     settings.overwriteOrientDbDir = true;
+    settings.createIndexOnNeo4jRelID = true;
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
