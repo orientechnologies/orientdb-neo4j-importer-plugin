@@ -28,6 +28,10 @@ This document contains the last changes of the Neo4j to OrientDB Importer.
 
 
 -----------------------------------------------------------------------------------------------------------------------------------
+VERSION 2.2.15 - (Jan, 18 2017)
+- orientdb-neo4j-importer (3): https://github.com/orientechnologies/orientdb-neo4j-importer/issues?q=is%3Aissue+milestone%3A2.2.15+is%3Aclosed
+
+-----------------------------------------------------------------------------------------------------------------------------------
 VERSION 2.2.14 - (Dec, 19 2016)
 - orientdb-neo4j-importer (5): https://github.com/orientechnologies/orientdb-neo4j-importer/issues?q=is%3Aissue+milestone%3A2.2.14+is%3Aclosed
 
