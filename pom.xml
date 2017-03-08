@@ -53,7 +53,7 @@
     </developers>
     <properties>
         <VERSION>${project.version}</VERSION>
-        <orient.version>2.2.14</orient.version>
+        <orient.version>${project.version}</orient.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
