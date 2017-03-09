@@ -10,3 +10,22 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+
+build.number
+*/target/*
+target
+plugin
+
+# Eclipse IDE files
+*.classpath
+*.project
+.settings/
+*.prefs
+
+# IntelliJ IDEA files
+*.iml
+.idea/
+
+tests/src/test/java/com/orientechnologies/orient/test/database/auto/_*.xml
+.gitignore
