@@ -4,6 +4,7 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.http.ONeo4jImporterHandler;
 import org.assertj.core.api.Assertions;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -50,6 +51,7 @@ public class ONeo4jImporterTest {
 
   }
 
+  @Ignore
   @Test
   public void shouldImportUniqueConstraintsOnlyDb() throws Exception {
 
@@ -92,6 +94,7 @@ public class ONeo4jImporterTest {
 
   }
 
+  @Ignore
   @Test
   public void shouldImportNodesOnlyDb() throws Exception {
 
@@ -125,6 +128,7 @@ public class ONeo4jImporterTest {
 
   }
 
+  @Ignore
   @Test
   public void shouldImportNodesOnlyNoLabelsDb() throws Exception {
 
@@ -154,6 +158,7 @@ public class ONeo4jImporterTest {
 
   }
 
+  @Ignore
   @Test
   public void shouldImportNodesOnlyMixedLabelsNoLabelsDb() throws Exception {
 
@@ -184,6 +189,7 @@ public class ONeo4jImporterTest {
 
   }
 
+  @Ignore
   @Test
   public void shouldImportNodesOnlyLabelCaseDb() throws Exception {
 
@@ -213,6 +219,7 @@ public class ONeo4jImporterTest {
 
   }
 
+  @Ignore
   @Test
   public void shouldImportNodesOnlyLabelCaseConstraintsDb() throws Exception {
 
@@ -247,6 +254,7 @@ public class ONeo4jImporterTest {
 
   }
 
+  @Ignore
   @Test
   public void shouldImportNodesOnlyMultipleLabelsDb() throws Exception {
 
@@ -281,6 +289,7 @@ public class ONeo4jImporterTest {
 
   }
 
+  @Ignore
   @Test
   public void shouldImportMultipleLabelsAndConstraintsDb() throws Exception {
 
