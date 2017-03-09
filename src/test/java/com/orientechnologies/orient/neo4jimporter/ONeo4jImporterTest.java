@@ -1,10 +1,13 @@
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.http.ONeo4jImporterHandler;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Created by frank on 08/11/2016.
@@ -317,6 +320,24 @@ public class ONeo4jImporterTest {
 
     db.close();
 
+  }
+
+  @Test
+  public void basicImportingTest() throws Exception {
+
+    String neo4jDbDir = "/Users/gabriele/neo4j-community-3.1.1/data/databases/graph.db";
+    String odbDir = "/Users/gabriele/orientdb-community-2.2.18-SNAPSHOT/databases/neo4jImport";
+
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jDbDir, odbDir, true, true);
+    final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
+
+    try {
+      neo4jImporter.execute();
+    } catch(Exception e) {
+      fail();
+      System.out.println("Exception message: " + e.getMessage());
+      System.out.println("Stacktrace:\n" + e.getStackTrace());
+    }
   }
 
 }

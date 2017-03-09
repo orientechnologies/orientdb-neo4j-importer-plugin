@@ -25,9 +25,49 @@ package com.orientechnologies.orient.neo4jimporter;
  */
 
 public class ONeo4jImporterSettings {
-  public String  neo4jLibPath;
   public String  neo4jDbPath;
   public String  orientDbDir;
   public boolean overwriteOrientDbDir = false;
   public boolean createIndexOnNeo4jRelID = false;
+
+  public ONeo4jImporterSettings() {}
+
+  public ONeo4jImporterSettings(String neo4jDbPath, String orientDbDir, boolean overwriteOrientDbDir, boolean createIndexOnNeo4jRelID) {
+    this.neo4jDbPath = neo4jDbPath;
+    this.orientDbDir = orientDbDir;
+    this.overwriteOrientDbDir = overwriteOrientDbDir;
+    this.createIndexOnNeo4jRelID = createIndexOnNeo4jRelID;
+  }
+
+  public String getNeo4jDbPath() {
+    return neo4jDbPath;
+  }
+
+  public void setNeo4jDbPath(String neo4jDbPath) {
+    this.neo4jDbPath = neo4jDbPath;
+  }
+
+  public String getOrientDbDir() {
+    return orientDbDir;
+  }
+
+  public void setOrientDbDir(String orientDbDir) {
+    this.orientDbDir = orientDbDir;
+  }
+
+  public boolean isOverwriteOrientDbDir() {
+    return overwriteOrientDbDir;
+  }
+
+  public void setOverwriteOrientDbDir(boolean overwriteOrientDbDir) {
+    this.overwriteOrientDbDir = overwriteOrientDbDir;
+  }
+
+  public boolean isCreateIndexOnNeo4jRelID() {
+    return createIndexOnNeo4jRelID;
+  }
+
+  public void setCreateIndexOnNeo4jRelID(boolean createIndexOnNeo4jRelID) {
+    this.createIndexOnNeo4jRelID = createIndexOnNeo4jRelID;
+  }
 }

@@ -1,11 +1,10 @@
 package com.orientechnologies.orient.http;
 
 import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.depsloader.OChildFirstURLClassLoader;
-import com.orientechnologies.orient.depsloader.OPluginDependencyManager;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporter;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterCommandLineParser;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterPlugin;
+import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,47 +27,35 @@ public class ONeo4jImporterJob  implements Runnable {
   @Override
   public void run() {
 
-    System.out.println("Thread: id:" + Thread.currentThread().getId() + ", name:" + Thread.currentThread().getId() + ", state:" + Thread.currentThread().getState() +
-        ", thread-group:" + Thread.currentThread().getThreadGroup().getName());
-
-    ClassLoader currentThreadClassLoader = Thread.currentThread().getContextClassLoader();
-    if(!(currentThreadClassLoader instanceof OChildFirstURLClassLoader)) {
-
-      try {
-        // defining child class loader to load neo4j dependencies
-        OPluginDependencyManager.setNewChildClassLoaderFromJarDir("/Users/gabriele/neo4j-community-3.1.1/lib");
-      } catch(Exception e) {
-        e.printStackTrace();
-      }
-    }
-
     List<String> argsList = new ArrayList<String>();
-    final String neo4jLibDir = cfg.field("neo4jLibDir");
-    final String neo4jDbDir = cfg.field("neo4jDbDir");
-    final String odbDir = cfg.field("outDbUrl");
-    final String override = cfg.field("override");
-    final String options = cfg.field("options");
 
-    argsList.add("-neo4jlibdir");
-    argsList.add(neo4jLibDir);
-    argsList.add("-neo4jdbdir");
-    argsList.add(neo4jDbDir);
-    if(odbDir != null) {
-      argsList.add("-odbdir");
-      argsList.add(odbDir);
-    }
-    if(options != null) {
-      argsList.add("");
-      argsList.add(options);
-    }
-    status = Status.RUNNING;
 
-    String[] args = argsList.toArray(new String[argsList.size()]);
+      final String neo4jDbDir = cfg.field("neo4jDbDir");
+      final String odbDir = cfg.field("outDbUrl");
+      final String override = cfg.field("override");
+      final String options = cfg.field("options");
+
+
+      argsList.add("-neo4jdbdir");
+      argsList.add(neo4jDbDir);
+      if(odbDir != null) {
+        argsList.add("-odbdir");
+        argsList.add(odbDir);
+      }
+      if(options != null) {
+        argsList.add("");
+        argsList.add(options);
+      }
+      status = Status.RUNNING;
+
+    // TODO: change default values ov booleans
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jDbDir, odbDir, true, true);
+    final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
 
     try {
-      final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
-      neo4jImporterPlugin.executeJob(args);
+      neo4jImporterPlugin.executeJob(settings);
     } catch (Exception e) {
+      e.printStackTrace();
     }
 
     synchronized (listener) {

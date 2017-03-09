@@ -22,7 +22,6 @@ import com.orientechnologies.common.io.OFileUtils;
 import com.orientechnologies.orient.core.OConstants;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -66,7 +65,6 @@ public class ONeo4jImporter {
     importLogger.log(Level.INFO, logString);
 
     // parameters (from command line)
-    String neo4jLibPath = settings.neo4jLibPath; //actually unused right now - but important to start the program from the command line
     String neo4jDBPath = settings.neo4jDbPath;
     String orientDbFolder = settings.orientDbDir;
     boolean overwriteOrientDBDir = settings.overwriteOrientDbDir;
@@ -106,7 +104,6 @@ public class ONeo4jImporter {
     //
 
     ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(neo4jDBPath, orientDbFolder).invoke();
-    GraphDatabaseService neo4jGraphDb = initializer.getNeo4jGraphDb();
     String orientVertexClass = initializer.getOrientVertexClass();
     OrientGraphNoTx oDb = initializer.getoDb();
     OrientGraphFactory oFactory = initializer.getoFactory();
@@ -117,21 +114,20 @@ public class ONeo4jImporter {
     //
 
     ONeo4jImporterVerticesAndEdgesMigrator verticesAndEngesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(keepLogString,
-        migrateRels, migrateNodes, df, neo4jGraphDb, orientVertexClass, oDb, counters, relSampleOnly, neo4jRelIdIndex).invoke();
+        migrateRels, migrateNodes, df, orientVertexClass, oDb, counters, relSampleOnly, neo4jRelIdIndex).invoke();
     keepLogString = verticesAndEngesImporter.getKeepLogString();
 
     //
     // PHASE 3 : SCHEMA MIGRATION
     //
 
-    ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, neo4jGraphDb, oDb, counters)
-        .invoke();
+    ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, oDb, counters).invoke();
 
     //
     // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO
     //
 
-    stopServers(neo4jGraphDb, oDb, oFactory);
+    stopServers(oDb, oFactory);
 
     printSummary(startTime, df, dfd, counters, initializer, verticesAndEngesImporter, schemaMigrator, neo4jRelIdIndex);
 
@@ -140,7 +136,7 @@ public class ONeo4jImporter {
 
   }
 
-  private void stopServers(GraphDatabaseService neo4jGraphDb, OrientGraphNoTx oDb, OrientGraphFactory oFactory) {
+  private void stopServers(OrientGraphNoTx oDb, OrientGraphFactory oFactory) {
     String logString;
     logString = "Shutting down OrientDB...";
 
@@ -154,7 +150,6 @@ public class ONeo4jImporter {
 
     System.out.print("\rShutting down OrientDB...Done");
 
-    //
     logString = "Shutting down Neo4j...";
 
     System.out.println();
@@ -162,11 +157,8 @@ public class ONeo4jImporter {
 
     importLogger.log(Level.INFO, logString);
 
-    neo4jGraphDb.shutdown();
-
     System.out.print("\rShutting down Neo4j...Done");
     System.out.println();
-    //
   }
 
   private void printSummary(double startTime, DecimalFormat df, DecimalFormat dfd, ONeo4jImporterCounters counters,

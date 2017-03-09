@@ -19,7 +19,9 @@
 package com.orientechnologies.orient.neo4jimporter;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,15 +33,12 @@ import java.util.Map;
 
 public class ONeo4jImporterCommandLineParser {
 
-  public static final String OPTION_NEO4J_LIBDIR           = "neo4jlibdir";
   public static final String OPTION_NEO4J_DBDIR            = "neo4jdbdir";
   public static final String OPTION_ORIENTDB_PATH          = "odbdir";
   public static final String OPTION_OVERWRITE_ORIENTDB_DIR = "o";
   public static final String CREATE_INDEX_ON_NEO4JRELID    = "i";
+  public List<String> mainOptions;
 
-  public final static String MAIN_OPTIONS = OPTION_NEO4J_LIBDIR + OPTION_NEO4J_DBDIR + OPTION_ORIENTDB_PATH;
-
-  static final String COMMAND_LINE_PARSER_NEO4J_LIBDIR_PARAM_MANDATORY  = "Error: The Neo4j Lib Directory parameter '-neo4jlibdir' is mandatory.";
   static final String COMMAND_LINE_PARSER_NEO4J_DBDIR_PARAM_MANDATORY   = "Error: The Neo4j Database Directory parameter '-neo4jdbdir' is mandatory.";
   static final String COMMAND_LINE_PARSER_ORIENTDB_PATH_PARAM_MANDATORY = "Error: The OrientDB Database Directory parameter '-orientdbdir' is mandatory.";
 
@@ -49,6 +48,12 @@ public class ONeo4jImporterCommandLineParser {
   static final String COMMAND_LINE_PARSER_NOT_PATH            = "Error: The directory '%s' doesn't exist.";
   static final String COMMAND_LINE_PARSER_NO_WRITE_PERMISSION = "Error: You don't have write permissions on directory '%s'.";
   static final String COMMAND_LINE_PARSER_NOT_DIRECTORY       = "Error: '%s' is not a directory.";
+
+  public ONeo4jImporterCommandLineParser() {
+    this.mainOptions = new ArrayList<String>();
+    this.mainOptions.add(OPTION_NEO4J_DBDIR);
+    this.mainOptions.add(OPTION_ORIENTDB_PATH);
+  }
 
   /**
    * builds a ONeo4jImporter object using the command line arguments
@@ -60,7 +65,7 @@ public class ONeo4jImporterCommandLineParser {
    * @throws Exception
    */
 
-  public static ONeo4jImporter getNeo4jImporter(String[] args) throws Exception {
+  public ONeo4jImporterSettings getNeo4jImporter(String[] args) throws Exception {
 
     final Map<String, String> options = checkOptions(readOptions(args));
 
@@ -99,18 +104,13 @@ public class ONeo4jImporterCommandLineParser {
       }
     }
 
-    return new ONeo4jImporter(settings);
-
+    return settings;
   }
 
-  private static Map<String, String> checkOptions(Map<String, String> options) throws IllegalArgumentException {
+  private Map<String, String> checkOptions(Map<String, String> options) throws IllegalArgumentException {
 
     if (options.get(OPTION_NEO4J_DBDIR) == null) {
       throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NEO4J_DBDIR_PARAM_MANDATORY));
-    }
-
-    if (options.get(OPTION_NEO4J_LIBDIR) == null) {
-      throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NEO4J_LIBDIR_PARAM_MANDATORY));
     }
 
     options = setDefaultIfNotPresent(options, OPTION_OVERWRITE_ORIENTDB_DIR, "false");
@@ -127,7 +127,7 @@ public class ONeo4jImporterCommandLineParser {
     return options;
   }
 
-  private static Map<String, String> readOptions(final String[] args) throws IllegalArgumentException {
+  private Map<String, String> readOptions(final String[] args) throws IllegalArgumentException {
 
     final Map<String, String> options = new HashMap<String, String>();
 
@@ -149,7 +149,7 @@ public class ONeo4jImporterCommandLineParser {
         if (option.startsWith("-")) {
           option = option.substring(1);
         } else {
-          if (!MAIN_OPTIONS.contains(option)) {
+          if (!this.mainOptions.contains(option)) {
             throw new IllegalArgumentException((String.format(COMMAND_LINE_PARSER_INVALID_OPTION, args[i])));
           }
         }
@@ -165,7 +165,7 @@ public class ONeo4jImporterCommandLineParser {
     return options;
   }
 
-  private static Map<String, String> setDefaultIfNotPresent(Map<String, String> options, String option, String value)
+  private Map<String, String> setDefaultIfNotPresent(Map<String, String> options, String option, String value)
       throws IllegalArgumentException {
 
     if (!options.containsKey(option)) {
