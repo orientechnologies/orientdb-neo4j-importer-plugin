@@ -113,9 +113,9 @@ public class ONeo4jImporter {
     // PHASE 2 : MIGRATION OF VERTICES AND EDGES
     //
 
-    ONeo4jImporterVerticesAndEdgesMigrator verticesAndEngesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(keepLogString,
+    ONeo4jImporterVerticesAndEdgesMigrator verticesAndEdgesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(keepLogString,
         migrateRels, migrateNodes, df, orientVertexClass, oDb, counters, relSampleOnly, neo4jRelIdIndex).invoke();
-    keepLogString = verticesAndEngesImporter.getKeepLogString();
+    keepLogString = verticesAndEdgesImporter.getKeepLogString();
 
     //
     // PHASE 3 : SCHEMA MIGRATION
@@ -124,12 +124,12 @@ public class ONeo4jImporter {
     ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, oDb, counters).invoke();
 
     //
-    // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO
+    // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO<
     //
 
     stopServers(oDb, oFactory);
 
-    printSummary(startTime, df, dfd, counters, initializer, verticesAndEngesImporter, schemaMigrator, neo4jRelIdIndex);
+    printSummary(startTime, df, dfd, counters, initializer, verticesAndEdgesImporter, schemaMigrator, neo4jRelIdIndex);
 
     returnCode = 0;
     return returnCode;
