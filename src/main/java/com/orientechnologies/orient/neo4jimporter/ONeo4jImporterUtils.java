@@ -1,5 +1,6 @@
 package com.orientechnologies.orient.neo4jimporter;
 
+import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
@@ -40,7 +41,7 @@ public class ONeo4jImporterUtils {
     int u = 0;
     for (Vertex v : (Iterable<Vertex>) odb.command(new OCommandSQL(sqlQuery)).execute()) {
       u++;
-      //System.out.println("\n\n\nfound it: " + myOrientDBIndexClass + " " + v); //debug
+      ONeo4jImporterContext.getInstance().getOutputManager().debug("\n\n\nfound it: " + orientDBClassName + " " + v);
       orientDBClassName = "MultipleLabelNeo4jConversion";
     }
 
@@ -49,7 +50,7 @@ public class ONeo4jImporterUtils {
       // case: the label is mapped to a single OrientDB class, and it will be created as not present in the target database yet.
       // In fact this method is called when the class does not exist in orientDB, because no nodes in neo4j are logically connected to it, but just an index some constraints.
 
-      //System.out.println("\n\n\ndid not find it: " + myOrientDBIndexClass); //debug
+      ONeo4jImporterContext.getInstance().getOutputManager().debug("\n\n\ndid not find it: " + orientDBClassName);
       OClass orientDBClass = odb.createVertexType(orientDBClassName);
 
       // in order to improve record lookup when filtering on Neo4j labels all classes must have the Neo4jLabelList properties and an index on it
@@ -64,15 +65,17 @@ public class ONeo4jImporterUtils {
         try {
           orientDBClass.getProperty("Neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
         } catch (Exception e) {
-          logString =
+          String mess =
               "Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'Neo4jLabelList' Property of the vertex Class '"
                   + orientDBClassName + "': " + e.getMessage();
-          ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+          ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+          ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
         }
       } catch (Exception e) {
-        logString = "Found an error when trying to create the 'Neo4jLabelList' Property in OrientDB on the vertex Class '"
+        String mess = "Found an error when trying to create the 'Neo4jLabelList' Property in OrientDB on the vertex Class '"
             + orientDBClassName + "': " + e.getMessage();
-        ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+        ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+        ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
       }
     }
     return orientDBClassName;
@@ -99,37 +102,40 @@ public class ONeo4jImporterUtils {
       while (result.hasNext()) {
         debugCounter++;
 
+        String neo4jPropType = "";
         try {
 
           // get just the first node with the specific label and
           Record currentNode = result.next();
 
-          //debug
-          //System.out.println("debugCounter is: " + debugCounter + ". Working on node " + myNode);
+          ONeo4jImporterContext.getInstance().getOutputManager().debug("debugCounter is: " + debugCounter + ". Working on node " + currentNode.get("id").asString());
           Object propertyValue = currentNode.get("targetProp");
           if(propertyValue != null) {
 
             //map the Neo4j property type to an OrientDB property data type
-            orientOtype = mapNeo4JToOrientDBPropertyType(getNeo4jPropType(propertyValue));
+            neo4jPropType = getNeo4jPropType(propertyValue);
+            orientOtype = mapNeo4JToOrientDBPropertyType(neo4jPropType);
 
             //not all nodes with label myNeo4jLabel may have this property - even if we have a unique constraint on this property (it is unique in the nodes where the property exists). When we find a node with this property, we exit the loop
             foundNode = true;
           }
 
-          //debug
-          //System.out.println("Property defined on this node: " + myNeo4jPropKey + " value: " + PropertyValue + " data type: " + neo4jPropType);
+          ONeo4jImporterContext.getInstance().getOutputManager().debug("Property defined on this node: " + neo4jPropKey + " value: " + propertyValue + " data type: " + neo4jPropType);
           if(foundNode) {
             break;
           }
         } catch (Exception e) {
-          logString = e.toString();
-          ONeo4jImporter.importLogger.log(Level.WARNING, logString);
+          String mess = "";
+          ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+          ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
           break;
         }
       }
 
     } catch(Exception e) {
-      e.printStackTrace();
+      String mess = "";
+      ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+      ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
     }
 
     //Now that we know the data type of the property, we can create it in OrientDB
@@ -139,8 +145,7 @@ public class ONeo4jImporterUtils {
       orientOtype = OType.STRING;
     }
 
-    //debug
-    //System.out.println("Creating OrientDB Property '" + myNeo4jPropKey + "' of type '" + orientOtype + "' on Class '" + myOrientDBIndexClass + "' ");
+    ONeo4jImporterContext.getInstance().getOutputManager().debug("Creating OrientDB Property '" + neo4jPropKey + "' of type '" + orientOtype + "' on Class '" + orientDBIndexClass + "' ");
 
     try {
 
@@ -152,18 +157,18 @@ public class ONeo4jImporterUtils {
             "The Neo4j Property '" + neo4jPropKey + "' on the Neo4j Label '" + neo4jLabel + "' associated to a Neo4j '"
                 + myNeo4jConstraintType
                 + "' constraint/index has been imported as STRING because there are no nodes in Neo4j that have this property, hence it was not possible to determine the type of this Neo4j Property";
-        ONeo4jImporter.importLogger.log(Level.INFO, logString);
+        ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
       } else {
         logString =
             "Created Property '" + neo4jPropKey + "' on the Class '" + orientDBIndexClass + "' with type '" + orientOtype + "'";
-        ONeo4jImporter.importLogger.log(Level.INFO, logString);
+        ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
       }
       return true;
     } catch (Exception e) {
-      logString =
-          "Found an error when trying to create a Property in OrientDB. Correspinding Property in Neo4j is '" + neo4jPropKey
+      String mess = "Found an error when trying to create a Property in OrientDB. Correspinding Property in Neo4j is '" + neo4jPropKey
               + "' on node label '" + orientDBIndexClass + "': " + e.getMessage();
-      ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
+      ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+      ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
       return false;
     }
   }

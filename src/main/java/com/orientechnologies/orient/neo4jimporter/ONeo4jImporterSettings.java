@@ -29,10 +29,12 @@ public class ONeo4jImporterSettings {
   private String neo4jUrl;
   private String neo4jUsername;
   private String neo4jPassword;
-  public String  orientDbDir;
-  public String  orientDbProtocol;
-  public boolean overwriteOrientDbDir = false;
-  public boolean createIndexOnNeo4jRelID = false;
+  private String  orientDbDir;
+  private String  orientDbProtocol;
+  private boolean overwriteOrientDbDir = false;
+  private boolean createIndexOnNeo4jRelID = false;
+
+  private int logLevel;
 
   public ONeo4jImporterSettings() {}
 
@@ -102,5 +104,13 @@ public class ONeo4jImporterSettings {
 
   public void setCreateIndexOnNeo4jRelID(boolean createIndexOnNeo4jRelID) {
     this.createIndexOnNeo4jRelID = createIndexOnNeo4jRelID;
+  }
+
+  public int getLogLevel() {
+    return this.logLevel;
+  }
+
+  public void setLogLevel(int logLevel) {
+    this.logLevel = logLevel;
   }
 }

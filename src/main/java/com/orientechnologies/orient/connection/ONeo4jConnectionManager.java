@@ -1,5 +1,6 @@
 package com.orientechnologies.orient.connection;
 
+import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.v1.Session;
@@ -32,7 +33,9 @@ public class ONeo4jConnectionManager {
       driver = GraphDatabase.driver(this.sourceNeo4jInfo.getNeo4jUrl(), AuthTokens.basic( this.sourceNeo4jInfo.getNeo4jUsername(), this.sourceNeo4jInfo.getNeo4jPassword()) );
       session = driver.session();
     } catch (Exception e) {
-      e.printStackTrace();
+      String mess = "";
+      ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+      ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
     }
     return session;
   }

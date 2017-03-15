@@ -5,6 +5,7 @@ import com.orientechnologies.orient.neo4jimporter.ONeo4jImporter;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterCommandLineParser;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterPlugin;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterSettings;
+import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -42,15 +43,15 @@ public class ONeo4jImporterJob  implements Runnable {
     String odbProtocol = cfg.field("odbProtocol");
     boolean overrideDB = cfg.field("overwriteDB");
     boolean indexesOnRelationships = cfg.field("indexesOnRelationships");
+    int logLevel = cfg.field("logLevel");
 
     status = Status.RUNNING;
 
-    // TODO: change default values ov booleans
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overrideDB, indexesOnRelationships);
     final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
 
     try {
-      neo4jImporterPlugin.executeJob(settings);
+      neo4jImporterPlugin.executeJob(settings, new OOutputStreamManager(this.stream, logLevel));
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -18,6 +18,8 @@
 
 package com.orientechnologies.orient.neo4jimporter;
 
+import com.orientechnologies.orient.context.ONeo4jImporterContext;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,9 +82,9 @@ public class ONeo4jImporterCommandLineParser {
         false);
 
     //checks on orientDbDir
-    if (settings.orientDbDir != null) {
-      if (settings.orientDbDir.endsWith(File.separator)) {
-        settings.orientDbDir = settings.orientDbDir.substring(0, settings.orientDbDir.length() - File.separator.length());
+    if (settings.getOrientDbDir() != null) {
+      if (settings.getOrientDbDir().endsWith(File.separator)) {
+        settings.setOrientDbDir(settings.getOrientDbDir().substring(0, settings.getOrientDbDir().length() - File.separator.length()));
       }
     }
 
@@ -151,10 +153,8 @@ public class ONeo4jImporterCommandLineParser {
       throws IllegalArgumentException {
 
     if (!options.containsKey(option)) {
-
-      System.out.println(String.format("WARNING: '%s' option not found. Defaulting to '%s'.", option, value));
-      System.out.println();
-
+      ONeo4jImporterContext.getInstance().getOutputManager().warn(String.format("WARNING: '%s' option not found. Defaulting to '%s'.", option, value));
+      ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
       options.put(option, value);
     }
 

@@ -1,5 +1,6 @@
 package com.orientechnologies.orient.neo4jimporter;
 
+import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.http.ONeo4jImporterHandler;
@@ -28,9 +29,9 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.orientDbDir = "target/migrated_databases/graphdb_empty_db";
-    settings.overwriteOrientDbDir = true;
-    settings.createIndexOnNeo4jRelID = true;
+    settings.setOrientDbDir("target/migrated_databases/graphdb_empty_db");
+    settings.setOverwriteOrientDbDir(true);
+    settings.setCreateIndexOnNeo4jRelID(true);
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -57,9 +58,9 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.orientDbDir = "target/migrated_databases/graphdb_unique_constraints_only";
-    settings.overwriteOrientDbDir = true;
-    settings.createIndexOnNeo4jRelID = true;
+    settings.setOrientDbDir("target/migrated_databases/graphdb_unique_constraints_only");
+    settings.setOverwriteOrientDbDir(true);
+    settings.setCreateIndexOnNeo4jRelID(true);
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -99,9 +100,9 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only";
-    settings.overwriteOrientDbDir = true;
-    settings.createIndexOnNeo4jRelID = true;
+    settings.setOrientDbDir("target/migrated_databases/graphdb_nodes_only");
+    settings.setOverwriteOrientDbDir(true);
+    settings.setCreateIndexOnNeo4jRelID(true);
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -132,9 +133,9 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_no_labels";
-    settings.overwriteOrientDbDir = true;
-    settings.createIndexOnNeo4jRelID = true;
+    settings.setOrientDbDir("target/migrated_databases/graphdb_nodes_only_no_labels");
+    settings.setOverwriteOrientDbDir(true);
+    settings.setCreateIndexOnNeo4jRelID(true);
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -161,9 +162,9 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_mixed_labels_and_no_labels";
-    settings.overwriteOrientDbDir = true;
-    settings.createIndexOnNeo4jRelID = true;
+    settings.setOrientDbDir("target/migrated_databases/graphdb_nodes_only_mixed_labels_and_no_labels");
+    settings.setOverwriteOrientDbDir(true);
+    settings.setCreateIndexOnNeo4jRelID(true);
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -191,9 +192,9 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_label_case_test";
-    settings.overwriteOrientDbDir = true;
-    settings.createIndexOnNeo4jRelID = true;
+    settings.setOrientDbDir("target/migrated_databases/graphdb_nodes_only_label_case_test");
+    settings.setOverwriteOrientDbDir(true);
+    settings.setCreateIndexOnNeo4jRelID(true);
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -220,9 +221,9 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_label_case_test_constraints";
-    settings.overwriteOrientDbDir = true;
-    settings.createIndexOnNeo4jRelID = true;
+    settings.setOrientDbDir("target/migrated_databases/graphdb_nodes_only_label_case_test_constraints");
+    settings.setOverwriteOrientDbDir(true);
+    settings.setCreateIndexOnNeo4jRelID(true);
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -254,9 +255,9 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_multiple_labels";
-    settings.overwriteOrientDbDir = true;
-    settings.createIndexOnNeo4jRelID = true;
+    settings.setOrientDbDir("target/migrated_databases/graphdb_nodes_only_multiple_labels");
+    settings.setOverwriteOrientDbDir(true);
+    settings.setCreateIndexOnNeo4jRelID(true);
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -288,9 +289,9 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.orientDbDir = "target/migrated_databases/graphdb_multiple_labels_and_constraints";
-    settings.overwriteOrientDbDir = true;
-    settings.createIndexOnNeo4jRelID = true;
+    settings.setOrientDbDir("target/migrated_databases/graphdb_multiple_labels_and_constraints");
+    settings.setOverwriteOrientDbDir(true);
+    settings.setCreateIndexOnNeo4jRelID(true);
 
     ONeo4jImporter importer = new ONeo4jImporter(settings);
 
@@ -322,8 +323,10 @@ public class ONeo4jImporterTest {
     db.close();
   }
 
+
   @Test
   public void basicImportingTest() throws Exception {
+
 
     String neo4jUrl = "bolt://localhost:7687";
     String neo4jUsername = "neo4j";
@@ -334,14 +337,13 @@ public class ONeo4jImporterTest {
     boolean createIndexOnNeo4jRelID = true;
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overwriteDB, createIndexOnNeo4jRelID);
-    final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
 
     try {
-      neo4jImporter.execute();
+      ONeo4jImporterMain.executeJob(settings);
     } catch(Exception e) {
       fail();
-      System.out.println("Exception message: " + e.getMessage());
-      System.out.println("Stacktrace:\n" + e.getStackTrace());
+      ONeo4jImporterContext.getInstance().getOutputManager().info("Exception message: " + e.getMessage());
+      ONeo4jImporterContext.getInstance().getOutputManager().info("Stacktrace:\n" + e.getStackTrace());
     }
   }
 

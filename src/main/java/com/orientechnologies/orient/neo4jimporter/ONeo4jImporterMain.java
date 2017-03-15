@@ -1,6 +1,8 @@
 package com.orientechnologies.orient.neo4jimporter;
 
+import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.OConstants;
+import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
 
 import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
@@ -11,26 +13,36 @@ public class ONeo4jImporterMain {
 
   private static OOutputStreamManager outputManager = new OOutputStreamManager(2);
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
 
-    System.out.println();
-    System.out.println(String.format(PROGRAM_NAME + " v.%s - %s", OConstants.getVersion(), OConstants.COPYRIGHT));
-    System.out.println();
+    int returnValue = 1;
+
+    ONeo4jImporterCommandLineParser commandParser = new ONeo4jImporterCommandLineParser();
+    ONeo4jImporterSettings settings = commandParser.getNeo4jImporter(args);
+    returnValue = executeJob(settings);
+
+    System.exit(returnValue);
+  }
+
+  public static int executeJob(ONeo4jImporterSettings settings) {
+
+    ONeo4jImporterContext.getInstance().setOutputManager(outputManager);
+    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
+    ONeo4jImporterContext.getInstance().getOutputManager().info(String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.getVersion(), OConstants.COPYRIGHT));
+    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
 
     //parses the command line parameters, and starts the import (.execute). Then exits
     int returnValue = 1;
-    try {
 
-      ONeo4jImporterCommandLineParser commandParser = new ONeo4jImporterCommandLineParser();
-      ONeo4jImporterSettings settings = commandParser.getNeo4jImporter(args);
+    try {
       final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
       returnValue = neo4jImporter.execute();
-
-    } catch (Exception ex) {
-      System.err.println(ex.getMessage());
+    } catch (Exception e) {
+      String mess = "";
+      ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+      ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
     }
-
-    System.exit(returnValue);
+    return returnValue;
   }
 
 }

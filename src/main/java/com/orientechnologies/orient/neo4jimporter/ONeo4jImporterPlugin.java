@@ -1,5 +1,6 @@
 package com.orientechnologies.orient.neo4jimporter;
 
+import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.exception.OConfigurationException;
 import com.orientechnologies.orient.http.OServerCommandNeo4jImporter;
 import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
@@ -15,19 +16,20 @@ import com.orientechnologies.orient.server.plugin.OServerPluginAbstract;
 public class ONeo4jImporterPlugin extends OServerPluginAbstract {
 
   private OServer server;
-  private static OOutputStreamManager outputManager = new OOutputStreamManager(2);
 
   public ONeo4jImporterPlugin() {}
 
-  public void executeJob(ONeo4jImporterSettings settings) throws Exception {
+  public void executeJob(ONeo4jImporterSettings settings, OOutputStreamManager outputManager) throws Exception {
 
     final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
+    ONeo4jImporterContext.getInstance().setOutputManager(outputManager);
 
     try {
       neo4jImporter.execute();
     } catch(Exception e) {
-      outputManager.error("Exception message: " + e.getMessage());
-      System.out.println("Stacktrace:\n" + e.getStackTrace());
+      String mess = "";
+      ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+      ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
     }
   }
 
