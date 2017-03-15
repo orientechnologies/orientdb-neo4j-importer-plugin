@@ -19,9 +19,11 @@
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.common.io.OFileUtils;
+import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.core.OConstants;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
+import org.neo4j.driver.v1.Session;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -64,10 +66,13 @@ public class ONeo4jImporter {
     logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " started!\n";
     importLogger.log(Level.INFO, logString);
 
-    // parameters (from command line)
-    String neo4jDBPath = settings.neo4jDbPath;
-    String orientDbFolder = settings.orientDbDir;
-    boolean overwriteOrientDBDir = settings.overwriteOrientDbDir;
+    // parameters
+    String neo4jUrl = settings.getNeo4jUrl();
+    String neo4jUsername = settings.getNeo4jUsername();
+    String neo4jPassword = settings.getNeo4jPassword();
+    String orientDbFolder = settings.getOrientDbDir();
+    String orienDbProtocol = settings.getOrientDbProtocol();
+    boolean overwriteOrientDBDir = settings.getOverwriteOrientDbDir();
     boolean neo4jRelIdIndex = settings.createIndexOnNeo4jRelID;
     //
 
@@ -97,46 +102,49 @@ public class ONeo4jImporter {
 
       }
     }
-    //
 
     //
     // PHASE 1 : INITIALIZATION
     //
 
-    ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(neo4jDBPath, orientDbFolder).invoke();
+    OSourceNeo4jInfo sourceNeo4jInfo = new OSourceNeo4jInfo(neo4jUrl, neo4jUsername, neo4jPassword);
+    ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orienDbProtocol, orientDbFolder);
+    Session neo4jSession = initializer.initConnections();
     String orientVertexClass = initializer.getOrientVertexClass();
     OrientGraphNoTx oDb = initializer.getoDb();
-    OrientGraphFactory oFactory = initializer.getoFactory();
+    OrientGraphFactory oFactory = initializer.getOFactory();
     ONeo4jImporterCounters counters = new ONeo4jImporterCounters();
+
 
     //
     // PHASE 2 : MIGRATION OF VERTICES AND EDGES
     //
 
     ONeo4jImporterVerticesAndEdgesMigrator verticesAndEdgesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(keepLogString,
-        migrateRels, migrateNodes, df, orientVertexClass, oDb, counters, relSampleOnly, neo4jRelIdIndex).invoke();
+        migrateRels, migrateNodes, df, orientVertexClass, oDb, counters, relSampleOnly, neo4jRelIdIndex);
+    verticesAndEdgesImporter.invoke(neo4jSession);
     keepLogString = verticesAndEdgesImporter.getKeepLogString();
 
     //
     // PHASE 3 : SCHEMA MIGRATION
     //
 
-    ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, oDb, counters).invoke();
+    ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, oDb, counters);
+    schemaMigrator.invoke(neo4jSession);
 
     //
     // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO<
     //
 
-    stopServers(oDb, oFactory);
-
+    stopServers(neo4jSession, oDb, oFactory);
     printSummary(startTime, df, dfd, counters, initializer, verticesAndEdgesImporter, schemaMigrator, neo4jRelIdIndex);
 
     returnCode = 0;
     return returnCode;
-
   }
 
-  private void stopServers(OrientGraphNoTx oDb, OrientGraphFactory oFactory) {
+  private void stopServers(Session neo4jSession, OrientGraphNoTx oDb, OrientGraphFactory oFactory) throws Exception {
+
     String logString;
     logString = "Shutting down OrientDB...";
 
@@ -151,6 +159,15 @@ public class ONeo4jImporter {
     System.out.print("\rShutting down OrientDB...Done");
 
     logString = "Shutting down Neo4j...";
+
+    try {
+      if(neo4jSession != null) {
+        neo4jSession.close();
+      }
+    } catch(Exception e) {
+      e.printStackTrace();
+      throw new Exception(e.getMessage());
+    }
 
     System.out.println();
     System.out.print(logString);

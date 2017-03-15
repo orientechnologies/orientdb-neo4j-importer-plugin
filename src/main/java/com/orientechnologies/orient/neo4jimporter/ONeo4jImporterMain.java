@@ -9,6 +9,8 @@ import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_
  */
 public class ONeo4jImporterMain {
 
+  private static OOutputStreamManager outputManager = new OOutputStreamManager(2);
+
   public static void main(String[] args) {
 
     System.out.println();

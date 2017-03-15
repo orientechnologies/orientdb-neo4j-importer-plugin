@@ -22,12 +22,12 @@ import static org.junit.Assert.fail;
  */
 public class ONeo4jImporterTest {
 
+  @Ignore
   @Test
   public void shouldImportEmptyDb() throws Exception {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_empty_db";
     settings.orientDbDir = "target/migrated_databases/graphdb_empty_db";
     settings.overwriteOrientDbDir = true;
     settings.createIndexOnNeo4jRelID = true;
@@ -57,7 +57,6 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_unique_constraints_only";
     settings.orientDbDir = "target/migrated_databases/graphdb_unique_constraints_only";
     settings.overwriteOrientDbDir = true;
     settings.createIndexOnNeo4jRelID = true;
@@ -100,7 +99,6 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only";
     settings.overwriteOrientDbDir = true;
     settings.createIndexOnNeo4jRelID = true;
@@ -134,7 +132,6 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_no_labels";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_no_labels";
     settings.overwriteOrientDbDir = true;
     settings.createIndexOnNeo4jRelID = true;
@@ -164,7 +161,6 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_mixed_labels_and_no_labels";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_mixed_labels_and_no_labels";
     settings.overwriteOrientDbDir = true;
     settings.createIndexOnNeo4jRelID = true;
@@ -195,7 +191,6 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_label_case_test";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_label_case_test";
     settings.overwriteOrientDbDir = true;
     settings.createIndexOnNeo4jRelID = true;
@@ -225,7 +220,6 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_label_case_test_constraints";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_label_case_test_constraints";
     settings.overwriteOrientDbDir = true;
     settings.createIndexOnNeo4jRelID = true;
@@ -260,7 +254,6 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_nodes_only_multiple_labels";
     settings.orientDbDir = "target/migrated_databases/graphdb_nodes_only_multiple_labels";
     settings.overwriteOrientDbDir = true;
     settings.createIndexOnNeo4jRelID = true;
@@ -295,7 +288,6 @@ public class ONeo4jImporterTest {
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = "./neo4jdbs/databases/graphdb_multiple_labels_and_constraints";
     settings.orientDbDir = "target/migrated_databases/graphdb_multiple_labels_and_constraints";
     settings.overwriteOrientDbDir = true;
     settings.createIndexOnNeo4jRelID = true;
@@ -328,16 +320,20 @@ public class ONeo4jImporterTest {
     assertEquals(20, db.getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion").count());
 
     db.close();
-
   }
 
   @Test
   public void basicImportingTest() throws Exception {
 
-    String neo4jDbDir = "/Users/gabriele/neo4j-community-3.1.1/data/databases/graph.db";
+    String neo4jUrl = "bolt://localhost:7687";
+    String neo4jUsername = "neo4j";
+    String neo4jPassword = "admin";
     String odbDir = "/Users/gabriele/orientdb-community-2.2.18-SNAPSHOT/databases/neo4jImport";
+    String odbProtocol = "plocal";
+    boolean overwriteDB = true;
+    boolean createIndexOnNeo4jRelID = true;
 
-    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jDbDir, odbDir, true, true);
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overwriteDB, createIndexOnNeo4jRelID);
     final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
 
     try {

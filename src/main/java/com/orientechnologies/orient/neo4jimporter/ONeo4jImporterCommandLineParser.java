@@ -71,31 +71,13 @@ public class ONeo4jImporterCommandLineParser {
 
     final ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.neo4jDbPath = options.get(OPTION_NEO4J_DBDIR);
-    settings.orientDbDir = options.get(OPTION_ORIENTDB_PATH);
-    settings.overwriteOrientDbDir = options.get(OPTION_OVERWRITE_ORIENTDB_DIR) != null ?
+    settings.setOrientDbDir(options.get(OPTION_ORIENTDB_PATH));
+    settings.setOverwriteOrientDbDir(options.get(OPTION_OVERWRITE_ORIENTDB_DIR) != null ?
         Boolean.parseBoolean(options.get(OPTION_OVERWRITE_ORIENTDB_DIR)) :
-        false;
-    settings.createIndexOnNeo4jRelID =  options.get(CREATE_INDEX_ON_NEO4JRELID) != null ?
+        false);
+    settings.setCreateIndexOnNeo4jRelID(options.get(CREATE_INDEX_ON_NEO4JRELID) != null ?
         Boolean.parseBoolean(options.get(CREATE_INDEX_ON_NEO4JRELID)) :
-        false;
-
-    //checks on neo4jDbPath
-    if (settings.neo4jDbPath != null) {
-      if (settings.neo4jDbPath.endsWith(File.separator)) {
-        settings.neo4jDbPath = settings.neo4jDbPath.substring(0, settings.neo4jDbPath.length() - File.separator.length());
-      }
-      File neo4jDbPath = new File(settings.neo4jDbPath);
-      if (!neo4jDbPath.exists()) {
-        throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NOT_PATH, settings.neo4jDbPath));
-      }
-      if (!neo4jDbPath.canWrite()) {
-        throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NO_WRITE_PERMISSION, settings.neo4jDbPath));
-      }
-      if (!neo4jDbPath.isDirectory()) {
-        throw new IllegalArgumentException(String.format(COMMAND_LINE_PARSER_NOT_DIRECTORY, settings.neo4jDbPath));
-      }
-    }
+        false);
 
     //checks on orientDbDir
     if (settings.orientDbDir != null) {

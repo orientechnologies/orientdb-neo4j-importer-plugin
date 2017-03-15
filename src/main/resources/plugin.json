@@ -1,0 +1,10 @@
+{
+  "name": "neo4j-importer",
+  "version": "2.2.18",
+  "javaClass": "com.orientechnologies.orient.neo4jimporter.ONeo4jImporterPlugin",
+  "description": "This is Neo4j Importer plugin",
+  "web": "http://www.orientdb.com",
+  "copyrights": "OrientDB LTD",
+  "license": "Commercial",
+  "parameters": {}
+}

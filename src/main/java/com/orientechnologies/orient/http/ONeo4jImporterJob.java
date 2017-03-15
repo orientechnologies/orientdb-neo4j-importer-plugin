@@ -6,6 +6,8 @@ import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterCommandLineParse
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterPlugin;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterSettings;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,38 +20,33 @@ public class ONeo4jImporterJob  implements Runnable {
   private       ONeo4ImporterListener listener;
   public Status      status;
 
+  public  PrintStream           stream;
+  private ByteArrayOutputStream baos;
+
   public ONeo4jImporterJob(ODocument cfg, ONeo4ImporterListener listener) {
     this.cfg = cfg;
     this.listener = listener;
+
+    this.baos = new ByteArrayOutputStream();
+    this.stream = new PrintStream(baos);
   }
 
 
   @Override
   public void run() {
 
-    List<String> argsList = new ArrayList<String>();
+    String neo4jUrl = cfg.field("neo4jUrl");
+    String neo4jUsername = cfg.field("neo4jUsername");
+    String neo4jPassword = cfg.field("neo4jPassword");
+    String odbDir = cfg.field("outDbUrl");
+    String odbProtocol = cfg.field("odbProtocol");
+    boolean overrideDB = cfg.field("overwriteDB");
+    boolean indexesOnRelationships = cfg.field("indexesOnRelationships");
 
-
-      final String neo4jDbDir = cfg.field("neo4jDbDir");
-      final String odbDir = cfg.field("outDbUrl");
-      final String override = cfg.field("override");
-      final String options = cfg.field("options");
-
-
-      argsList.add("-neo4jdbdir");
-      argsList.add(neo4jDbDir);
-      if(odbDir != null) {
-        argsList.add("-odbdir");
-        argsList.add(odbDir);
-      }
-      if(options != null) {
-        argsList.add("");
-        argsList.add(options);
-      }
-      status = Status.RUNNING;
+    status = Status.RUNNING;
 
     // TODO: change default values ov booleans
-    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jDbDir, odbDir, true, true);
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overrideDB, indexesOnRelationships);
     final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
 
     try {
@@ -69,6 +66,26 @@ public class ONeo4jImporterJob  implements Runnable {
   }
 
   public void validate() {
+
+  }
+
+  /**
+   * Single Job Status
+   *
+   * @return ODocument
+   */
+  public ODocument status() {
+
+    synchronized (listener) {
+      ODocument status = new ODocument();
+      status.field("cfg", cfg);
+      status.field("status", this.status);
+      status.field("log", baos.toString());
+      if (this.status == Status.FINISHED) {
+        listener.notifyAll();
+      }
+      return status;
+    }
 
   }
 

@@ -65,29 +65,25 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
    * @return
    */
 
-  public ONeo4jImporterVerticesAndEdgesMigrator invoke() {
+  public void invoke(Session neo4jSession) {
 
     String logString;
-    Driver driver = null;
-    Session session = null;
 
     try {
 
-      driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "admin" ) );
-      session = driver.session();
 
       /**
        * Importing nodes with all properties and labels into OrientDB
        */
 
-      this.importNodesAndBuildIndices(session);
+      this.importNodesAndBuildIndices(neo4jSession);
 
 
       /**
        * Importing all relationships from Neo4j and creates the corresponding Edges in OrientDB
        */
 
-      this.importRelationships(session);
+      this.importRelationships(neo4jSession);
 
 
       /**
@@ -100,17 +96,10 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
     } catch (Exception e) {
       e.printStackTrace();
-    } finally {
-      if(session != null)
-        session.close();
-      if(driver != null)
-        driver.close();
     }
 
     logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 2 completed!\n";
     ONeo4jImporter.importLogger.log(Level.INFO, logString);
-
-    return this;
   }
 
 

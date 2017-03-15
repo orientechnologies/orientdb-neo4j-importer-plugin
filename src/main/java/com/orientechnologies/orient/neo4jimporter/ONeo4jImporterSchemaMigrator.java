@@ -41,45 +41,39 @@ class ONeo4jImporterSchemaMigrator {
     return importingSchemaStopTime;
   }
 
-  public ONeo4jImporterSchemaMigrator invoke() {
-
-    Session session = null;
-    Driver driver = null;
+  public void invoke(Session neo4jSession) {
 
     try {
-      driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "admin"));
-      session = driver.session();
+
+      /**
+       * Importing constraints
+       */
+      this.importConstraints(neo4jSession);
+
+      String logString;
+      boolean propertyCreationSuccess;
+      double value;
+
+      /**
+       * Importing indices
+       */
+
+      this.importIndices(neo4jSession);
+
+      //prints number of unique constraints in the log
+      ONeo4jImporter.importLogger.log(Level.INFO, keepLogString);
+
+      System.out.println("\nDone");
+
+      logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 3 completed!\n";
+      ONeo4jImporter.importLogger.log(Level.INFO, logString);
+
+      System.out.println();
+      System.out.println("Import completed!");
     } catch(Exception e) {
       e.printStackTrace();
     }
 
-    /**
-     * Importing constraints
-     */
-    this.importConstraints(session);
-
-    String logString;
-    boolean propertyCreationSuccess;
-    double value;
-
-    /**
-     * Importing indices
-     */
-
-    this.importIndices(session);
-
-    //prints number of unique constraints in the log
-    ONeo4jImporter.importLogger.log(Level.INFO, keepLogString);
-
-    System.out.println("\nDone");
-
-    logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 3 completed!\n";
-    ONeo4jImporter.importLogger.log(Level.INFO, logString);
-
-    System.out.println();
-    System.out.println("Import completed!");
-
-    return this;
   }
 
   private void importIndices(Session session) {

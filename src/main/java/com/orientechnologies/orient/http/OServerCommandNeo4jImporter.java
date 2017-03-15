@@ -36,9 +36,8 @@ public class OServerCommandNeo4jImporter extends OServerCommandAuthenticatedServ
   private void doGet(OHttpRequest iRequest, OHttpResponse iResponse, String[] parts) throws IOException {
 
     if ("status".equalsIgnoreCase(parts[1])) {
-//      ODocument status = handler.status();
-//      iResponse.send(OHttpUtils.STATUS_OK_CODE, "OK", OHttpUtils.CONTENT_JSON, status.toJSON("prettyPrint"), null);
-
+      ODocument status = handler.status();
+      iResponse.send(OHttpUtils.STATUS_OK_CODE, "OK", OHttpUtils.CONTENT_JSON, status.toJSON("prettyPrint"), null);
     }
     else {
       throw new IllegalArgumentException("");
@@ -53,14 +52,13 @@ public class OServerCommandNeo4jImporter extends OServerCommandAuthenticatedServ
       iResponse.send(OHttpUtils.STATUS_OK_CODE, "OK", OHttpUtils.CONTENT_JSON, null, null);
 
     } else if ("test".equalsIgnoreCase(parts[1])) {
-//      ODocument cfg = new ODocument().fromJSON(iRequest.content);
-//      try {
-//        handler.checkConnection(cfg);
-//      } catch (Exception e) {
-//        throw new IllegalArgumentException(e);
-//      }
-//      iResponse.send(OHttpUtils.STATUS_OK_CODE, "OK", OHttpUtils.CONTENT_JSON, null, null);
-
+      ODocument cfg = new ODocument().fromJSON(iRequest.content);
+      try {
+        handler.checkConnection(cfg);
+      } catch (Exception e) {
+        throw new IllegalArgumentException(e);
+      }
+      iResponse.send(OHttpUtils.STATUS_OK_CODE, "OK", OHttpUtils.CONTENT_JSON, null, null);
     }
   }
 

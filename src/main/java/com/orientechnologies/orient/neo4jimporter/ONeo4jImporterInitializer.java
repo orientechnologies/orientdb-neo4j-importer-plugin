@@ -1,10 +1,13 @@
 package com.orientechnologies.orient.neo4jimporter;
 
+import com.orientechnologies.orient.connection.ONeo4jConnectionManager;
+import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
+import org.neo4j.driver.v1.Session;
 
 import java.io.File;
 import java.util.logging.Level;
@@ -15,24 +18,37 @@ import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_
  * Created by frank on 08/11/2016.
  */
 class ONeo4jImporterInitializer {
-  private final String               neo4jDBPath;
+
   private final String               orientDbFolder;
+  private final String               orientDbProtocol;
   private       double               initializationStartTime;
   private       OrientGraphFactory   oFactory;
   private       OrientGraphNoTx      oDb;
   private       String               orientVertexClass;
   private       double               initializationStopTime;
 
-  public ONeo4jImporterInitializer(String neo4jDBPath, String orientDbFolder) {
-    this.neo4jDBPath = neo4jDBPath;
+  private OSourceNeo4jInfo sourceNeo4jInfo;
+  private Session neo4jSession;
+
+  public ONeo4jImporterInitializer(OSourceNeo4jInfo sourceNeo4jInfo, String orientDbProtocol, String orientDbFolder) {
     this.orientDbFolder = orientDbFolder;
+    this.orientDbProtocol = orientDbProtocol;
+    this.sourceNeo4jInfo = sourceNeo4jInfo;
+  }
+
+  public OSourceNeo4jInfo getSourceNeo4jInfo() {
+    return sourceNeo4jInfo;
+  }
+
+  public void setSourceNeo4jInfo(OSourceNeo4jInfo sourceNeo4jInfo) {
+    this.sourceNeo4jInfo = sourceNeo4jInfo;
   }
 
   public double getInitializationStartTime() {
     return initializationStartTime;
   }
 
-  public OrientGraphFactory getoFactory() {
+  public OrientGraphFactory getOFactory() {
     return oFactory;
   }
 
@@ -48,23 +64,31 @@ class ONeo4jImporterInitializer {
     return initializationStopTime;
   }
 
-  public ONeo4jImporterInitializer invoke() {
+  public Session getNeo4jSession() {
+    return neo4jSession;
+  }
+
+  public void setNeo4jSession(Session neo4jSession) {
+    this.neo4jSession = neo4jSession;
+  }
+
+  public Session initConnections() throws Exception {
     String logString;
 
     initializationStartTime = System.currentTimeMillis();
 
-    System.out.println("Please make sure that there are no running servers on:");
-    System.out.println("  '" + neo4jDBPath + "' (Neo4j)");
-    System.out.println("and:");
-    System.out.println("  '" + orientDbFolder + "' (OrientDB)");
+//    System.out.println("Please make sure that there are no running servers on:");
+//    System.out.println("  '" + neo4jDBPath + "' (Neo4j)");
+//    System.out.println("and:");
+//    System.out.println("  '" + orientDbFolder + "' (OrientDB)");
 
     System.out.println();
     System.out.print("Trying connection to Neo4j...");
 
-    File DB_PATH = new File(neo4jDBPath);
+    ONeo4jConnectionManager connectionManager = new ONeo4jConnectionManager(sourceNeo4jInfo);
+    Session neo4jSession = connectionManager.getSession();
 
-
-    logString = "Trying connection to Neo4j...Neo4j server is alive and connetion succeeded.";
+    logString = "Trying connection to Neo4j...Neo4j server is alive and connection succeeded.";
 
     System.out.print("\r" + logString + "\n");
     ONeo4jImporter.importLogger.log(Level.INFO, logString);
@@ -72,7 +96,7 @@ class ONeo4jImporterInitializer {
     System.out.println();
     System.out.print("Initializing OrientDB...");
 
-    String dbUrl = "plocal:" + orientDbFolder;
+    String dbUrl = this.orientDbProtocol + ":" + orientDbFolder;
 
     OGlobalConfiguration.USE_WAL.setValue(false);
     OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
@@ -91,8 +115,8 @@ class ONeo4jImporterInitializer {
     ONeo4jImporter.importLogger.log(Level.INFO, logString);
 
     System.out.println();
-    System.out.println("Importing Neo4j database:");
-    System.out.println("  '" + neo4jDBPath + "'");
+    System.out.println("Importing Neo4j database from server:");
+    System.out.println("  '" + sourceNeo4jInfo.getNeo4jUrl() + "'");
     System.out.println("into OrientDB database:");
     System.out.println("  '" + orientDbFolder + "'");
 
@@ -100,6 +124,6 @@ class ONeo4jImporterInitializer {
     ONeo4jImporter.importLogger.log(Level.INFO, logString);
 
     initializationStopTime = System.currentTimeMillis();
-    return this;
+    return neo4jSession;
   }
 }
