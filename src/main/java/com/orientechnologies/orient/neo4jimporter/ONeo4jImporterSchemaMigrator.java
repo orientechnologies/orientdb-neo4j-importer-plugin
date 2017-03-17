@@ -1,7 +1,7 @@
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
-import com.orientechnologies.orient.context.ONeo4jImporterCounters;
+import com.orientechnologies.orient.context.ONeo4jImporterStatistics;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
@@ -13,7 +13,6 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
@@ -21,18 +20,18 @@ import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_
  * Created by frank on 08/11/2016.
  */
 class ONeo4jImporterSchemaMigrator {
-  private String                 keepLogString;
-  private DecimalFormat          df;
-  private OrientGraphNoTx        oDb;
-  private ONeo4jImporterCounters counters;
-  private double                 importingSchemaStartTime;
-  private double                 importingSchemaStopTime;
+  private String                   keepLogString;
+  private DecimalFormat            df;
+  private OrientGraphNoTx          oDb;
+  private ONeo4jImporterStatistics statistics;
+  private double                   importingSchemaStartTime;
+  private double                   importingSchemaStopTime;
 
-  public ONeo4jImporterSchemaMigrator(String keepLogString, DecimalFormat df, OrientGraphNoTx oDb, ONeo4jImporterCounters counters) {
+  public ONeo4jImporterSchemaMigrator(String keepLogString, DecimalFormat df, OrientGraphNoTx oDb, ONeo4jImporterStatistics statistics) {
     this.keepLogString = keepLogString;
     this.df = df;
     this.oDb = oDb;
-    this.counters = counters;
+    this.statistics = statistics;
   }
 
   public double getImportingSchemaStartTime() {
@@ -50,13 +49,18 @@ class ONeo4jImporterSchemaMigrator {
       /**
        * Importing constraints
        */
+      this.statistics.importingElements = "constraints";
       this.importConstraints(neo4jSession);
+      ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
+      this.statistics.importingElements = "nothing";
 
       /**
        * Importing indices
        */
-
+      this.statistics.importingElements = "indices";
       this.importIndices(neo4jSession);
+      ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
+      this.statistics.importingElements = "nothing";
 
       ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n");
 
@@ -71,11 +75,13 @@ class ONeo4jImporterSchemaMigrator {
   }
 
   private void importIndices(Session session) {
+
     String logString;
     boolean propertyCreationSuccess;
     double value;
-    if (counters.orientDBImportedUniqueConstraintsCounter == 0) {
-      keepLogString = df.format(counters.orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created";
+
+    if (statistics.orientDBImportedUniqueConstraintsCounter == 0) {
+      keepLogString = df.format(statistics.orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created";
       ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
     }
 
@@ -95,7 +101,7 @@ class ONeo4jImporterSchemaMigrator {
 
       String query = "CALL db.indexes()";
       indices = session.run(query).list();  // storing result in a list in order to avoid another similar query later. List's dimension is not a problem.
-      counters.neo4jTotalIndices = indices.size();
+      statistics.neo4jTotalIndices = indices.size();
     } catch(Exception e) {
       String mess = "";
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
@@ -107,7 +113,7 @@ class ONeo4jImporterSchemaMigrator {
 
       for (Record currentIndexDefinition : indices) {
 
-        counters.neo4jIndicesCounter++;
+        statistics.neo4jIndicesCounter++;
         String indexDescription = currentIndexDefinition.get("description").asString();
 
         //the label this index is on (Neo4j indices are allowed on nodes only)
@@ -116,7 +122,7 @@ class ONeo4jImporterSchemaMigrator {
 
         ONeo4jImporterContext.getInstance().getOutputManager().debug("all index: on label " + neo4jLabelOfIndex);
 
-        counters.neo4jNonConstraintsIndicesCounter++;
+        statistics.neo4jNonConstraintsIndicesCounter++;
 
         ONeo4jImporterContext.getInstance().getOutputManager().debug("non constraint index: on label " + neo4jLabelOfIndex);
 
@@ -159,7 +165,7 @@ class ONeo4jImporterSchemaMigrator {
             }
             oDb.command(new OCommandSQL(statement)).execute();
 
-            counters.orientDBImportedIndicesCounter++;
+            statistics.orientDBImportedIndicesCounter++;
           }
         } catch (Exception e) {
           String mess = "Found an error when trying to create a NOTUNIQUE Index in OrientDB. Node label '" + neo4jLabelOfIndex + "': " + e.getMessage();
@@ -168,13 +174,13 @@ class ONeo4jImporterSchemaMigrator {
         }
 
         //print progress
-        value = 100 * (counters.neo4jNonConstraintsIndicesCounter / (counters.neo4jTotalIndices
-            - counters.neo4jTotalUniqueConstraints));
-        keepLogString =
-            df.format(counters.orientDBImportedIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
-                + "% done)";
-        ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + keepLogString);
-        value = 0;
+//        value = 100 * (statistics.neo4jNonConstraintsIndicesCounter / (statistics.neo4jTotalIndices
+//            - statistics.neo4jTotalUniqueConstraints));
+//        keepLogString =
+//            df.format(statistics.orientDBImportedIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
+//                + "% done)";
+//        ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + keepLogString);
+//        value = 0;
       }
     } catch(Exception e) {
       String mess = "";
@@ -184,10 +190,10 @@ class ONeo4jImporterSchemaMigrator {
 
     importingSchemaStopTime = System.currentTimeMillis();
 
-    if (counters.orientDBImportedIndicesCounter == 0) {
-      keepLogString = df.format(counters.orientDBImportedIndicesCounter) + " OrientDB Indices have been created";
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-    }
+//    if (statistics.orientDBImportedIndicesCounter == 0) {
+//      keepLogString = df.format(statistics.orientDBImportedIndicesCounter) + " OrientDB Indices have been created";
+//      ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
+//    }
   }
 
 
@@ -203,35 +209,31 @@ class ONeo4jImporterSchemaMigrator {
 
     boolean propertyCreationSuccess = false;
 
-//    boolean indexWorkaround = true;
-    // index workaround
-//    if (indexWorkaround) {
-//      if (oDb.getRawGraph().getMetadata().getSchema().existsClass("MultipleLabelNeo4jConversion")) {
-//        OClass multipleLabelClass = oDb.getRawGraph().getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion");
-//
-//        if (multipleLabelClass.existsProperty("Neo4jLabelList")) {
-//          if (oDb.getRawGraph().getMetadata().getIndexManager().existsIndex("MultipleLabelNeo4jConversion.Neo4jLabelList")) {
-//
-//            logString = "Rebuilding Index MultipleLabelNeo4jConversion.Neo4jLabelList. Please wait...";
-//            ONeo4jImporterContext.getInstance().getOutputManager().info();
-//            ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
-//
-//            try{
-//
-//              oDb.getRawGraph().getMetadata().getIndexManager().getClassIndex("MultipleLabelNeo4jConversion", "MultipleLabelNeo4jConversion.Neo4jLabelList").rebuild();
-//              ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + logString + "Done\n");
-//
-//            } catch (Exception e) {
-//
-//              ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + logString + "Failed\n");
-//              logString =
-//                  "Found an error when trying to rebuild the index 'MultipleLabelNeo4jConversion.Neo4jLabelList': " + e.getMessage();
-//              ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
-//            }
-//          }
-//        }
-//      }
-//    }
+    //     index workaround
+    boolean indexWorkaround = true;
+    if (indexWorkaround) {
+      if (oDb.getRawGraph().getMetadata().getSchema().existsClass("MultipleLabelNeo4jConversion")) {
+        OClass multipleLabelClass = oDb.getRawGraph().getMetadata().getSchema().getClass("MultipleLabelNeo4jConversion");
+
+        if (multipleLabelClass.existsProperty("neo4jLabelList")) {
+          if (oDb.getRawGraph().getMetadata().getIndexManager().existsIndex("MultipleLabelNeo4jConversion.neo4jLabelList")) {
+
+            logString = "Rebuilding Index MultipleLabelNeo4jConversion.neo4jLabelList. Please wait...\n";
+            ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
+
+            try{
+              oDb.getRawGraph().getMetadata().getIndexManager().getClassIndex("MultipleLabelNeo4jConversion", "MultipleLabelNeo4jConversion.neo4jLabelList").rebuild();
+              ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + logString + "Done\n");
+            } catch (Exception e) {
+              ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + logString + "Failed\n");
+              String mess = "Found an error when trying to rebuild the index 'MultipleLabelNeo4jConversion.neo4jLabelList': " + e.getMessage();
+              ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+              ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+            }
+          }
+        }
+      }
+    }
     // end index workaround
 
     logString = "Getting Constraints from Neo4j and creating corresponding ones in OrientDB...";
@@ -248,15 +250,15 @@ class ONeo4jImporterSchemaMigrator {
       while(result.hasNext()) {
         Record currentRecord = result.next();
         Map<String, Object> neo4jConstraintDefinition = currentRecord.asMap();
-        counters.neo4jTotalConstraints++;
+        statistics.neo4jTotalConstraints++;
         if ("UNIQUENESS".equals(neo4jConstraintDefinition.get("type"))) {
-          counters.neo4jTotalUniqueConstraints++;
+          statistics.neo4jTotalUniqueConstraints++;
         }
         if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintDefinition.get("type"))) {
-          counters.neo4jTotalNodePropertyExistenceConstraints++;
+          statistics.neo4jTotalNodePropertyExistenceConstraints++;
         }
         if ("RELATIONSHIP_PROPERTY_EXISTENCE".equals(neo4jConstraintDefinition.get("type"))) {
-          counters.neo4jTotalRelPropertyExistenceConstraints++;
+          statistics.neo4jTotalRelPropertyExistenceConstraints++;
         }
       }
     } catch(Exception e) {
@@ -275,7 +277,7 @@ class ONeo4jImporterSchemaMigrator {
       while(result.hasNext()) {
         Record currentRecord = result.next();
         Map<String, Object> neo4jConstraintDefinition = currentRecord.asMap();
-        counters.neo4jConstraintsCounter++;
+        statistics.neo4jConstraintsCounter++;
 
         //determine the type of the constraints - different actions will need to be taken according to this type
         String neo4jConstraintType = neo4jConstraintDefinition.get("type").toString();
@@ -342,7 +344,7 @@ class ONeo4jImporterSchemaMigrator {
           //taking actions depending on the type of the constraints
           if ("UNIQUENESS".equals(neo4jConstraintType)) {
 
-            counters.neo4jUniqueConstraintsCounter++;
+            statistics.neo4jUniqueConstraintsCounter++;
 
             try {
 
@@ -359,8 +361,8 @@ class ONeo4jImporterSchemaMigrator {
 
                   ONeo4jImporterContext.getInstance().getOutputManager().debug("\nCreated index: " + OrientDBIndex);
 
-                  counters.orientDBImportedUniqueConstraintsCounter++;
-                  counters.orientDBImportedConstraintsCounter++;
+                  statistics.orientDBImportedUniqueConstraintsCounter++;
+                  statistics.orientDBImportedConstraintsCounter++;
                 }
               }
             } catch (Exception e) {
@@ -379,7 +381,7 @@ class ONeo4jImporterSchemaMigrator {
                 OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass)
                     .getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
 
-                counters.orientDBImportedNotUniqueWorkaroundCounter++;
+                statistics.orientDBImportedNotUniqueWorkaroundCounter++;
 
               } catch (Exception e2) {
                 String mess2 = "";
@@ -397,19 +399,19 @@ class ONeo4jImporterSchemaMigrator {
         }
 
         //print progress
-        value = 100 * (counters.neo4jConstraintsCounter / counters.neo4jTotalConstraints);
+        value = 100 * (statistics.neo4jConstraintsCounter / statistics.neo4jTotalConstraints);
 
         if ("UNIQUENESS".equals(neo4jConstraintType)) {
-          keepLogString =
-              df.format(counters.orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created";
+//          keepLogString =
+//              df.format(statistics.orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created";
         }
         if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintType)) {
         }
         if ("RELATIONSHIP_PROPERTY_EXISTENCE ".equals(neo4jConstraintType)) {
         }
 
-        keepLogString = keepLogString + " (" + df.format(value) + "% done)";
-        ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
+//        keepLogString = keepLogString + " (" + df.format(value) + "% done)";
+//        ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
         value = 0;
       }
 

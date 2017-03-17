@@ -13,11 +13,11 @@ public class ONeo4jImporterContext {
 
   private static ONeo4jImporterContext instance = null;
 
-  private OOutputStreamManager outputManager;
-  private ONeo4jImporterCounters  counters;
+  private OOutputStreamManager     outputManager;
+  private ONeo4jImporterStatistics statistics;
 
   public ONeo4jImporterContext() {
-    this.counters = new ONeo4jImporterCounters();
+    this.statistics = new ONeo4jImporterStatistics();
   }
 
   public static ONeo4jImporterContext getInstance() {
@@ -109,11 +109,11 @@ public class ONeo4jImporterContext {
     this.outputManager = outputManager;
   }
 
-  public ONeo4jImporterCounters getCounters() {
-    return this.counters;
+  public ONeo4jImporterStatistics getStatistics() {
+    return this.statistics;
   }
 
-  public void setCounters(ONeo4jImporterCounters counters) {
-    this.counters = counters;
+  public void setStatistics(ONeo4jImporterStatistics statistics) {
+    this.statistics = statistics;
   }
 }

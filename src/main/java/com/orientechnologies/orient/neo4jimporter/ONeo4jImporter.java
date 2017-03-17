@@ -21,7 +21,7 @@ package com.orientechnologies.orient.neo4jimporter;
 import com.orientechnologies.common.io.OFileUtils;
 import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
-import com.orientechnologies.orient.context.ONeo4jImporterCounters;
+import com.orientechnologies.orient.context.ONeo4jImporterStatistics;
 import com.orientechnologies.orient.core.OConstants;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
@@ -29,8 +29,6 @@ import org.neo4j.driver.v1.Session;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The main class of the ONeo4jImporter. It is instantiated from the ONeo4jImporterCommandLineParser
@@ -42,9 +40,28 @@ public class ONeo4jImporter {
 
   public static final String PROGRAM_NAME = "Neo4j to OrientDB Importer";
   private final ONeo4jImporterSettings settings;
+  private String orientdbDatabasesAbsolutePath;
 
+
+  /**
+   * Used byt the script work flow
+   * @param settings
+   * @throws Exception
+   */
   public ONeo4jImporter(final ONeo4jImporterSettings settings) throws Exception {
     this.settings = settings;
+  }
+
+
+  /**
+   * Used by the plugin work flow
+   * @param settings
+   * @param orientdbDatabasesAbsolutePath
+   * @throws Exception
+   */
+  public ONeo4jImporter(final ONeo4jImporterSettings settings, String orientdbDatabasesAbsolutePath) throws Exception {
+    this.settings = settings;
+    this.orientdbDatabasesAbsolutePath = orientdbDatabasesAbsolutePath;
   }
 
   public int execute() throws Exception {
@@ -73,6 +90,11 @@ public class ONeo4jImporter {
     String orienDbProtocol = settings.getOrientDbProtocol();
     boolean overwriteOrientDBDir = settings.getOverwriteOrientDbDir();
     boolean neo4jRelIdIndex = settings.getCreateIndexOnNeo4jRelID();
+
+    if(this.orientdbDatabasesAbsolutePath != null) {
+      // entered through the plugin, so orientDbFolder contains just the name, and we must prepend orientdbDatabasesAbsolutePath
+      orientDbFolder = this.orientdbDatabasesAbsolutePath + "/" + orientDbFolder;
+    }
 
     // check existence of orientDbFolder and takes action accordingly to option overwriteOrientDBDir
     final File f = new File(orientDbFolder);
@@ -110,7 +132,7 @@ public class ONeo4jImporter {
     String orientVertexClass = initializer.getOrientVertexClass();
     OrientGraphNoTx oDb = initializer.getoDb();
     OrientGraphFactory oFactory = initializer.getOFactory();
-    ONeo4jImporterCounters counters = new ONeo4jImporterCounters();
+    ONeo4jImporterStatistics statistics = ONeo4jImporterContext.getInstance().getStatistics();
 
 
     //
@@ -118,7 +140,7 @@ public class ONeo4jImporter {
     //
 
     ONeo4jImporterVerticesAndEdgesMigrator verticesAndEdgesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(keepLogString,
-        migrateRels, migrateNodes, df, orientVertexClass, oDb, counters, relSampleOnly, neo4jRelIdIndex);
+        migrateRels, migrateNodes, df, orientVertexClass, oDb, statistics, relSampleOnly, neo4jRelIdIndex);
     verticesAndEdgesImporter.invoke(neo4jSession);
     keepLogString = verticesAndEdgesImporter.getKeepLogString();
 
@@ -126,15 +148,15 @@ public class ONeo4jImporter {
     // PHASE 3 : SCHEMA MIGRATION
     //
 
-    ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, oDb, counters);
+    ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, oDb, statistics);
     schemaMigrator.invoke(neo4jSession);
 
     //
-    // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO<
+    // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO
     //
 
     stopServers(neo4jSession, oDb, oFactory);
-    printSummary(startTime, df, dfd, counters, initializer, verticesAndEdgesImporter, schemaMigrator, neo4jRelIdIndex);
+    printSummary(startTime, df, dfd, statistics, initializer, verticesAndEdgesImporter, schemaMigrator, neo4jRelIdIndex);
 
     returnCode = 0;
     return returnCode;
@@ -170,7 +192,7 @@ public class ONeo4jImporter {
     ONeo4jImporterContext.getInstance().getOutputManager().info("\rShutting down Neo4j...Done\n");
   }
 
-  private void printSummary(double startTime, DecimalFormat df, DecimalFormat dfd, ONeo4jImporterCounters counters,
+  private void printSummary(double startTime, DecimalFormat df, DecimalFormat dfd, ONeo4jImporterStatistics counters,
       ONeo4jImporterInitializer initializer, ONeo4jImporterVerticesAndEdgesMigrator migrator,
       ONeo4jImporterSchemaMigrator schemaMigrator, boolean neo4jRelIdIndex) {
 
@@ -253,7 +275,7 @@ public class ONeo4jImporter {
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n\n");
 
-    //ONeo4jImporterContext.getInstance().getOutputManager().info("- Additional created Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')          : " + df.format(counters.neo4jInternalIndicesCounter));
+    //ONeo4jImporterContext.getInstance().getOutputManager().info("- Additional created Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')          : " + df.format(counters.neo4jInternalIndicesCounter));
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("- Additional internal Indices created                                                         : " + df.format(neo4jTotalInternalIndicesCounter) + "\n");
 
@@ -261,7 +283,7 @@ public class ONeo4jImporter {
     ONeo4jImporterContext.getInstance().getOutputManager().info("- Total Import time:                                                                          : " + df.format(elapsedTimeSeconds) + " seconds\n");
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("-- Initialization time                                                                        : " + df.format(initializationElapsedTimeSeconds) + " seconds\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("-- Time to Import Nodes                                                                       : " + df.format(importingNodesElapsedTimeSeconds) + " secondswith at least");
+    ONeo4jImporterContext.getInstance().getOutputManager().info("-- Time to Import Nodes                                                                       : " + df.format(importingNodesElapsedTimeSeconds) + " seconds");
     if (importingNodesElapsedTimeSeconds > 0) {
       value = (counters.orientDBImportedVerticesCounter / importingNodesElapsedTimeSeconds);
       ONeo4jImporterContext.getInstance().getOutputManager().info(" (" + dfd.format(value) + " nodes/sec)");
@@ -286,7 +308,7 @@ public class ONeo4jImporter {
     }
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("-- Time to Create Internal Indices (on vertex properties 'Neo4jNodeID' & 'Neo4jLabelList')    : " + df.format(internalVertexIndicesElapsedTimeSeconds) + " seconds");
+    ONeo4jImporterContext.getInstance().getOutputManager().info("-- Time to Create Internal Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')    : " + df.format(internalVertexIndicesElapsedTimeSeconds) + " seconds");
     if (internalVertexIndicesElapsedTimeSeconds > 0) {
       value = (counters.neo4jInternalVertexIndicesCounter / internalVertexIndicesElapsedTimeSeconds);
       ONeo4jImporterContext.getInstance().getOutputManager().info(" (" + dfd.format(value) + " indices/sec)");
@@ -295,7 +317,7 @@ public class ONeo4jImporter {
 
     if (neo4jRelIdIndex) {
       ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-      ONeo4jImporterContext.getInstance().getOutputManager().info("-- Time to Create Internal Indices (on edge property 'Neo4jRelID')                            : " + df.format(internalEdgeIndicesElapsedTimeSeconds) + " seconds");
+      ONeo4jImporterContext.getInstance().getOutputManager().info("-- Time to Create Internal Indices (on edge property 'neo4jRelID')                            : " + df.format(internalEdgeIndicesElapsedTimeSeconds) + " seconds");
       if (internalEdgeIndicesElapsedTimeSeconds > 0) {
         value = (counters.neo4jInternalEdgeIndicesCounter / internalEdgeIndicesElapsedTimeSeconds);
         ONeo4jImporterContext.getInstance().getOutputManager().info(" (" + dfd.format(value) + " indices/sec)");

@@ -93,9 +93,6 @@ class ONeo4jImporterInitializer {
 
     String dbUrl = this.orientDbProtocol + ":" + orientDbFolder;
 
-    OGlobalConfiguration.USE_WAL.setValue(false);
-    OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
-
     oFactory = new OrientGraphFactory(dbUrl, "admin", "admin");
     oFactory.declareIntent(new OIntentMassiveInsert());
     oDb = oFactory.getNoTx();

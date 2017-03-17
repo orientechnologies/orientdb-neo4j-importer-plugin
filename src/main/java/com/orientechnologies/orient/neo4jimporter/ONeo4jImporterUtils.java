@@ -35,7 +35,7 @@ public class ONeo4jImporterUtils {
     String orientDBClassName = neo4jLabel;
 
     String sqlQuery =
-        "SELECT @rid FROM V WHERE @class = 'MultipleLabelNeo4jConversion' AND Neo4jLabelList CONTAINS '" + neo4jLabel
+        "SELECT @rid FROM V WHERE @class = 'MultipleLabelNeo4jConversion' AND neo4jLabelList CONTAINS '" + neo4jLabel
             + "' LIMIT 1";
 
     int u = 0;
@@ -53,26 +53,26 @@ public class ONeo4jImporterUtils {
       ONeo4jImporterContext.getInstance().getOutputManager().debug("\n\n\ndid not find it: " + orientDBClassName);
       OClass orientDBClass = odb.createVertexType(orientDBClassName);
 
-      // in order to improve record lookup when filtering on Neo4j labels all classes must have the Neo4jLabelList properties and an index on it
+      // in order to improve record lookup when filtering on Neo4j labels all classes must have the neo4jLabelList properties and an index on it
       // when classes are created during nodes migration, this property is created automatically
       // here we need to create it for those additional classes that are created (empty) during schema migration
       try {
 
         //first create the property
-        orientDBClass.createProperty("Neo4jLabelList", OType.EMBEDDEDLIST, OType.STRING);
+        orientDBClass.createProperty("neo4jLabelList", OType.EMBEDDEDLIST, OType.STRING);
 
         //creates the index if the property creation was successful
         try {
-          orientDBClass.getProperty("Neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
+          orientDBClass.getProperty("neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
         } catch (Exception e) {
           String mess =
-              "Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'Neo4jLabelList' Property of the vertex Class '"
+              "Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'neo4jLabelList' Property of the vertex Class '"
                   + orientDBClassName + "': " + e.getMessage();
           ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
           ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
         }
       } catch (Exception e) {
-        String mess = "Found an error when trying to create the 'Neo4jLabelList' Property in OrientDB on the vertex Class '"
+        String mess = "Found an error when trying to create the 'neo4jLabelList' Property in OrientDB on the vertex Class '"
             + orientDBClassName + "': " + e.getMessage();
         ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
         ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");

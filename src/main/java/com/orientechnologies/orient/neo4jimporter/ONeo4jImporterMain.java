@@ -2,7 +2,11 @@ package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.OConstants;
+import com.orientechnologies.orient.listener.OProgressMonitor;
 import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
@@ -35,8 +39,29 @@ public class ONeo4jImporterMain {
     int returnValue = 1;
 
     try {
-      final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
-      returnValue = neo4jImporter.execute();
+
+      // Progress Monitor initialization
+      OProgressMonitor progressMonitor = new OProgressMonitor();
+      progressMonitor.initialize();
+
+      // Timer for statistics notifying
+      Timer timer = new Timer();
+      try {
+        timer.scheduleAtFixedRate(new TimerTask() {
+
+          @Override
+          public void run() {
+            ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
+          }
+        }, 0, 1000);
+
+        final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
+        returnValue = neo4jImporter.execute();
+
+      } finally {
+        timer.cancel();
+      }
+
     } catch (Exception e) {
       String mess = "";
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");

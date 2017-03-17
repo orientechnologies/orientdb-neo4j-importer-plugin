@@ -1,9 +1,16 @@
 package com.orientechnologies.orient.context;
 
+import com.orientechnologies.orient.listener.OStatisticsListener;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by frank on 08/11/2016.
  */
-public class ONeo4jImporterCounters {
+public class ONeo4jImporterStatistics {
+
+  public volatile String importingElements = "nothing";
 
   public volatile double neo4jNodeCounter                           = 0;
   public volatile double neo4jNodeNoLabelCounter                    = 0;
@@ -38,5 +45,24 @@ public class ONeo4jImporterCounters {
   public volatile double orientDBEdgeClassesCount       = 0;
   public volatile double internalEdgeIndicesStopTime    = 0;
 
-  public ONeo4jImporterCounters() {}
+  // Listeners
+  private volatile List<OStatisticsListener> listeners;
+
+  public ONeo4jImporterStatistics() {
+    this.listeners = new ArrayList<OStatisticsListener>();
+  }
+
+  /*
+   * Publisher-Subscribers
+   */
+
+  public void registerListener(OStatisticsListener listener) {
+    this.listeners.add(listener);
+  }
+
+  public void notifyListeners() {
+    for (OStatisticsListener listener : this.listeners) {
+      listener.updateOnEvent(this);
+    }
+  }
 }

@@ -2,8 +2,6 @@ package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.http.ONeo4jImporterHandler;
 import org.assertj.core.api.Assertions;
 import org.junit.Ignore;
 import org.junit.Test;

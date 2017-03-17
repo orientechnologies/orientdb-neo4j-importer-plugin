@@ -59,9 +59,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-		<argLine>-XX:MaxDirectMemorySize=512g</argLine>
+        <argLine>-XX:MaxDirectMemorySize=512g</argLine>
     </properties>
-	
+
     <distributionManagement>
         <repository>
             <id>sonatype-nexus-staging</id>
@@ -159,6 +159,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-tools</artifactId>
+            <version>${orient.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.neo4j.driver</groupId>
             <artifactId>neo4j-java-driver</artifactId>
             <version>1.1.2</version>
@@ -178,19 +184,45 @@
             </activation>
             <build>
                 <plugins>
+
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.orientechnologies.orient.neo4jimporter.ONeo4jImporterMain</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
                         <executions>
                             <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
+                                <id>make-assembly</id>
+                                <phase>package</phase>
                                 <goals>
-                                    <goal>sign</goal>
+                                    <goal>single</goal>
                                 </goals>
                             </execution>
                         </executions>
                     </plugin>
+
+                    <!--
+                            <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-gpg-plugin</artifactId>
+                                <executions>
+                                    <execution>
+                                        <id>sign-artifacts</id>
+                                        <phase>verify</phase>
+                                        <goals>
+                                            <goal>sign</goal>
+                                        </goals>
+                                    </execution>
+                                </executions>
+                            </plugin>
+                    -->
                 </plugins>
             </build>
         </profile>
