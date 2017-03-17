@@ -6,6 +6,7 @@ import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterCommandLineParse
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterPlugin;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterSettings;
 import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
+import com.orientechnologies.orient.server.OServer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -24,12 +25,16 @@ public class ONeo4jImporterJob  implements Runnable {
   public  PrintStream           stream;
   private ByteArrayOutputStream baos;
 
-  public ONeo4jImporterJob(ODocument cfg, ONeo4ImporterListener listener) {
+  private OServer currentServerInstance;
+
+  public ONeo4jImporterJob(ODocument cfg, OServer currentServerInstance, ONeo4ImporterListener listener) {
     this.cfg = cfg;
     this.listener = listener;
 
     this.baos = new ByteArrayOutputStream();
     this.stream = new PrintStream(baos);
+
+    this.currentServerInstance = currentServerInstance;
   }
 
 
@@ -51,7 +56,8 @@ public class ONeo4jImporterJob  implements Runnable {
     final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
 
     try {
-      neo4jImporterPlugin.executeJob(settings, new OOutputStreamManager(this.stream, logLevel));
+      String databaseDirectory = this.currentServerInstance.getDatabaseDirectory();
+      neo4jImporterPlugin.executeJob(settings, new OOutputStreamManager(this.stream, logLevel), databaseDirectory);
     } catch (Exception e) {
       e.printStackTrace();
     }

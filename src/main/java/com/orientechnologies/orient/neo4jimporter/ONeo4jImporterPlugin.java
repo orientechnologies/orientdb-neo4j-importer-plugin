@@ -16,13 +16,12 @@ import com.orientechnologies.orient.server.plugin.OServerPluginAbstract;
 public class ONeo4jImporterPlugin extends OServerPluginAbstract {
 
   private OServer server;
-  private String  orientdbDatabasesAbsolutePath;
 
   public ONeo4jImporterPlugin() {}
 
-  public void executeJob(ONeo4jImporterSettings settings, OOutputStreamManager outputManager) throws Exception {
+  public void executeJob(ONeo4jImporterSettings settings, OOutputStreamManager outputManager, String orientdbDatabasesAbsolutePath) throws Exception {
 
-    final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings, this.orientdbDatabasesAbsolutePath);
+    final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings, orientdbDatabasesAbsolutePath);
     ONeo4jImporterContext.getInstance().setOutputManager(outputManager);
 
     try {
@@ -52,8 +51,6 @@ public class ONeo4jImporterPlugin extends OServerPluginAbstract {
       throw new OConfigurationException("HTTP listener not found");
 
     listener.registerStatelessCommand(new OServerCommandNeo4jImporter());
-
-    this.orientdbDatabasesAbsolutePath = server.getDatabaseDirectory();
   }
 
   @Override

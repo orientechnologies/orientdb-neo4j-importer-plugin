@@ -3,6 +3,7 @@ package com.orientechnologies.orient.http;
 import com.orientechnologies.orient.connection.ONeo4jConnectionManager;
 import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.server.OServer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +17,11 @@ public class ONeo4jImporterHandler {
 
   private ExecutorService pool = Executors.newFixedThreadPool(1);
   private ONeo4jImporterJob currentJob = null;
+  private OServer currentServerInstance;
+
+  public ONeo4jImporterHandler(OServer server) {
+    this.currentServerInstance = server;
+  }
 
   /**
    * Executes import with configuration;
@@ -24,7 +30,7 @@ public class ONeo4jImporterHandler {
    */
   public void executeImport(ODocument cfg) {
 
-    ONeo4jImporterJob job = new ONeo4jImporterJob(cfg, new ONeo4ImporterListener() {
+    ONeo4jImporterJob job = new ONeo4jImporterJob(cfg, this.currentServerInstance, new ONeo4ImporterListener() {
       @Override
       public void onEnd(ONeo4jImporterJob oTeleporterJob) {
         currentJob = null;

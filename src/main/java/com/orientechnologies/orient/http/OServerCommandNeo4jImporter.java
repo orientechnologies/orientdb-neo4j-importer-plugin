@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class OServerCommandNeo4jImporter extends OServerCommandAuthenticatedServerAbstract {
 
-  ONeo4jImporterHandler handler = new ONeo4jImporterHandler();
+  ONeo4jImporterHandler handler = new ONeo4jImporterHandler(super.getServer());
   private static final String[] NAMES = { "GET|neo4j-importer/*", "POST|neo4j-importer/*" };
 
   public OServerCommandNeo4jImporter() {
