@@ -44,10 +44,8 @@ public class ONeo4jImporterTest {
 
     assertEquals(0, db.getMetadata().getSchema().getClass("V").count());
     assertEquals(0, db.getMetadata().getSchema().getClass("E").count());
-    //
 
     db.close();
-
   }
 
   @Ignore

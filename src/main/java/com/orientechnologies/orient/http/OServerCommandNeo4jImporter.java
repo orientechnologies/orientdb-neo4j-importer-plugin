@@ -13,11 +13,12 @@ import java.io.IOException;
  */
 public class OServerCommandNeo4jImporter extends OServerCommandAuthenticatedServerAbstract {
 
-  ONeo4jImporterHandler handler = new ONeo4jImporterHandler(super.getServer());
+  ONeo4jImporterHandler handler;
   private static final String[] NAMES = { "GET|neo4j-importer/*", "POST|neo4j-importer/*" };
 
   public OServerCommandNeo4jImporter() {
     super("server.profiler");
+    this.handler = new ONeo4jImporterHandler(super.getServer());
   }
 
   @Override

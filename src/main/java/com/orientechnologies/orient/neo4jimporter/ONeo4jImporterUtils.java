@@ -152,7 +152,7 @@ public class ONeo4jImporterUtils {
       OProperty OrientDBProperty = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass)
           .createProperty(neo4jPropKey, orientOtype);
 
-      if (foundNode == false) {
+      if (!foundNode) {
         logString =
             "The Neo4j Property '" + neo4jPropKey + "' on the Neo4j Label '" + neo4jLabel + "' associated to a Neo4j '"
                 + myNeo4jConstraintType
@@ -165,7 +165,7 @@ public class ONeo4jImporterUtils {
       }
       return true;
     } catch (Exception e) {
-      String mess = "Found an error when trying to create a Property in OrientDB. Correspinding Property in Neo4j is '" + neo4jPropKey
+      String mess = "Found an error when trying to create a Property in OrientDB. Corresponding Property in Neo4j is '" + neo4jPropKey
               + "' on node label '" + orientDBIndexClass + "': " + e.getMessage();
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
       ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");

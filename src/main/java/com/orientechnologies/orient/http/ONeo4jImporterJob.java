@@ -56,7 +56,10 @@ public class ONeo4jImporterJob  implements Runnable {
     final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
 
     try {
-      String databaseDirectory = this.currentServerInstance.getDatabaseDirectory();
+      String databaseDirectory = null;
+      if (this.currentServerInstance != null) {
+        databaseDirectory = this.currentServerInstance.getDatabaseDirectory();
+      }
       neo4jImporterPlugin.executeJob(settings, new OOutputStreamManager(this.stream, logLevel), databaseDirectory);
     } catch (Exception e) {
       e.printStackTrace();

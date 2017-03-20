@@ -22,7 +22,7 @@ public class ONeo4jImporterPlugin extends OServerPluginAbstract {
   public void executeJob(ONeo4jImporterSettings settings, OOutputStreamManager outputManager, String orientdbDatabasesAbsolutePath) throws Exception {
 
     final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings, orientdbDatabasesAbsolutePath);
-    ONeo4jImporterContext.getInstance().setOutputManager(outputManager);
+    ONeo4jImporterContext.newInstance().setOutputManager(outputManager);
 
     try {
       neo4jImporter.execute();
