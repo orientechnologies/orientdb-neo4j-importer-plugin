@@ -41,11 +41,6 @@ public class ONeo4jImporterPlugin extends OServerPluginAbstract {
   @Override
   public void startup() {
 
-    try {
-      Thread.sleep(5000L);
-    } catch(Exception e) {
-      e.printStackTrace();
-    }
     final OServerNetworkListener listener = server.getListenerByProtocol(ONetworkProtocolHttpAbstract.class);
     if (listener == null)
       throw new OConfigurationException("HTTP listener not found");

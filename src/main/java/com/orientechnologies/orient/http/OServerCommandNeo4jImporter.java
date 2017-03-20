@@ -13,12 +13,11 @@ import java.io.IOException;
  */
 public class OServerCommandNeo4jImporter extends OServerCommandAuthenticatedServerAbstract {
 
-  ONeo4jImporterHandler handler;
+  ONeo4jImporterHandler handler = new ONeo4jImporterHandler();
   private static final String[] NAMES = { "GET|neo4j-importer/*", "POST|neo4j-importer/*" };
 
   public OServerCommandNeo4jImporter() {
     super("server.profiler");
-    this.handler = new ONeo4jImporterHandler(super.getServer());
   }
 
   @Override
@@ -49,7 +48,7 @@ public class OServerCommandNeo4jImporter extends OServerCommandAuthenticatedServ
 
     if ("job".equalsIgnoreCase(parts[1])) {
       ODocument cfg = new ODocument().fromJSON(iRequest.content);
-      handler.executeImport(cfg);
+      handler.executeImport(cfg, super.server);
       iResponse.send(OHttpUtils.STATUS_OK_CODE, "OK", OHttpUtils.CONTENT_JSON, null, null);
 
     } else if ("test".equalsIgnoreCase(parts[1])) {

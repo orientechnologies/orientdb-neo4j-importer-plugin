@@ -29,8 +29,8 @@ public class ONeo4jImporterSettings {
   private String neo4jUrl;
   private String neo4jUsername;
   private String neo4jPassword;
-  private String  orientDbDir;
-  private String  orientDbProtocol;
+  private String orientDbPath;
+  private String orientDbProtocol;
   private boolean overwriteOrientDbDir = false;
   private boolean createIndexOnNeo4jRelID = false;
 
@@ -38,13 +38,13 @@ public class ONeo4jImporterSettings {
 
   public ONeo4jImporterSettings() {}
 
-  public ONeo4jImporterSettings(String neo4jUrl, String neo4jUsername, String neo4jPassword, String orientDbDir, String orientDbProtocol,
+  public ONeo4jImporterSettings(String neo4jUrl, String neo4jUsername, String neo4jPassword, String orientDbPath, String orientDbProtocol,
       boolean overwriteOrientDbDir, boolean createIndexOnNeo4jRelID) {
 
     this.neo4jUrl = neo4jUrl;
     this.neo4jUsername = neo4jUsername;
     this.neo4jPassword = neo4jPassword;
-    this.orientDbDir = orientDbDir;
+    this.orientDbPath = orientDbPath;
     this.orientDbProtocol = orientDbProtocol;
     this.overwriteOrientDbDir = overwriteOrientDbDir;
     this.createIndexOnNeo4jRelID = createIndexOnNeo4jRelID;
@@ -74,12 +74,12 @@ public class ONeo4jImporterSettings {
     this.neo4jPassword = neo4jPassword;
   }
 
-  public String getOrientDbDir() {
-    return orientDbDir;
+  public String getOrientDbPath() {
+    return orientDbPath;
   }
 
-  public void setOrientDbDir(String orientDbDir) {
-    this.orientDbDir = orientDbDir;
+  public void setOrientDbPath(String orientDbPath) {
+    this.orientDbPath = orientDbPath;
   }
 
   public String getOrientDbProtocol() {

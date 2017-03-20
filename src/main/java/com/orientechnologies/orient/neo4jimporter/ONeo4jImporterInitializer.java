@@ -96,7 +96,6 @@ class ONeo4jImporterInitializer {
     oFactory = new OrientGraphFactory(dbUrl, "admin", "admin");
     oFactory.declareIntent(new OIntentMassiveInsert());
     oDb = oFactory.getNoTx();
-
     oDb.setStandardElementConstraints(false);
 
     orientVertexClass = "";

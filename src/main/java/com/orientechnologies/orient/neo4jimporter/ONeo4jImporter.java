@@ -18,13 +18,12 @@
 
 package com.orientechnologies.orient.neo4jimporter;
 
-import com.orientechnologies.common.io.OFileUtils;
 import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.context.ONeo4jImporterStatistics;
 import com.orientechnologies.orient.core.OConstants;
-import com.orientechnologies.orient.core.intent.OIntentMassiveInsert;
-import com.orientechnologies.orient.core.sql.OCommandSQL;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.v1.Session;
@@ -88,40 +87,35 @@ public class ONeo4jImporter {
     String neo4jUrl = settings.getNeo4jUrl();
     String neo4jUsername = settings.getNeo4jUsername();
     String neo4jPassword = settings.getNeo4jPassword();
-    String orientDbFolder = settings.getOrientDbDir();
+    String orientDbPath = settings.getOrientDbPath();
     String orientDbProtocol = settings.getOrientDbProtocol();
     boolean overwriteOrientDBDir = settings.getOverwriteOrientDbDir();
     boolean neo4jRelIdIndex = settings.getCreateIndexOnNeo4jRelID();
 
-    if(this.orientdbDatabasesAbsolutePath != null) {
-      // entered through the plugin, so orientDbFolder contains just the name, and we must prepend orientdbDatabasesAbsolutePath
-      orientDbFolder = this.orientdbDatabasesAbsolutePath + "/" + orientDbFolder;
+    if(this.orientdbDatabasesAbsolutePath != null && orientDbProtocol.equals("plocal")) {
+      // entered in the work flow through the plugin, so orientDbPath contains just the name, and we must prepend orientdbDatabasesAbsolutePath if we want to connect in plocal
+      orientDbPath = this.orientdbDatabasesAbsolutePath + orientDbPath;
     }
 
-    // check existence of orientDbFolder and takes action accordingly to option overwriteOrientDBDir
-    if(orientDbFolder.contains("plocal:")) {
-      orientDbFolder = orientDbFolder.replace("plocal:", "");
+    boolean dbExist = true;
+    String dbUrl = orientDbProtocol + ":" + orientDbPath;
+    OrientGraphFactory oFactory = new OrientGraphFactory(dbUrl, "admin", "admin", false);
+    ODatabaseDocumentTx db = null;
+    try {
+      db = oFactory.getDatabase(false, true);
+    } catch(ODatabaseException e) {
+      dbExist = false;
     }
-    if(orientDbFolder.contains("memory:")) {
-      orientDbFolder = orientDbFolder.replace("memory:", "");
-    }
-    final File f = new File(orientDbFolder);
-    if (f.exists()) {
+
+    if (dbExist) {
       if (overwriteOrientDBDir) {
-
-        logString =
-            "Directory '" + orientDbFolder + "' exists already and the overwrite option '-o' is 'true'. Directory will be erased";
+        logString = "Directory '" + orientDbPath + "' exists already and the overwrite option '-o' is 'true'. Directory will be erased";
         ONeo4jImporterContext.getInstance().getOutputManager().warn(logString);
-
-        //drop database
-        String dbUrl = orientDbProtocol + ":" + orientDbFolder;
-        OrientGraphFactory oFactory = new OrientGraphFactory(dbUrl, "admin", "admin");
-        OrientGraphNoTx oDb = oFactory.getNoTx();
-        oDb.drop();
+        db.drop();
       } else {
 
         //we exit the program
-        logString = "ERROR: The directory '" + orientDbFolder
+        logString = "ERROR: The directory '" + orientDbPath
             + "' exists and the overwrite option '-o' is 'false' (default). Please delete the directory or run the program with the '-o true' option. Exiting.\n\n";
 
         ONeo4jImporterContext.getInstance().getOutputManager().error(logString);
@@ -133,11 +127,11 @@ public class ONeo4jImporter {
     //
 
     OSourceNeo4jInfo sourceNeo4jInfo = new OSourceNeo4jInfo(neo4jUrl, neo4jUsername, neo4jPassword);
-    ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, orientDbFolder);
+    ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, orientDbPath);
     Session neo4jSession = initializer.initConnections();
     String orientVertexClass = initializer.getOrientVertexClass();
     OrientGraphNoTx oDb = initializer.getoDb();
-    OrientGraphFactory oFactory = initializer.getOFactory();
+    oFactory = initializer.getOFactory();
     ONeo4jImporterStatistics statistics = ONeo4jImporterContext.getInstance().getStatistics();
 
 

@@ -73,7 +73,7 @@ public class ONeo4jImporterCommandLineParser {
 
     final ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
 
-    settings.setOrientDbDir(options.get(OPTION_ORIENTDB_PATH));
+    settings.setOrientDbPath(options.get(OPTION_ORIENTDB_PATH));
     settings.setOverwriteOrientDbDir(options.get(OPTION_OVERWRITE_ORIENTDB_DIR) != null ?
         Boolean.parseBoolean(options.get(OPTION_OVERWRITE_ORIENTDB_DIR)) :
         false);
@@ -82,9 +82,9 @@ public class ONeo4jImporterCommandLineParser {
         false);
 
     //checks on orientDbDir
-    if (settings.getOrientDbDir() != null) {
-      if (settings.getOrientDbDir().endsWith(File.separator)) {
-        settings.setOrientDbDir(settings.getOrientDbDir().substring(0, settings.getOrientDbDir().length() - File.separator.length()));
+    if (settings.getOrientDbPath() != null) {
+      if (settings.getOrientDbPath().endsWith(File.separator)) {
+        settings.setOrientDbPath(settings.getOrientDbPath().substring(0, settings.getOrientDbPath().length() - File.separator.length()));
       }
     }
 

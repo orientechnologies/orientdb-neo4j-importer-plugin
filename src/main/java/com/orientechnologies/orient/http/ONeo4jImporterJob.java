@@ -44,7 +44,7 @@ public class ONeo4jImporterJob  implements Runnable {
     String neo4jUrl = cfg.field("neo4jUrl");
     String neo4jUsername = cfg.field("neo4jUsername");
     String neo4jPassword = cfg.field("neo4jPassword");
-    String odbDir = cfg.field("outDbUrl");
+    String odbName = cfg.field("odbName");
     String odbProtocol = cfg.field("odbProtocol");
     boolean overrideDB = cfg.field("overwriteDB");
     boolean indexesOnRelationships = cfg.field("indexesOnRelationships");
@@ -52,7 +52,7 @@ public class ONeo4jImporterJob  implements Runnable {
 
     status = Status.RUNNING;
 
-    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overrideDB, indexesOnRelationships);
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbName, odbProtocol, overrideDB, indexesOnRelationships);
     final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
 
     try {

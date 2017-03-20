@@ -17,20 +17,17 @@ public class ONeo4jImporterHandler {
 
   private ExecutorService pool = Executors.newFixedThreadPool(1);
   private ONeo4jImporterJob currentJob = null;
-  private OServer currentServerInstance;
 
-  public ONeo4jImporterHandler(OServer server) {
-    this.currentServerInstance = server;
-  }
+  public ONeo4jImporterHandler() {}
 
   /**
    * Executes import with configuration;
    *
    * @param cfg
    */
-  public void executeImport(ODocument cfg) {
+  public void executeImport(ODocument cfg, OServer server) {
 
-    ONeo4jImporterJob job = new ONeo4jImporterJob(cfg, this.currentServerInstance, new ONeo4ImporterListener() {
+    ONeo4jImporterJob job = new ONeo4jImporterJob(cfg, server, new ONeo4ImporterListener() {
       @Override
       public void onEnd(ONeo4jImporterJob oTeleporterJob) {
         currentJob = null;
