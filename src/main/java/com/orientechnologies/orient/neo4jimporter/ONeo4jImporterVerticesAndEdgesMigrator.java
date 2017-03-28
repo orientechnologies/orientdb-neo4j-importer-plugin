@@ -30,8 +30,8 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
   private       String                   orientVertexClass;
   private       OrientGraphNoTx          oDb;
   private       ONeo4jImporterStatistics statistics;
-  private       double                   importingRelsStartTime;
-  private       double                   importingRelsStopTime;
+  private       long                     importingRelsStartTime;
+  private       long                     importingRelsStopTime;
 
   public ONeo4jImporterVerticesAndEdgesMigrator(String keepLogString, boolean migrateRels, boolean migrateNodes, DecimalFormat df,
       String orientVertexClass, OrientGraphNoTx oDb, ONeo4jImporterStatistics statistics,
@@ -52,11 +52,11 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     return keepLogString;
   }
 
-  public double getImportingRelsStartTime() {
+  public long getImportingRelsStartTime() {
     return importingRelsStartTime;
   }
 
-  public double getImportingRelsStopTime() {
+  public long getImportingRelsStopTime() {
     return importingRelsStopTime;
   }
 
@@ -139,12 +139,11 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
     if (migrateNodes) {
 
-      logString = "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB...";
+      logString = "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB...\n";
 
       ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
       ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
-      ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
       /**
        * Counting Neo4j Nodes so that we can show a % on OrientDB vertices creation
@@ -196,7 +195,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             statistics.neo4jNodeMultipleLabelsCounter++;
             logString = "Found node ('" + currentRecord + "') with multiple labels. Only the first (" + orientVertexClass
                 + ") will be used as Class when importing this node in OrientDB";
-            ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
+            ONeo4jImporterContext.getInstance().getOutputManager().debug(logString);
           }
 
           // if numberOfLabels=0 the neo4j node has no label
@@ -206,7 +205,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             orientVertexClass = "GenericClassNeo4jConversion";
             logString = "Found node ('" + currentRecord
                 + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB";
-            ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
+            ONeo4jImporterContext.getInstance().getOutputManager().debug(logString);
           }
 
           //gets the node properties
@@ -225,25 +224,12 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             Vertex myVertex = oDb.addVertex("class:" + orientVertexClass, nodeProperties);
             ONeo4jImporterContext.getInstance().getOutputManager().debug(myVertex.toString());
             statistics.orientDBImportedVerticesCounter++;
-
-//            value = 100.0 * (statistics.orientDBImportedVerticesCounter / statistics.neo4jTotalNodes);
-//            keepLogString =
-//                df.format(statistics.orientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value)
-//                    + "% done)";
-//            ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-//            value = 0;
           } catch (Exception e) {
             String mess = "Found an error when trying to store node ('" + currentRecord + "') to OrientDB: " + e.getMessage();
             ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
             ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
           }
         }
-
-//        if (statistics.orientDBImportedVerticesCounter == 0) {
-//          keepLogString = df.format(statistics.orientDBImportedVerticesCounter) + " OrientDB Vertices have been created";
-//          ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-//        }
-
       } catch (Exception e) {
         String mess = "";
         ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
@@ -286,13 +272,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
           currentClass.getProperty("neo4jNodeID").createIndex(OClass.INDEX_TYPE.UNIQUE_HASH_INDEX);
           statistics.neo4jInternalVertexIndicesCounter++;
-
-//          value = 100.0 * (statistics.neo4jInternalVertexIndicesCounter / (statistics.orientDBVerticesClassCount * 2));
-//          keepLogString =
-//              df.format(statistics.neo4jInternalVertexIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
-//                  + "% done)";
-//          ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-//          value = 0;
         } catch (Exception e) {
           String mess =
               "Found an error when trying to create a UNIQUE Index in OrientDB on the 'neo4jNodeID' Property of the vertex Class '"
@@ -318,13 +297,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
           currentClass.getProperty("neo4jLabelList").createIndex(OClass.INDEX_TYPE.NOTUNIQUE_HASH_INDEX);
           statistics.neo4jInternalVertexIndicesCounter++;
-
-//          value = 100.0 * (statistics.neo4jInternalVertexIndicesCounter / (statistics.orientDBVerticesClassCount * 2));
-//          keepLogString =
-//              df.format(statistics.neo4jInternalVertexIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
-//                  + "% done)";
-//          ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-//          value = 0;
         } catch (Exception e) {
           String mess =
               "Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'neo4jLabelList' Property of the vertex Class '"
@@ -340,12 +312,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     }
 
     statistics.internalVertexIndicesStopTime = System.currentTimeMillis();
-
-//    if (statistics.neo4jInternalVertexIndicesCounter == 0) {
-//      keepLogString = df.format(statistics.neo4jInternalVertexIndicesCounter) + " OrientDB Indices have been created";
-//      ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-//    }
-
   }
 
   /**
@@ -362,7 +328,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
     if (migrateRels) {
 
-      logString = "Getting all Relationships from Neo4j and creating corresponding Edges in OrientDB...";
+      logString = "Getting all Relationships from Neo4j and creating corresponding Edges in OrientDB...\n";
 
       ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
       ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
@@ -469,13 +435,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             statistics.orientDBImportedEdgesCounter++;
 
             ONeo4jImporterContext.getInstance().getOutputManager().debug("Orient:" + outOrientVertex.getProperty("@rid") +"-"+ currentRelationshipType  +"->"+ inOrientVertex.getProperty("@rid"));
-
-//            value = 100 * (statistics.orientDBImportedEdgesCounter / statistics.neo4jTotalRels);
-//            keepLogString =
-//                df.format(statistics.orientDBImportedEdgesCounter) + " OrientDB Edges have been created (" + df.format(value)
-//                    + "% done)";
-//            ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-//            value = 0;
           } catch (Exception e) {
             String mess = "Found an error when trying to create an Edge in OrientDB. Corresponding Relationship in Neo4j is '"
                 + currentRecord + "': " + e.getMessage();
@@ -488,14 +447,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
         ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
       }
-
       importingRelsStopTime = System.currentTimeMillis();
-
-//      if (statistics.orientDBImportedEdgesCounter == 0) {
-//        keepLogString = df.format(statistics.orientDBImportedEdgesCounter) + " OrientDB Edges have been created";
-//        ONeo4jImporterContext.getInstance().getOutputManager().debug("\r  " + keepLogString);
-//      }
-
     }
   }
 
@@ -531,16 +483,8 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
             //creates the index if the property creation was successful
             try {
-
               currentEdgeClass.getProperty("neo4jRelID").createIndex(OClass.INDEX_TYPE.UNIQUE_HASH_INDEX);
               statistics.neo4jInternalEdgeIndicesCounter++;
-
-//              value = 100.0 * (statistics.neo4jInternalEdgeIndicesCounter / (statistics.orientDBEdgeClassesCount));
-//              keepLogString =
-//                  df.format(statistics.neo4jInternalEdgeIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
-//                      + "% done)";
-//              ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-//              value = 0;
             } catch (Exception e) {
               String mess =
                   "Found an error when trying to create a UNIQUE Index in OrientDB on the 'neo4jRelID' Property of the edge Class '"
@@ -556,12 +500,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         }
 
         statistics.internalEdgeIndicesStopTime = System.currentTimeMillis();
-
-//        if (statistics.neo4jInternalEdgeIndicesCounter == 0) {
-//          keepLogString = df.format(statistics.neo4jInternalEdgeIndicesCounter) + " OrientDB Indices have been created";
-//          ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-//        }
-
       }
     }
   }

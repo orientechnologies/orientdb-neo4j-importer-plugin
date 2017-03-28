@@ -144,7 +144,6 @@
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-test-commons</artifactId>
             <version>${orient.version}</version>
-            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.testng</groupId>
@@ -156,7 +155,6 @@
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-graphdb</artifactId>
             <version>${orient.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>

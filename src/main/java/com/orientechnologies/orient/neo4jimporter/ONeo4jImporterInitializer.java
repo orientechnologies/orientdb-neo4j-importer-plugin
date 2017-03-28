@@ -22,11 +22,11 @@ class ONeo4jImporterInitializer {
 
   private final String               orientDbFolder;
   private final String               orientDbProtocol;
-  private       double               initializationStartTime;
+  private       long               initializationStartTime;
   private       OrientGraphFactory   oFactory;
   private       OrientGraphNoTx      oDb;
   private       String               orientVertexClass;
-  private       double               initializationStopTime;
+  private       long               initializationStopTime;
 
   private OSourceNeo4jInfo sourceNeo4jInfo;
   private Session neo4jSession;
@@ -45,7 +45,7 @@ class ONeo4jImporterInitializer {
     this.sourceNeo4jInfo = sourceNeo4jInfo;
   }
 
-  public double getInitializationStartTime() {
+  public long getInitializationStartTime() {
     return initializationStartTime;
   }
 
@@ -61,7 +61,7 @@ class ONeo4jImporterInitializer {
     return orientVertexClass;
   }
 
-  public double getInitializationStopTime() {
+  public long getInitializationStopTime() {
     return initializationStopTime;
   }
 

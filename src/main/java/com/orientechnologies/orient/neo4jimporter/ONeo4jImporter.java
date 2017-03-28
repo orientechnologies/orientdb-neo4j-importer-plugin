@@ -24,6 +24,7 @@ import com.orientechnologies.orient.context.ONeo4jImporterStatistics;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
+import com.orientechnologies.orient.util.OFunctionsHandler;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.v1.Session;
@@ -70,7 +71,7 @@ public class ONeo4jImporter {
     int returnCode = 1;
     String logString = "";
     String keepLogString = "";
-    double startTime = System.currentTimeMillis();
+    long startTime = System.currentTimeMillis();
     double value;
 
     boolean migrateRels = true;  //set to false only during debug
@@ -192,34 +193,34 @@ public class ONeo4jImporter {
     ONeo4jImporterContext.getInstance().getOutputManager().info("\rShutting down Neo4j...Done\n");
   }
 
-  private void printSummary(double startTime, DecimalFormat df, DecimalFormat dfd, ONeo4jImporterStatistics counters,
+  private void printSummary(long startTime, DecimalFormat df, DecimalFormat dfd, ONeo4jImporterStatistics counters,
       ONeo4jImporterInitializer initializer, ONeo4jImporterVerticesAndEdgesMigrator migrator,
       ONeo4jImporterSchemaMigrator schemaMigrator, boolean neo4jRelIdIndex) {
 
     double value;
     String logString;
 
-    double stopTime = System.currentTimeMillis();
-    double elapsedTime = (stopTime - startTime);
-    double elapsedTimeSeconds = elapsedTime / (1000);
+    long stopTime = System.currentTimeMillis();
+    long elapsedTime = (stopTime - startTime);
+    long elapsedTimeSeconds = elapsedTime / (1000);
 
-    double initializationElapsedTime = (initializer.getInitializationStopTime() - initializer.getInitializationStartTime());
-    double initializationElapsedTimeSeconds = initializationElapsedTime / (1000);
+    long initializationElapsedTime = (initializer.getInitializationStopTime() - initializer.getInitializationStartTime());
+    long initializationElapsedTimeSeconds = initializationElapsedTime / (1000);
 
-    double importingNodesElapsedTime = counters.importingNodesStopTime - counters.importingNodesStartTime;
-    double importingNodesElapsedTimeSeconds = importingNodesElapsedTime / (1000);
+    long importingNodesElapsedTime = counters.importingNodesStopTime - counters.importingNodesStartTime;
+    long importingNodesElapsedTimeSeconds = importingNodesElapsedTime / (1000);
 
-    double importingRelsElapsedTime = migrator.getImportingRelsStopTime() - migrator.getImportingRelsStartTime();
-    double importingRelsElapsedTimeSeconds = importingRelsElapsedTime / (1000);
+    long importingRelsElapsedTime = migrator.getImportingRelsStopTime() - migrator.getImportingRelsStartTime();
+    long importingRelsElapsedTimeSeconds = importingRelsElapsedTime / (1000);
 
-    double importingSchemaElapsedTime = schemaMigrator.getImportingSchemaStopTime() - schemaMigrator.getImportingSchemaStartTime();
-    double importingSchemaElapsedTimeSeconds = importingSchemaElapsedTime / (1000);
+    long importingSchemaElapsedTime = schemaMigrator.getImportingSchemaStopTime() - schemaMigrator.getImportingSchemaStartTime();
+    long importingSchemaElapsedTimeSeconds = importingSchemaElapsedTime / (1000);
 
-    double internalVertexIndicesElapsedTime = counters.internalVertexIndicesStopTime - counters.internalVertexIndicesStartTime;
-    double internalVertexIndicesElapsedTimeSeconds = internalVertexIndicesElapsedTime / (1000);
+    long internalVertexIndicesElapsedTime = counters.internalVertexIndicesStopTime - counters.internalVertexIndicesStartTime;
+    long internalVertexIndicesElapsedTimeSeconds = internalVertexIndicesElapsedTime / (1000);
 
-    double internalEdgeIndicesElapsedTime = counters.internalEdgeIndicesStopTime - counters.internalEdgeIndicesStartTime;
-    double internalEdgeIndicesElapsedTimeSeconds = internalEdgeIndicesElapsedTime / (1000);
+    long internalEdgeIndicesElapsedTime = counters.internalEdgeIndicesStopTime - counters.internalEdgeIndicesStartTime;
+    long internalEdgeIndicesElapsedTimeSeconds = internalEdgeIndicesElapsedTime / (1000);
 
     double neo4jTotalInternalIndicesCounter = counters.neo4jInternalVertexIndicesCounter + counters.neo4jInternalEdgeIndicesCounter;
 
@@ -276,24 +277,24 @@ public class ONeo4jImporter {
     ONeo4jImporterContext.getInstance().getOutputManager().info(format, "- Additional internal Indices created", ": " + df.format(neo4jTotalInternalIndicesCounter) + "\n");
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "- Total Import time:", ": " + df.format(elapsedTimeSeconds) + " seconds\n");
+    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "- Total Import time:", ": " + OFunctionsHandler.getHMSFormat(elapsedTime) + "\n");
 
-    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Initialization time", ": " + df.format(initializationElapsedTimeSeconds) + " seconds\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Import Nodes", ": " + df.format(importingNodesElapsedTimeSeconds) + " seconds");
+    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Initialization time", ": " + OFunctionsHandler.getHMSFormat(initializationElapsedTime) + "\n");
+    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Import Nodes", ": " + OFunctionsHandler.getHMSFormat(importingNodesElapsedTime));
     if (importingNodesElapsedTimeSeconds > 0) {
       value = (counters.orientDBImportedVerticesCounter / importingNodesElapsedTimeSeconds);
       ONeo4jImporterContext.getInstance().getOutputManager().info(" (" + dfd.format(value) + " nodes/sec)");
     }
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Import Relationships", ": " + df.format(importingRelsElapsedTimeSeconds) + " seconds");
+    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Import Relationships", ": " + OFunctionsHandler.getHMSFormat(importingRelsElapsedTime));
     if (importingRelsElapsedTimeSeconds > 0) {
       value = (counters.orientDBImportedEdgesCounter / importingRelsElapsedTimeSeconds);
       ONeo4jImporterContext.getInstance().getOutputManager().info(" (" + dfd.format(value) + " rels/sec)");
     }
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Import Constraints and Indices", ": " + df.format(importingSchemaElapsedTimeSeconds) + " seconds");
+    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Import Constraints and Indices", ": " + OFunctionsHandler.getHMSFormat(importingSchemaElapsedTime));
     if (importingSchemaElapsedTimeSeconds > 0) {
       value = ((counters.orientDBImportedConstraintsCounter + counters.orientDBImportedIndicesCounter)
           / importingSchemaElapsedTimeSeconds);
@@ -301,7 +302,7 @@ public class ONeo4jImporter {
     }
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Create Internal Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')", ": " + df.format(internalVertexIndicesElapsedTimeSeconds) + " seconds");
+    ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Create Internal Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')", ": " + OFunctionsHandler.getHMSFormat(internalVertexIndicesElapsedTime));
     if (internalVertexIndicesElapsedTimeSeconds > 0) {
       value = (counters.neo4jInternalVertexIndicesCounter / internalVertexIndicesElapsedTimeSeconds);
       ONeo4jImporterContext.getInstance().getOutputManager().info(" (" + dfd.format(value) + " indices/sec)");
@@ -309,7 +310,7 @@ public class ONeo4jImporter {
 
     if (neo4jRelIdIndex) {
       ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-      ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Create Internal Indices (on edge property 'neo4jRelID')", ": " + df.format(internalEdgeIndicesElapsedTimeSeconds) + " seconds");
+      ONeo4jImporterContext.getInstance().getOutputManager().info(format, "-- Time to Create Internal Indices (on edge property 'neo4jRelID')", ": " + OFunctionsHandler.getHMSFormat(internalEdgeIndicesElapsedTime));
       if (internalEdgeIndicesElapsedTimeSeconds > 0) {
         value = (counters.neo4jInternalEdgeIndicesCounter / internalEdgeIndicesElapsedTimeSeconds);
         ONeo4jImporterContext.getInstance().getOutputManager().info(" (" + dfd.format(value) + " indices/sec)");

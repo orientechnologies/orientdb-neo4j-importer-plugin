@@ -36,14 +36,14 @@ public class ONeo4jImporterStatistics {
   public volatile double neo4jTotalRelPropertyExistenceConstraints  = 0;
   public volatile double neo4jTotalIndices                          = 0;
 
-  public volatile double importingNodesStartTime        = 0;
-  public volatile double importingNodesStopTime         = 0;
-  public volatile double internalVertexIndicesStartTime = 0;
+  public volatile long importingNodesStartTime        = 0;
+  public volatile long importingNodesStopTime         = 0;
+  public volatile long internalVertexIndicesStartTime = 0;
   public volatile double orientDBVerticesClassCount     = 0;
-  public volatile double internalVertexIndicesStopTime  = 0;
-  public volatile double internalEdgeIndicesStartTime   = 0;
+  public volatile long internalVertexIndicesStopTime  = 0;
+  public volatile long internalEdgeIndicesStartTime   = 0;
   public volatile double orientDBEdgeClassesCount       = 0;
-  public volatile double internalEdgeIndicesStopTime    = 0;
+  public volatile long internalEdgeIndicesStopTime    = 0;
 
   // Listeners
   private volatile List<OStatisticsListener> listeners;

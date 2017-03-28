@@ -67,7 +67,7 @@ public class ONeo4jImporterCommandLineParser {
    * @throws Exception
    */
 
-  public ONeo4jImporterSettings getNeo4jImporter(String[] args) throws Exception {
+  public ONeo4jImporterSettings getNeo4jImporterSettings(String[] args) throws Exception {
 
     final Map<String, String> options = checkOptions(readOptions(args));
 

@@ -24,8 +24,8 @@ class ONeo4jImporterSchemaMigrator {
   private DecimalFormat            df;
   private OrientGraphNoTx          oDb;
   private ONeo4jImporterStatistics statistics;
-  private double                   importingSchemaStartTime;
-  private double                   importingSchemaStopTime;
+  private long                     importingSchemaStartTime;
+  private long                     importingSchemaStopTime;
 
   public ONeo4jImporterSchemaMigrator(String keepLogString, DecimalFormat df, OrientGraphNoTx oDb, ONeo4jImporterStatistics statistics) {
     this.keepLogString = keepLogString;
@@ -34,11 +34,11 @@ class ONeo4jImporterSchemaMigrator {
     this.statistics = statistics;
   }
 
-  public double getImportingSchemaStartTime() {
+  public long getImportingSchemaStartTime() {
     return importingSchemaStartTime;
   }
 
-  public double getImportingSchemaStopTime() {
+  public long getImportingSchemaStopTime() {
     return importingSchemaStopTime;
   }
 
@@ -87,11 +87,9 @@ class ONeo4jImporterSchemaMigrator {
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n");
 
-    logString = "Getting Indices from Neo4j and creating corresponding ones in OrientDB...";
+    logString = "Getting Indices from Neo4j and creating corresponding ones in OrientDB...\n";
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
-
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
     //counting Neo4j Indices so that we can show a % on OrientDB indices creation
@@ -236,7 +234,7 @@ class ONeo4jImporterSchemaMigrator {
     }
     // end index workaround
 
-    logString = "Getting Constraints from Neo4j and creating corresponding ones in OrientDB...";
+    logString = "Getting Constraints from Neo4j and creating corresponding ones in OrientDB...\n";
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
