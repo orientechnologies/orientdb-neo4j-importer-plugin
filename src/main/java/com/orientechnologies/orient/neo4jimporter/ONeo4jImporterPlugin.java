@@ -1,14 +1,21 @@
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
+import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.exception.OConfigurationException;
 import com.orientechnologies.orient.http.OServerCommandNeo4jImporter;
+import com.orientechnologies.orient.listener.OProgressMonitor;
 import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.config.OServerParameterConfiguration;
 import com.orientechnologies.orient.server.network.OServerNetworkListener;
 import com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpAbstract;
 import com.orientechnologies.orient.server.plugin.OServerPluginAbstract;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
 /**
  * Created by gabriele on 01/03/17.
@@ -23,9 +30,33 @@ public class ONeo4jImporterPlugin extends OServerPluginAbstract {
 
     final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings, orientdbDatabasesAbsolutePath);
     ONeo4jImporterContext.newInstance().setOutputManager(outputManager);
+    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
+    ONeo4jImporterContext.getInstance().getOutputManager().info(String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.ORIENT_VERSION, OConstants.COPYRIGHT));
+    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
 
     try {
-      neo4jImporter.execute();
+
+      // Progress Monitor initialization
+      OProgressMonitor progressMonitor = new OProgressMonitor();
+      progressMonitor.initialize();
+
+      // Timer for statistics notifying
+      Timer timer = new Timer();
+      try {
+        timer.scheduleAtFixedRate(new TimerTask() {
+
+          @Override
+          public void run() {
+            ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
+          }
+        }, 0, 1000);
+
+        neo4jImporter.execute();
+
+      } finally {
+        timer.cancel();
+      }
+
     } catch(Exception e) {
       String mess = "";
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");

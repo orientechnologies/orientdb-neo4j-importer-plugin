@@ -79,7 +79,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       this.statistics.importingElements = "vertices";
       this.importVertices(neo4jSession);
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n");
+      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
 
@@ -90,7 +90,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       this.statistics.importingElements = "indices-on-vertices";
       this.importIndicesOnVertices();
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n");
+      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
 
@@ -100,7 +100,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       this.statistics.importingElements = "edges";
       this.importEdges(neo4jSession);
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n");
+      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
 
@@ -111,7 +111,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       this.statistics.importingElements = "indices-on-edges";
       this.buildIndicesOnEdges();
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n");
+      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
 
@@ -121,7 +121,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
     }
 
-    logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 2 completed!\n";
+    logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 2 completed!\n\n";
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
   }
 
@@ -140,8 +140,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     if (migrateNodes) {
 
       logString = "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB...\n";
-
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
       ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
 
@@ -330,7 +328,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
       logString = "Getting all Relationships from Neo4j and creating corresponding Edges in OrientDB...\n";
 
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
       ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
       //counting Neo4j Relationships so that we can show a % on OrientDB Edges creation
@@ -466,8 +463,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
       if (migrateRels) {
 
-        logString = "Creating internal Indices on properties 'neo4jRelID' on all OrientDB Edge Classes...";
-        ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
+        logString = "Creating internal Indices on properties 'neo4jRelID' on all OrientDB Edge Classes...\n";
         ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
         Collection<OClass> edgeClasses = oDb.getRawGraph().getMetadata().getSchema().getClass("E").getAllSubclasses();

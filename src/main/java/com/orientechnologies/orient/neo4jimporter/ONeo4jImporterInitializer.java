@@ -109,7 +109,7 @@ class ONeo4jImporterInitializer {
     ONeo4jImporterContext.getInstance().getOutputManager().info("into OrientDB database:");
     ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + orientDbFolder + "'\n");
 
-    logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 1 completed!\n";
+    logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 1 completed!\n\n";
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
     initializationStopTime = System.currentTimeMillis();

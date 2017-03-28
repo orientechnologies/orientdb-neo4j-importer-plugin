@@ -52,6 +52,7 @@ class ONeo4jImporterSchemaMigrator {
       this.statistics.importingElements = "constraints";
       this.importConstraints(neo4jSession);
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
+      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
       /**
@@ -60,11 +61,10 @@ class ONeo4jImporterSchemaMigrator {
       this.statistics.importingElements = "indices";
       this.importIndices(neo4jSession);
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
+      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n");
-
-      String logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 3 completed!\n";
+      String logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 3 completed!\n";
       ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
     } catch(Exception e) {
       String mess = "";
@@ -80,16 +80,7 @@ class ONeo4jImporterSchemaMigrator {
     boolean propertyCreationSuccess;
     double value;
 
-    if (statistics.orientDBImportedUniqueConstraintsCounter == 0) {
-      keepLogString = df.format(statistics.orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created";
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\r  " + keepLogString);
-    }
-
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n");
-
     logString = "Getting Indices from Neo4j and creating corresponding ones in OrientDB...\n";
-
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
     //counting Neo4j Indices so that we can show a % on OrientDB indices creation
@@ -235,8 +226,6 @@ class ONeo4jImporterSchemaMigrator {
     // end index workaround
 
     logString = "Getting Constraints from Neo4j and creating corresponding ones in OrientDB...\n";
-
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
     //counting Neo4j Constraints so that we can show a % on OrientDB Constraints creation

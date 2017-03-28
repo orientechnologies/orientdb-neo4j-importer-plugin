@@ -63,13 +63,13 @@ public class OProgressMonitor implements OStatisticsListener {
     String keepLogString;
 
     if (statistics.orientDBImportedVerticesCounter == 0) {
-      keepLogString = df.format(statistics.orientDBImportedVerticesCounter) + " OrientDB Vertices have been created";
+      keepLogString = "Added OrientDB Vertices: " + df.format(statistics.orientDBImportedVerticesCounter) + " (0% done)";
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }
     else {
       double value = 100.0 * (statistics.orientDBImportedVerticesCounter / statistics.neo4jTotalNodes);
-      keepLogString = df.format(statistics.orientDBImportedVerticesCounter) + " OrientDB Vertices have been created (" + df.format(value) + "% done)";
+      keepLogString = "Added OrientDB Vertices: " + df.format(statistics.orientDBImportedVerticesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }
@@ -81,13 +81,13 @@ public class OProgressMonitor implements OStatisticsListener {
     String keepLogString;
 
     if (statistics.neo4jInternalVertexIndicesCounter == 0) {
-      keepLogString = df.format(statistics.neo4jInternalVertexIndicesCounter) + " OrientDB Indices have been created (0% done)";
+      keepLogString = "Built OrientDB Indices: " + df.format(statistics.neo4jInternalVertexIndicesCounter) + " (0% done)";
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }
     else {
       double value = 100.0 * (statistics.neo4jInternalVertexIndicesCounter / (statistics.orientDBVerticesClassCount * 2));
-      keepLogString = df.format(statistics.neo4jInternalVertexIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
+      keepLogString = "Built OrientDB Indices: " + df.format(statistics.neo4jInternalVertexIndicesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }
@@ -100,13 +100,13 @@ public class OProgressMonitor implements OStatisticsListener {
     String keepLogString;
 
     if (statistics.orientDBImportedEdgesCounter == 0) {
-      keepLogString = df.format(statistics.orientDBImportedEdgesCounter) + " OrientDB Edges have been created (0% done)";
+      keepLogString = "Added OrientDB Edges: " + df.format(statistics.orientDBImportedEdgesCounter) + " (0% done)";
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }
     else {
       double value = 100 * (statistics.orientDBImportedEdgesCounter / statistics.neo4jTotalRels);
-      keepLogString = df.format(statistics.orientDBImportedEdgesCounter) + " OrientDB Edges have been created (" + df.format(value) + "% done)";
+      keepLogString = "Added OrientDB Edges: " + df.format(statistics.orientDBImportedEdgesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }
@@ -119,14 +119,13 @@ public class OProgressMonitor implements OStatisticsListener {
     String keepLogString;
 
     if (statistics.neo4jInternalEdgeIndicesCounter == 0) {
-      keepLogString = df.format(statistics.neo4jInternalEdgeIndicesCounter) + " OrientDB Indices have been created (0% done)";
+      keepLogString =  "Built OrientDB Indices: " + df.format(statistics.neo4jInternalEdgeIndicesCounter) + " (0% done)";
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }
     else {
       double value = 100.0 * (statistics.neo4jInternalEdgeIndicesCounter / (statistics.orientDBEdgeClassesCount));
-      keepLogString =
-          df.format(statistics.neo4jInternalEdgeIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
+      keepLogString = "Built OrientDB Indices: " + df.format(statistics.neo4jInternalEdgeIndicesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }
@@ -137,13 +136,26 @@ public class OProgressMonitor implements OStatisticsListener {
 
     String keepLogString;
 
-    double value = 100 * (statistics.neo4jConstraintsCounter / statistics.neo4jTotalConstraints);
-    keepLogString = df.format(statistics.orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created (0% done)";
+    if(statistics.neo4jConstraintsCounter == 0) {
+      keepLogString = "Built OrientDB UNIQUE Indices: " + df.format(statistics.orientDBImportedUniqueConstraintsCounter);
+      if(statistics.neo4jTotalConstraints == 0) {
+        keepLogString += " (100% done)";
+      }
+      else {
+        keepLogString += " (0% done)";
+      }
+      String message = String.format(format, keepLogString);
+      ONeo4jImporterContext.getInstance().getOutputManager().info(message);
+    }
+    else {
+      double value = 100 * (statistics.neo4jConstraintsCounter / statistics.neo4jTotalConstraints);
+      keepLogString = "Built OrientDB UNIQUE Indices: " + df.format(statistics.orientDBImportedUniqueConstraintsCounter) + " (" + df.format(value) + "% done)";
 
-    // TODO: discerning behaviour according to constraints' type (not present in old version too)
-    keepLogString = keepLogString + " (" + df.format(value) + "% done)";
-    String message = String.format(format, keepLogString);
-    ONeo4jImporterContext.getInstance().getOutputManager().info(message);
+      // TODO: discerning behaviour according to constraints' type (not present in old version too)
+
+      String message = String.format(format, keepLogString);
+      ONeo4jImporterContext.getInstance().getOutputManager().info(message);
+    }
 
     return keepLogString;
   }
@@ -153,13 +165,20 @@ public class OProgressMonitor implements OStatisticsListener {
     String keepLogString;
 
     if (statistics.orientDBImportedIndicesCounter == 0) {
-      keepLogString = df.format(statistics.orientDBImportedIndicesCounter) + " OrientDB Indices have been created (0% done)";
+      keepLogString = "Built OrientDB Indices: " + df.format(statistics.orientDBImportedIndicesCounter);
+      if((statistics.neo4jTotalIndices - statistics.neo4jTotalUniqueConstraints) == 0) {
+        keepLogString += " (100% done)";
+      }
+      else {
+        keepLogString += " (0% done)";
+
+      }
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }
     else {
       double value = 100 * (statistics.neo4jNonConstraintsIndicesCounter / (statistics.neo4jTotalIndices - statistics.neo4jTotalUniqueConstraints));
-      keepLogString = df.format(statistics.orientDBImportedIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
+      keepLogString = "Built OrientDB Indices: " + df.format(statistics.orientDBImportedIndicesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
       ONeo4jImporterContext.getInstance().getOutputManager().info(message);
     }

@@ -36,7 +36,7 @@ public class ONeo4jImporterMain {
 
     ONeo4jImporterContext.getInstance().setOutputManager(outputManager);
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info(String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.getVersion(), OConstants.COPYRIGHT));
+    ONeo4jImporterContext.getInstance().getOutputManager().info(String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.ORIENT_VERSION, OConstants.COPYRIGHT));
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
 
     //parses the command line parameters, and starts the import (.execute). Then exits

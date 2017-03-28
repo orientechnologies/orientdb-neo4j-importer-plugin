@@ -161,7 +161,7 @@ public class ONeo4jImporterUtils {
       } else {
         logString =
             "Created Property '" + neo4jPropKey + "' on the Class '" + orientDBIndexClass + "' with type '" + orientOtype + "'";
-        ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
+        ONeo4jImporterContext.getInstance().getOutputManager().debug(logString);
       }
       return true;
     } catch (Exception e) {
