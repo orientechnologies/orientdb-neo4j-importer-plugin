@@ -4,14 +4,9 @@ import com.orientechnologies.orient.connection.ONeo4jConnectionManager;
 import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.OConstants;
-import com.orientechnologies.orient.core.config.OGlobalConfiguration;
-import com.orientechnologies.orient.core.intent.OIntentMassiveInsert;
-import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
-import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
+import com.orientechnologies.orient.core.db.ODatabaseType;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import org.neo4j.driver.v1.Session;
-
-import java.io.File;
-import java.util.logging.Level;
 
 import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
@@ -20,19 +15,18 @@ import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_
  */
 class ONeo4jImporterInitializer {
 
-  private final String               orientDbFolder;
-  private final String               orientDbProtocol;
-  private       long               initializationStartTime;
-  private       OrientGraphFactory   oFactory;
-  private       OrientGraphNoTx      oDb;
-  private       String               orientVertexClass;
-  private       long               initializationStopTime;
+  private final String            orientDbName;
+  private final String            orientDbProtocol;
+  private       long              initializationStartTime;
+  private       ODatabaseDocument oDb;
+  private       String            orientVertexClass;
+  private       long              initializationStopTime;
 
   private OSourceNeo4jInfo sourceNeo4jInfo;
   private Session neo4jSession;
 
-  public ONeo4jImporterInitializer(OSourceNeo4jInfo sourceNeo4jInfo, String orientDbProtocol, String orientDbFolder) {
-    this.orientDbFolder = orientDbFolder;
+  public ONeo4jImporterInitializer(OSourceNeo4jInfo sourceNeo4jInfo, String orientDbProtocol, String orientDbName) {
+    this.orientDbName = orientDbName;
     this.orientDbProtocol = orientDbProtocol;
     this.sourceNeo4jInfo = sourceNeo4jInfo;
   }
@@ -49,11 +43,7 @@ class ONeo4jImporterInitializer {
     return initializationStartTime;
   }
 
-  public OrientGraphFactory getOFactory() {
-    return oFactory;
-  }
-
-  public OrientGraphNoTx getoDb() {
+  public ODatabaseDocument getoDb() {
     return oDb;
   }
 
@@ -91,12 +81,27 @@ class ONeo4jImporterInitializer {
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
     ONeo4jImporterContext.getInstance().getOutputManager().info("Initializing OrientDB...");
 
-    String dbUrl = this.orientDbProtocol + ":" + orientDbFolder;
+    // creating orientdb graph database
+    switch(this.orientDbProtocol) {
+    case "embedded":
+      ONeo4jImporterContext.getInstance().getOrientDBInstance().create(this.orientDbName, ODatabaseType.PLOCAL);
+      break;
+    case "plocal":
+      ONeo4jImporterContext.getInstance().getOrientDBInstance().create(this.orientDbName, ODatabaseType.PLOCAL);
+      break;
+    case "memory":
+      ONeo4jImporterContext.getInstance().getOrientDBInstance().create(this.orientDbName, ODatabaseType.MEMORY);
+      break;
+    case "remote":
+      String message = "Cannot create a new database in remote. Try to create a new empty database and restart the migration.\nThe current job will be aborted.";
+      throw new RuntimeException(message);
+    default:
+      message = "Protocol not correct. Migration will be aborted.";
+      throw new RuntimeException(message);
+    }
 
-    oFactory = new OrientGraphFactory(dbUrl, "admin", "admin");
-    oFactory.declareIntent(new OIntentMassiveInsert());
-    oDb = oFactory.getNoTx();
-    oDb.setStandardElementConstraints(false);
+    // acquiring connection to the just created database
+    oDb = ONeo4jImporterContext.getInstance().getOrientDBInstance().open(this.orientDbName, "admin", "admin");
 
     orientVertexClass = "";
 
@@ -107,7 +112,7 @@ class ONeo4jImporterInitializer {
     ONeo4jImporterContext.getInstance().getOutputManager().info("Importing Neo4j database from server:");
     ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + sourceNeo4jInfo.getNeo4jUrl() + "'");
     ONeo4jImporterContext.getInstance().getOutputManager().info("into OrientDB database:");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + orientDbFolder + "'\n");
+    ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + orientDbName + "'\n");
 
     logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 1 completed!\n\n";
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);

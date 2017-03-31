@@ -22,14 +22,12 @@ import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.context.ONeo4jImporterStatistics;
 import com.orientechnologies.orient.core.OConstants;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.util.OFunctionsHandler;
-import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
-import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.v1.Session;
 
-import java.io.File;
 import java.text.DecimalFormat;
 
 /**
@@ -88,38 +86,38 @@ public class ONeo4jImporter {
     String neo4jUrl = settings.getNeo4jUrl();
     String neo4jUsername = settings.getNeo4jUsername();
     String neo4jPassword = settings.getNeo4jPassword();
-    String orientDbPath = settings.getOrientDbPath();
+    String outDbUrl = settings.getOrientDbPath();
     String orientDbProtocol = settings.getOrientDbProtocol();
     boolean overwriteOrientDBDir = settings.getOverwriteOrientDbDir();
     boolean neo4jRelIdIndex = settings.getCreateIndexOnNeo4jRelID();
 
-    if(this.orientdbDatabasesAbsolutePath != null && orientDbProtocol.equals("plocal")) {
-      // entered in the work flow through the plugin, so orientDbPath contains just the name, and we must prepend orientdbDatabasesAbsolutePath if we want to connect in plocal
-      orientDbPath = this.orientdbDatabasesAbsolutePath + orientDbPath;
+    String dbName;
+
+    if(outDbUrl.contains("embedded") || outDbUrl.contains("plocal")) {
+      outDbUrl = outDbUrl.replace("plocal","embedded");
+      dbName = outDbUrl.substring(outDbUrl.lastIndexOf('/')+1);
     }
 
-    boolean dbExist = true;
-    String dbUrl = orientDbProtocol + ":" + orientDbPath;
-    OrientGraphFactory oFactory = new OrientGraphFactory(dbUrl, "admin", "admin", false);
-    ODatabaseDocumentTx db = null;
-    try {
-      db = oFactory.getDatabase(false, true);
-    } catch(ODatabaseException e) {
-      dbExist = false;
+    else if(outDbUrl.contains("remote")) {
+      dbName = outDbUrl.substring(outDbUrl.lastIndexOf('/')+1);
+    }
+    else {
+      // memory protocol
+      dbName = outDbUrl.substring(outDbUrl.lastIndexOf('/')+1);
     }
 
-    if (dbExist) {
+    if (ONeo4jImporterContext.getInstance().getOrientDBInstance().exists(dbName)) {
       if (overwriteOrientDBDir) {
-        logString = "Directory '" + orientDbPath + "' exists already and the overwrite option '-o' is 'true'. Directory will be erased";
+        logString = "Directory '" + outDbUrl + "' already exists and the overwrite option '-o' is 'true'. Directory will be erased.";
         ONeo4jImporterContext.getInstance().getOutputManager().warn(logString);
-        db.drop();
+        ONeo4jImporterContext.getInstance().getOrientDBInstance().drop(dbName);
       } else {
 
         //we exit the program
-        logString = "ERROR: The directory '" + orientDbPath
+        logString = "ERROR: The directory '" + outDbUrl
             + "' exists and the overwrite option '-o' is 'false' (default). Please delete the directory or run the program with the '-o true' option. Exiting.\n\n";
-
         ONeo4jImporterContext.getInstance().getOutputManager().error(logString);
+        throw new RuntimeException(logString);
       }
     }
 
@@ -128,11 +126,10 @@ public class ONeo4jImporter {
     //
 
     OSourceNeo4jInfo sourceNeo4jInfo = new OSourceNeo4jInfo(neo4jUrl, neo4jUsername, neo4jPassword);
-    ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, orientDbPath);
+    ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, dbName);
     Session neo4jSession = initializer.initConnections();
     String orientVertexClass = initializer.getOrientVertexClass();
-    OrientGraphNoTx oDb = initializer.getoDb();
-    oFactory = initializer.getOFactory();
+    ODatabaseDocument oDb = initializer.getoDb();
     ONeo4jImporterStatistics statistics = ONeo4jImporterContext.getInstance().getStatistics();
 
 
@@ -156,23 +153,19 @@ public class ONeo4jImporter {
     // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO
     //
 
-    stopServers(neo4jSession, oDb, oFactory);
+    stopServers(neo4jSession, oDb);
     printSummary(startTime, df, dfd, statistics, initializer, verticesAndEdgesImporter, schemaMigrator, neo4jRelIdIndex);
 
     returnCode = 0;
     return returnCode;
   }
 
-  private void stopServers(Session neo4jSession, OrientGraphNoTx oDb, OrientGraphFactory oFactory) throws Exception {
+  private void stopServers(Session neo4jSession, ODatabaseDocument oDb) throws Exception {
 
     String logString;
     logString = "\nShutting down OrientDB...";
-
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
-
-    oDb.shutdown();
-    oFactory.close();
-
+    oDb.close();
     ONeo4jImporterContext.getInstance().getOutputManager().info("\rShutting down OrientDB...Done\n");
 
     logString = "Shutting down Neo4j...";
@@ -187,9 +180,7 @@ public class ONeo4jImporter {
       ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
       throw new Exception(e.getMessage());
     }
-
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
-
     ONeo4jImporterContext.getInstance().getOutputManager().info("\rShutting down Neo4j...Done\n");
   }
 

@@ -1,12 +1,14 @@
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
+import com.orientechnologies.orient.core.sql.executor.OResultSet;
+import com.orientechnologies.orient.util.OGraphCommands;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
@@ -29,7 +31,7 @@ public class ONeo4jImporterUtils {
    * 2. its indices (and corresponding properties) are created
    */
 
-  public static String checkVertexClassCreation(String neo4jLabel, OrientGraphNoTx odb) {
+  public static String checkVertexClassCreation(String neo4jLabel, ODatabaseDocument odb) {
 
     String logString = "";
     String orientDBClassName = neo4jLabel;
@@ -39,8 +41,12 @@ public class ONeo4jImporterUtils {
             + "' LIMIT 1";
 
     int u = 0;
-    for (Vertex v : (Iterable<Vertex>) odb.command(new OCommandSQL(sqlQuery)).execute()) {
+
+    OResultSet vertices = odb.command(sqlQuery);
+
+    while(vertices.hasNext()) {
       u++;
+      OVertex v = vertices.next().getVertex().orElse(null);
       ONeo4jImporterContext.getInstance().getOutputManager().debug("\n\n\nfound it: " + orientDBClassName + " " + v);
       orientDBClassName = "MultipleLabelNeo4jConversion";
     }
@@ -51,7 +57,7 @@ public class ONeo4jImporterUtils {
       // In fact this method is called when the class does not exist in orientDB, because no nodes in neo4j are logically connected to it, but just an index some constraints.
 
       ONeo4jImporterContext.getInstance().getOutputManager().debug("\n\n\ndid not find it: " + orientDBClassName);
-      OClass orientDBClass = odb.createVertexType(orientDBClassName);
+      OClass orientDBClass = odb.createVertexClass(orientDBClassName);
 
       // in order to improve record lookup when filtering on Neo4j labels all classes must have the neo4jLabelList properties and an index on it
       // when classes are created during nodes migration, this property is created automatically
@@ -81,7 +87,7 @@ public class ONeo4jImporterUtils {
     return orientDBClassName;
   }
 
-  public static boolean createOrientDBProperty(Session session, String neo4jLabel, String orientDBIndexClass, String neo4jPropKey, OrientGraphNoTx oDb, String myNeo4jConstraintType) {
+  public static boolean createOrientDBProperty(Session session, String neo4jLabel, String orientDBIndexClass, String neo4jPropKey, ODatabaseDocument oDb, String myNeo4jConstraintType) {
 
     //To create a property in OrientDB first we need to understand the Neo4j property data type.
     //To do this we will use java instanceof, as there are no specific methods in the noe4j api to get the data type of a property
@@ -149,8 +155,7 @@ public class ONeo4jImporterUtils {
 
     try {
 
-      OProperty OrientDBProperty = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass)
-          .createProperty(neo4jPropKey, orientOtype);
+      OProperty orientDBProperty = oDb.getMetadata().getSchema().getClass(orientDBIndexClass).createProperty(neo4jPropKey, orientOtype);
 
       if (!foundNode) {
         logString =

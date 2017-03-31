@@ -1,5 +1,6 @@
 package com.orientechnologies.orient.http;
 
+import com.orientechnologies.orient.core.db.OrientDB;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporter;
 import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterCommandLineParser;
@@ -57,10 +58,12 @@ public class ONeo4jImporterJob  implements Runnable {
 
     try {
       String databaseDirectory = null;
+      OrientDB orientDBInstance = null;
       if (this.currentServerInstance != null) {
         databaseDirectory = this.currentServerInstance.getDatabaseDirectory();
+        orientDBInstance = currentServerInstance.getContext();
       }
-      neo4jImporterPlugin.executeJob(settings, new OOutputStreamManager(this.stream, logLevel), databaseDirectory);
+      neo4jImporterPlugin.executeJob(settings, new OOutputStreamManager(this.stream, logLevel), databaseDirectory, orientDBInstance);
     } catch (Exception e) {
       e.printStackTrace();
     }

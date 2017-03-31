@@ -25,7 +25,14 @@ public class ONeo4jImporterMain {
 //    ONeo4jImporterSettings settings = commandParser.getNeo4jImporterSettings(args);
 
     // TO DELETE
-    ONeo4jImporterSettings settings = new ONeo4jImporterSettings();
+    String neo4jUrl = "bolt://localhost:7687";
+    String neo4jUsername = "neo4j";
+    String neo4jPassword = "admin";
+    String odbDir = "/Users/gabriele/orientdb-community-2.2.18-SNAPSHOT/databases/neo4jImport";
+    String odbProtocol = "plocal";
+    boolean overwriteDB = true;
+    boolean createIndexOnNeo4jRelID = true;
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overwriteDB, createIndexOnNeo4jRelID);
 
     returnValue = executeJob(settings);
 
@@ -33,6 +40,12 @@ public class ONeo4jImporterMain {
   }
 
   public static int executeJob(ONeo4jImporterSettings settings) {
+
+    String outDbUrl = settings.getOrientDbProtocol() + ":" + settings.getOrientDbPath();
+    String serverInitUrl = outDbUrl.substring(0, outDbUrl.lastIndexOf('/') + 1);
+
+    // not working inside the orientdb server context: this execution is due to a script call
+    ONeo4jImporterContext.newInstance(serverInitUrl);
 
     ONeo4jImporterContext.getInstance().setOutputManager(outputManager);
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
@@ -58,16 +71,6 @@ public class ONeo4jImporterMain {
             ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
           }
         }, 0, 1000);
-
-        // to delete
-        String neo4jUrl = "bolt://localhost:7687";
-        String neo4jUsername = "neo4j";
-        String neo4jPassword = "admin";
-        String odbDir = "/Users/gabriele/orientdb-community-2.2.18-SNAPSHOT/databases/neo4jImport";
-        String odbProtocol = "plocal";
-        boolean overwriteDB = true;
-        boolean createIndexOnNeo4jRelID = true;
-        settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overwriteDB, createIndexOnNeo4jRelID);
 
         final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
         returnValue = neo4jImporter.execute();

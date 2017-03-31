@@ -1,5 +1,7 @@
 package com.orientechnologies.orient.context;
 
+import com.orientechnologies.orient.core.db.OrientDB;
+import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
 
 import java.io.PrintWriter;
@@ -11,24 +13,33 @@ import java.io.Writer;
  */
 public class ONeo4jImporterContext {
 
+  private OrientDB orient;
   private static ONeo4jImporterContext instance = null;
 
   private OOutputStreamManager     outputManager;
   private ONeo4jImporterStatistics statistics;
 
-  public ONeo4jImporterContext() {
+  public ONeo4jImporterContext(OrientDB orientDBInstance) {
     this.statistics = new ONeo4jImporterStatistics();
+    this.orient = orientDBInstance;
+  }
+
+  public ONeo4jImporterContext(String url) {
+    this.statistics = new ONeo4jImporterStatistics();
+    this.initOrientDBInstance(url);
   }
 
   public static ONeo4jImporterContext getInstance() {
-    if(instance == null) {
-      instance = new ONeo4jImporterContext();
-    }
     return instance;
   }
 
-  public static ONeo4jImporterContext newInstance() {
-    instance = new ONeo4jImporterContext();
+  public static ONeo4jImporterContext newInstance(OrientDB orientDBInstance) {
+    instance = new ONeo4jImporterContext(orientDBInstance);
+    return instance;
+  }
+
+  public static ONeo4jImporterContext newInstance(String url) {
+    instance = new ONeo4jImporterContext(url);
     return instance;
   }
 
@@ -99,6 +110,22 @@ public class ONeo4jImporterContext {
     }
 
     return s;
+  }
+
+  public OrientDB getOrientDBInstance() {
+    return orient;
+  }
+
+  public void initOrientDBInstance(String url) {
+    this.orient = new OrientDB(url, OrientDBConfig.defaultConfig());
+  }
+
+  public void initOrientDBInstance(String url, OrientDBConfig config) {
+    this.orient = new OrientDB(url, config);
+  }
+
+  public void closeOrientDBInstance() {
+    this.orient.close();
   }
 
   public OOutputStreamManager getOutputManager() {
