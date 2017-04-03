@@ -2,6 +2,7 @@ package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import org.assertj.core.api.Assertions;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -278,6 +279,7 @@ public class ONeo4jImporterTest {
 
   }
 
+  @Ignore
   @Test
   public void shouldImportMultipleLabelsAndConstraintsDb() throws Exception {
 
