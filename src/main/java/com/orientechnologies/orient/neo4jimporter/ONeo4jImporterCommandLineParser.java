@@ -71,7 +71,7 @@ public class ONeo4jImporterCommandLineParser {
     settings.overwriteOrientDbDir = options.get(OPTION_OVERWRITE_ORIENTDB_DIR) != null ?
         Boolean.parseBoolean(options.get(OPTION_OVERWRITE_ORIENTDB_DIR)) :
         false;
-    settings.createIndexOnNeo4jRelID =  options.get(CREATE_INDEX_ON_NEO4JRELID) != null ?
+    settings.createIndexOnNeo4jRelID = options.get(CREATE_INDEX_ON_NEO4JRELID) != null ?
         Boolean.parseBoolean(options.get(CREATE_INDEX_ON_NEO4JRELID)) :
         false;
 

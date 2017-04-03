@@ -483,7 +483,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     //Creates index on each OrientDB edge class on property Neo4jRelID
     //it will help querying by original Neo4j Rel IDs
 
-    if(neo4jRelIdIndex) {
+    if (neo4jRelIdIndex) {
 
       counters.internalEdgeIndicesStartTime = System.currentTimeMillis();
 
@@ -514,13 +514,15 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             //creates the index if the property creation was successful
             try {
 
-              oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty("Neo4jRelID").createIndex(OClass.INDEX_TYPE.UNIQUE_HASH_INDEX);
+              oDb.getRawGraph().getMetadata().getSchema().getClass(classCollectionElement.getName()).getProperty("Neo4jRelID")
+                  .createIndex(OClass.INDEX_TYPE.UNIQUE_HASH_INDEX);
 
               counters.neo4jInternalEdgeIndicesCounter++;
 
               value = 100.0 * (counters.neo4jInternalEdgeIndicesCounter / (counters.orientDBEdgeClassesCount));
               keepLogString =
-                  df.format(counters.neo4jInternalEdgeIndicesCounter) + " OrientDB Indices have been created (" + df.format(value) + "% done)";
+                  df.format(counters.neo4jInternalEdgeIndicesCounter) + " OrientDB Indices have been created (" + df.format(value)
+                      + "% done)";
               System.out.print("\r  " + keepLogString);
               value = 0;
 
@@ -535,7 +537,8 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
           } catch (Exception e) {
 
-            logString = "Found an error when trying to create the 'Neo4jRelID' Property in OrientDB on the edge Class '" + classCollectionElement.getName() + "': " + e.getMessage();
+            logString = "Found an error when trying to create the 'Neo4jRelID' Property in OrientDB on the edge Class '"
+                + classCollectionElement.getName() + "': " + e.getMessage();
             ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
 
           }

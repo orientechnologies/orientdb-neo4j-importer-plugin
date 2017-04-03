@@ -319,7 +319,8 @@ public class ONeo4jImporter {
 
     if (neo4jRelIdIndex) {
       System.out.println();
-      System.out.print("-- Time to Create Internal Indices (on edge property 'Neo4jRelID')                            :  " + df.format(internalEdgeIndicesElapsedTimeSeconds) + " seconds");
+      System.out.print("-- Time to Create Internal Indices (on edge property 'Neo4jRelID')                            :  " + df
+          .format(internalEdgeIndicesElapsedTimeSeconds) + " seconds");
       if (internalEdgeIndicesElapsedTimeSeconds > 0) {
         value = (counters.neo4jInternalEdgeIndicesCounter / internalEdgeIndicesElapsedTimeSeconds);
         System.out.print(" (" + dfd.format(value) + " indices/sec)");

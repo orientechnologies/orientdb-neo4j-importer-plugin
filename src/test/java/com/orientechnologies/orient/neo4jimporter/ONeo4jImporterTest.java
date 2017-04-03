@@ -11,8 +11,8 @@ import static org.junit.Assert.assertEquals;
  * <p>
  * Tests are documented in the README.md
  * Reminder:
- *    when nodes are migrated, for each vertex class, two internal properties and two indices are created declaredProperties=2
- *    when edges are migrated, for each edge class, an internal property and an index are created declaredProperties=1
+ * when nodes are migrated, for each vertex class, two internal properties and two indices are created declaredProperties=2
+ * when edges are migrated, for each edge class, an internal property and an index are created declaredProperties=1
  * Ideas for other tests:
  * - test with edges
  */

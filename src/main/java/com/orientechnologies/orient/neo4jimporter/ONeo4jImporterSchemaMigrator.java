@@ -74,10 +74,10 @@ class ONeo4jImporterSchemaMigrator {
             System.out.println();
             System.out.print(logString);
 
-            try{
+            try {
 
               oDb.getRawGraph().getMetadata().getIndexManager()
-                .getClassIndex("MultipleLabelNeo4jConversion", "MultipleLabelNeo4jConversion.Neo4jLabelList").rebuild();
+                  .getClassIndex("MultipleLabelNeo4jConversion", "MultipleLabelNeo4jConversion.Neo4jLabelList").rebuild();
 
               System.out.print("\r" + logString + "Done\n");
 
@@ -86,7 +86,8 @@ class ONeo4jImporterSchemaMigrator {
               System.out.print("\r" + logString + "Failed\n");
 
               logString =
-                "Found an error when trying to rebuild the index 'MultipleLabelNeo4jConversion.Neo4jLabelList': " + e.getMessage();
+                  "Found an error when trying to rebuild the index 'MultipleLabelNeo4jConversion.Neo4jLabelList': " + e
+                      .getMessage();
               ONeo4jImporter.importLogger.log(Level.SEVERE, logString);
 
             }
