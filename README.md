@@ -1,4 +1,4 @@
-Develop: [![Build Status](http://helios.orientdb.com/view/multibranch/job/orientdb-neo4j-importer-multibranch/job/develop/badge/icon)](http://helios.orientdb.com/view/multibranch/job/orientdb-neo4j-importer-multibranch/job/develop/) - 2.2.x:  [![Build Status](http://helios.orientdb.com/view/multibranch/job/orientdb-neo4j-importer-multibranch/job/2.2.x/badge/icon)](http://helios.orientdb.com/view/multibranch/job/orientdb-neo4j-importer-multibranch/job/2.2.x/)
+Develop: [![Build Status](http://helios.orientdb.com/view/multibranch/job/orientdb-neo4j-importer-multibranch/job/develop/badge/icon)](http://helios.orientdb.com/view/multibranch/job/orientdb-neo4j-importer-multibranch/job/develop/) 2.2.x:  [![Build Status](http://helios.orientdb.com/view/multibranch/job/orientdb-neo4j-importer-multibranch/job/2.2.x/badge/icon)](http://helios.orientdb.com/view/multibranch/job/orientdb-neo4j-importer-multibranch/job/2.2.x/)
 
 # Neo4j to OrientDB Importer
 
