@@ -112,8 +112,8 @@ public class ONeo4jImporter {
       } else {
 
         //we exit the program
-        logString = "ERROR: The database '" + dbName
-            + "' exists and the overwrite option is 'false' (default value). Please delete the database or run the migration with the 'overwrite' option set true. Exiting.\n\n";
+        logString = "The database '" + dbName
+            + "' exists and the overwrite option is 'false' (default value). Please delete the database or run the migration with the 'overwrite' option set to true. Exiting.\n\n";
         ONeo4jImporterContext.getInstance().getOutputManager().error(logString);
         throw new RuntimeException(logString);
       }
