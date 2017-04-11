@@ -110,7 +110,7 @@ public class ONeo4jImporter {
 
     if (dbExist) {
       if (overwriteOrientDBDir) {
-        logString = "Directory '" + orientDbPath + "' exists already and the overwrite option '-o' is 'true'. Directory will be erased";
+        logString = "Directory '" + orientDbPath + "' already exists and the overwrite option '-o' is 'true'. Directory will be erased";
         ONeo4jImporterContext.getInstance().getOutputManager().warn(logString);
         db.drop();
       } else {

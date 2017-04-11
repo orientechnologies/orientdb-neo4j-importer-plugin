@@ -54,6 +54,8 @@
     <properties>
         <VERSION>${project.version}</VERSION>
         <orient.version>${project.version}</orient.version>
+        <neo4j.version>3.1.1</neo4j.version>
+        <neo4j-driver.version>1.1.2</neo4j-driver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -165,10 +167,8 @@
         <dependency>
             <groupId>org.neo4j.driver</groupId>
             <artifactId>neo4j-java-driver</artifactId>
-            <version>1.1.2</version>
+            <version>${neo4j-driver.version}</version>
         </dependency>
-
-
     </dependencies>
 
     <profiles>
