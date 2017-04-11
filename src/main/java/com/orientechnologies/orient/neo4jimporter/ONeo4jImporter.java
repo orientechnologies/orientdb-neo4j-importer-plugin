@@ -23,8 +23,6 @@ import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.context.ONeo4jImporterStatistics;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.util.OFunctionsHandler;
 import org.neo4j.driver.v1.Session;
 
@@ -108,14 +106,14 @@ public class ONeo4jImporter {
 
     if (ONeo4jImporterContext.getInstance().getOrientDBInstance().exists(dbName)) {
       if (overwriteOrientDBDir) {
-        logString = "Directory '" + outDbUrl + "' already exists and the overwrite option '-o' is 'true'. Directory will be erased.";
+        logString = "Database '" + dbName + "' already exists and the overwrite option is 'true'. Directory will be erased.";
         ONeo4jImporterContext.getInstance().getOutputManager().warn(logString);
         ONeo4jImporterContext.getInstance().getOrientDBInstance().drop(dbName);
       } else {
 
         //we exit the program
-        logString = "ERROR: The directory '" + outDbUrl
-            + "' exists and the overwrite option '-o' is 'false' (default). Please delete the directory or run the program with the '-o true' option. Exiting.\n\n";
+        logString = "ERROR: The database '" + dbName
+            + "' exists and the overwrite option is 'false' (default value). Please delete the database or run the migration with the 'overwrite' option set true. Exiting.\n\n";
         ONeo4jImporterContext.getInstance().getOutputManager().error(logString);
         throw new RuntimeException(logString);
       }

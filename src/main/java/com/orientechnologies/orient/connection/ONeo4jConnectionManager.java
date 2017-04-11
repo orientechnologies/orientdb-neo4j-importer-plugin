@@ -24,7 +24,7 @@ public class ONeo4jConnectionManager {
    * @throws SQLException
    */
 
-  public Session getSession() {
+  public Session getSession() throws Exception {
 
     org.neo4j.driver.v1.Driver driver = null;
     Session session = null;
@@ -36,6 +36,7 @@ public class ONeo4jConnectionManager {
       String mess = "";
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
       ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+      throw new RuntimeException(e.getMessage());
     }
     return session;
   }
@@ -49,9 +50,12 @@ public class ONeo4jConnectionManager {
 
   public void checkConnection() throws Exception {
 
+    org.neo4j.driver.v1.Driver driver = null;
     Session session = null;
+
     try {
-      session = this.getSession();
+      driver = GraphDatabase.driver(this.sourceNeo4jInfo.getNeo4jUrl(), AuthTokens.basic( this.sourceNeo4jInfo.getNeo4jUsername(), this.sourceNeo4jInfo.getNeo4jPassword()) );
+      session = driver.session();
     } finally {
       if (session != null) {
         session.close();
