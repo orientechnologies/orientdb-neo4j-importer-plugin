@@ -83,6 +83,7 @@ public class ONeo4jImporterMain {
       String mess = "";
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
       ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+      throw new RuntimeException(e);
     }
     return returnValue;
   }

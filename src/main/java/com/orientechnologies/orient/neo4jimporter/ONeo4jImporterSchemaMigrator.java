@@ -8,6 +8,7 @@ import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import org.neo4j.driver.v1.*;
+import org.neo4j.driver.v1.exceptions.Neo4jException;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -42,7 +43,7 @@ class ONeo4jImporterSchemaMigrator {
     return importingSchemaStopTime;
   }
 
-  public void invoke(Session neo4jSession) {
+  public void invoke(Session neo4jSession) throws Exception {
 
     try {
 
@@ -66,10 +67,9 @@ class ONeo4jImporterSchemaMigrator {
 
       String logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 3 completed!\n";
       ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
+
     } catch(Exception e) {
-      String mess = "";
-      ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
-      ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+      throw new RuntimeException(e);
     }
 
   }
@@ -171,7 +171,7 @@ class ONeo4jImporterSchemaMigrator {
   }
 
 
-  private String importConstraints(Session session) {
+  private String importConstraints(Session session) throws Exception {
 
     String logString;
     double value;
@@ -233,6 +233,11 @@ class ONeo4jImporterSchemaMigrator {
           statistics.neo4jTotalRelPropertyExistenceConstraints++;
         }
       }
+    } catch (Neo4jException e) {
+      String mess = "";
+      ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+      ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+      throw new RuntimeException(e);
     } catch(Exception e) {
       String mess = "";
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
@@ -383,6 +388,11 @@ class ONeo4jImporterSchemaMigrator {
         }
       }
 
+    } catch (Neo4jException e) {
+      String mess = "";
+      ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+      ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+      throw new RuntimeException(e);
     } catch(Exception e) {
       String mess = "";
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");

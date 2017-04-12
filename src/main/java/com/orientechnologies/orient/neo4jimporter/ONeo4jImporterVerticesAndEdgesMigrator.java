@@ -13,6 +13,7 @@ import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import com.orientechnologies.orient.util.OGraphCommands;
 import org.neo4j.driver.v1.*;
+import org.neo4j.driver.v1.exceptions.Neo4jException;
 import org.neo4j.driver.v1.types.Type;
 
 import java.text.DecimalFormat;
@@ -70,7 +71,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
    * @return
    */
 
-  public void invoke(Session neo4jSession) {
+  public void invoke(Session neo4jSession) throws Exception {
 
     String logString;
 
@@ -118,11 +119,8 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       ONeo4jImporterContext.getInstance().getOutputManager().info("\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
-
     } catch (Exception e) {
-      String mess = "";
-      ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
-      ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+      throw new RuntimeException(e);
     }
 
     logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 2 completed!\n\n";
@@ -135,7 +133,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
    * @param session
    */
 
-  private void importVertices(Session session) {
+  private void importVertices(Session session) throws Exception {
 
     String logString;
     boolean hasMultipleLabels;
@@ -155,6 +153,11 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         StatementResult result = session.run(query);
         Record record = result.next();
         statistics.neo4jTotalNodes = record.get("count").asDouble();
+      } catch (Neo4jException e) {
+        String mess = "";
+        ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+        ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+        throw new RuntimeException(e);
       } catch (Exception e) {
         String mess = "";
         ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
@@ -232,6 +235,11 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
           }
         }
+      } catch (Neo4jException e) {
+        String mess = "";
+        ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+        ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+        throw new RuntimeException(e);
       } catch (Exception e) {
         String mess = "";
         ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
@@ -321,7 +329,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
    * @param session
    */
 
-  private void importEdges(Session session) {
+  private void importEdges(Session session) throws Exception {
 
     String logString;
     double value;
@@ -340,6 +348,11 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         StatementResult result = session.run(query);
         Record record = result.next();
         statistics.neo4jTotalRels = record.get("count").asDouble();
+      } catch (Neo4jException e) {
+        String mess = "";
+        ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+        ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+        throw new RuntimeException(e);
       } catch (Exception e) {
         String mess = "";
         ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
@@ -437,6 +450,11 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
           }
         }
+      } catch (Neo4jException e) {
+        String mess = "";
+        ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
+        ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+        throw new RuntimeException(e);
       } catch (Exception e) {
         String mess = "";
         ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");

@@ -25,6 +25,7 @@ import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.util.OFunctionsHandler;
 import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.exceptions.Neo4jException;
 
 import java.text.DecimalFormat;
 
@@ -119,40 +120,45 @@ public class ONeo4jImporter {
       }
     }
 
-    //
-    // PHASE 1 : INITIALIZATION
-    //
+    try {
 
-    OSourceNeo4jInfo sourceNeo4jInfo = new OSourceNeo4jInfo(neo4jUrl, neo4jUsername, neo4jPassword);
-    ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, dbName);
-    Session neo4jSession = initializer.initConnections();
-    String orientVertexClass = initializer.getOrientVertexClass();
-    ODatabaseDocument oDb = initializer.getoDb();
-    ONeo4jImporterStatistics statistics = ONeo4jImporterContext.getInstance().getStatistics();
+      //
+      // PHASE 1 : INITIALIZATION
+      //
 
+      OSourceNeo4jInfo sourceNeo4jInfo = new OSourceNeo4jInfo(neo4jUrl, neo4jUsername, neo4jPassword);
+      ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, dbName);
+      Session neo4jSession = initializer.initConnections();
+      String orientVertexClass = initializer.getOrientVertexClass();
+      ODatabaseDocument oDb = initializer.getoDb();
+      ONeo4jImporterStatistics statistics = ONeo4jImporterContext.getInstance().getStatistics();
 
-    //
-    // PHASE 2 : MIGRATION OF VERTICES AND EDGES
-    //
+      //
+      // PHASE 2 : MIGRATION OF VERTICES AND EDGES
+      //
 
-    ONeo4jImporterVerticesAndEdgesMigrator verticesAndEdgesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(keepLogString,
-        migrateRels, migrateNodes, df, orientVertexClass, oDb, statistics, relSampleOnly, neo4jRelIdIndex);
-    verticesAndEdgesImporter.invoke(neo4jSession);
-    keepLogString = verticesAndEdgesImporter.getKeepLogString();
+      ONeo4jImporterVerticesAndEdgesMigrator verticesAndEdgesImporter = new ONeo4jImporterVerticesAndEdgesMigrator(keepLogString,
+          migrateRels, migrateNodes, df, orientVertexClass, oDb, statistics, relSampleOnly, neo4jRelIdIndex);
+      verticesAndEdgesImporter.invoke(neo4jSession);
+      keepLogString = verticesAndEdgesImporter.getKeepLogString();
 
-    //
-    // PHASE 3 : SCHEMA MIGRATION
-    //
+      //
+      // PHASE 3 : SCHEMA MIGRATION
+      //
 
-    ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, oDb, statistics);
-    schemaMigrator.invoke(neo4jSession);
+      ONeo4jImporterSchemaMigrator schemaMigrator = new ONeo4jImporterSchemaMigrator(keepLogString, df, oDb, statistics);
+      schemaMigrator.invoke(neo4jSession);
 
-    //
-    // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO
-    //
+      //
+      // PHASE 4 : SHUTDOWN OF THE SERVERS AND SUMMARY INFO
+      //
 
-    stopServers(neo4jSession, oDb);
-    printSummary(startTime, df, dfd, statistics, initializer, verticesAndEdgesImporter, schemaMigrator, neo4jRelIdIndex);
+      stopServers(neo4jSession, oDb);
+      printSummary(startTime, df, dfd, statistics, initializer, verticesAndEdgesImporter, schemaMigrator, neo4jRelIdIndex);
+
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
     returnCode = 0;
     return returnCode;
@@ -176,7 +182,7 @@ public class ONeo4jImporter {
       String mess = "";
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
       ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
-      throw new Exception(e.getMessage());
+      throw new RuntimeException(e.getMessage());
     }
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
     ONeo4jImporterContext.getInstance().getOutputManager().info("\rShutting down Neo4j...Done\n");
