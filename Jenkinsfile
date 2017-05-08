@@ -1,7 +1,7 @@
 #!groovy
 node("master") {
     def mvnHome = tool 'mvn'
-    def mvnJdk7Image = "orientdb/mvn-gradle-zulu-jdk-7"
+    def mvJdk8Image = "orientdb/mvn-gradle-zulu-jdk-8"
 
     stage('Source checkout') {
 
@@ -9,7 +9,7 @@ node("master") {
     }
 
     stage('Run tests on Java7') {
-        docker.image("${mvnJdk7Image}").inside("${env.VOLUMES}") {
+        docker.image("${mvJdk8Image}").inside("${env.VOLUMES}") {
             try {
 
                 sh "${mvnHome}/bin/mvn  --batch-mode -V -U  clean install -Dsurefire.useFile=false"
