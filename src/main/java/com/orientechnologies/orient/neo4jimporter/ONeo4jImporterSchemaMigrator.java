@@ -303,16 +303,20 @@ class ONeo4jImporterSchemaMigrator {
         try {
           //we can get the relationship this constraint is associated with only if it is associated with a relationship
 
-          String neo4jConstraintRelationshipType = neo4jConstraintDefinition.get("relationshipType").toString();
-          orientDBIndexClass = neo4jConstraintRelationshipType;
+          String neo4jConstraintRelationshipType = this.getRelationshipType(neo4jConstraintDefinition);
 
-          //create class orientDBIndexClass
-          //there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
-          if (oDb.getRawGraph().getMetadata().getSchema().existsClass(orientDBIndexClass) == false) {
-            oDb.createEdgeType(orientDBIndexClass);
+          if(neo4jConstraintRelationshipType != null) {
+            orientDBIndexClass = neo4jConstraintRelationshipType;
+
+            //create class orientDBIndexClass
+            //there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
+            if (oDb.getRawGraph().getMetadata().getSchema().existsClass(orientDBIndexClass) == false) {
+              oDb.createEdgeType(orientDBIndexClass);
+            }
+            isConstraintsOnNode = false;
+            isConstraintsOnRelationship = true;
           }
-          isConstraintsOnNode = false;
-          isConstraintsOnRelationship = true;
+
         } catch (IllegalStateException a) {
           //otherwise it is associated with a node
           //this is associated with a node. Do nothing
@@ -321,10 +325,11 @@ class ONeo4jImporterSchemaMigrator {
         //we now know the type of this constraints and the class on which it is defined (orientDBIndexClass)
 
         //determine the property key on which the constraint has been defined
-        Iterable<String> neo4jConstraintKeys = neo4jConstraintDefinition.keySet();
-        for (final String myNeo4jConstraintPropKey : neo4jConstraintKeys) {
-          neo4jPropKey = myNeo4jConstraintPropKey;
-        }
+//        Iterable<String> neo4jConstraintKeys = neo4jConstraintDefinition.keySet();
+//        for (final String myNeo4jConstraintPropKey : neo4jConstraintKeys) {
+//          neo4jPropKey = myNeo4jConstraintPropKey;
+//        }
+        neo4jPropKey = this.getConstraintProperty(neo4jConstraintDefinition);
 
         //to import this constraint, we first have to create the corresponding property in OrientDB
         propertyCreationSuccess = ONeo4jImporterUtils.createOrientDBProperty(session, neo4jLabel, orientDBIndexClass, neo4jPropKey, oDb,
@@ -437,6 +442,31 @@ class ONeo4jImporterSchemaMigrator {
     String constraintDescription = neo4jConstraintDefinition.get("description").toString();
     String label = constraintDescription.substring(constraintDescription.indexOf("(")+1, constraintDescription.indexOf(")"));
     label = label.replace(" ", "");
+
+    if(label.contains(":")) {
+      label = label.substring(label.indexOf(":")+1);
+    }
     return label;
+  }
+
+  private String getRelationshipType(Map<String, Object> neo4jConstraintDefinition) {
+
+    String constraintDescription = neo4jConstraintDefinition.get("description").toString();
+    String relationshipType = null;
+    if(constraintDescription.contains("exists(")) {
+      relationshipType = constraintDescription.substring(constraintDescription.indexOf("exists(")+1, constraintDescription.lastIndexOf(")"));
+      relationshipType = relationshipType.substring(0, relationshipType.indexOf("."));
+    }
+    return relationshipType;
+  }
+
+  private String getConstraintProperty(Map<String, Object> neo4jConstraintDefinition) {
+
+    String constraintDescription = neo4jConstraintDefinition.get("description").toString();
+    String propertyName = constraintDescription.substring(constraintDescription.indexOf(") ASSERT ") + 1, constraintDescription.indexOf("IS"));
+    propertyName = propertyName.replace("ASSERT", "");
+    propertyName = propertyName.replace(" ", "");
+    propertyName = propertyName.substring(propertyName.indexOf(".") +1);
+    return propertyName;
   }
 }

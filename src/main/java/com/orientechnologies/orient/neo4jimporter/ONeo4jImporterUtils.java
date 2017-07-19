@@ -149,8 +149,13 @@ public class ONeo4jImporterUtils {
 
     try {
 
-      OProperty OrientDBProperty = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass)
-          .createProperty(neo4jPropKey, orientOtype);
+//      OProperty OrientDBProperty = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass)
+//          .createProperty(neo4jPropKey, orientOtype);
+
+      OClass orientClass = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass);
+      if(!orientClass.existsProperty(neo4jPropKey)) {
+        orientClass.createProperty(neo4jPropKey, orientOtype);
+      }
 
       if (!foundNode) {
         logString =
