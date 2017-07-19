@@ -2,58 +2,36 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.orientechnologies</groupId>
-    <artifactId>orientdb-neo4j-importer</artifactId>
-    <version>2.2.24-SNAPSHOT</version>
+
+    <parent>
+        <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-parent</artifactId>
+        <version>2.2.24-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>orientdb-neo4j-importer-plugin</artifactId>
     <packaging>jar</packaging>
 
 
-    <name>OrientDB - Neo4j to OrientDB Importer</name>
+    <name>OrientDB - Neo4j to OrientDB Importer Plugin</name>
     <description>OrientDB NoSQL document graph dbms</description>
-    <url>http://www.orientdb.com</url>
-    <organization>
-        <name>OrientDB</name>
-        <url>http://orientdb.com</url>
-    </organization>
-    <licenses>
-        <license>
-            <name>GPL</name>
-            <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
-        </license>
-    </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer.git</connection>
-        <developerConnection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer.git</developerConnection>
-        <url>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer.git</url>
+        <connection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git</developerConnection>
+        <url>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git</url>
     </scm>
     <issueManagement>
         <system>GitHub Issues</system>
-        <url>https://github.com/orientechnologies/orientdb-neo4j-importer/issues</url>
+        <url>https://github.com/orientechnologies/orientdb-neo4j-importer-plugin/issues</url>
     </issueManagement>
     <ciManagement>
         <system>jenkins</system>
-        <url>http://helios.orientdb.com/</url>
+        <url>https://helios.orientdb.com/</url>
     </ciManagement>
 
-    <developers>
-        <developer>
-            <id>l.garulli</id>
-            <name>Luca Garulli</name>
-            <email>l.garulli@orientdb.com</email>
-            <organization>OrientDB</organization>
-            <organizationUrl>http://www.orientdb.com</organizationUrl>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-                <role>founder</role>
-            </roles>
-            <timezone>+1</timezone>
-        </developer>
-    </developers>
     <properties>
-        <VERSION>${project.version}</VERSION>
-        <orient.version>${project.version}</orient.version>
         <neo4j.version>3.1.1</neo4j.version>
         <neo4j-driver.version>1.1.2</neo4j-driver.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -64,88 +42,13 @@
         <argLine>-XX:MaxDirectMemorySize=512g</argLine>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>OrientDB Maven2 Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>OrientDB Maven2 Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
-    <repositories>
-        <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>distribution-package</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>${basedir}/src/main/assembly/package.xml</descriptor>
-                            </descriptors>
-                            <filters>
-                                <filter></filter>
-                            </filters>
-                            <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-        </plugins>
-    </build>
     <dependencies>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-test-commons</artifactId>
-            <version>${orient.version}</version>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.testng</groupId>
@@ -153,15 +56,24 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-core</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-graphdb</artifactId>
-            <version>${orient.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-tools</artifactId>
-            <version>${orient.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -171,42 +83,5 @@
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
 
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <configuration>
-                            <archive>
-                                <manifest>
-                                    <mainClass>com.orientechnologies.orient.neo4jimporter.ONeo4jImporterMain</mainClass>
-                                </manifest>
-                            </archive>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>make-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
