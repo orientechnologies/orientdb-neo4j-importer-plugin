@@ -257,7 +257,7 @@ class ONeo4jImporterSchemaMigrator {
         statistics.neo4jConstraintsCounter++;
 
         //determine the type of the constraints - different actions will need to be taken according to this type
-        String neo4jConstraintType = neo4jConstraintDefinition.get("type").toString();
+        String neo4jConstraintType = this.getConstraintType(neo4jConstraintDefinition);
 
         //determine the class where the constraints will be added in OrientDB
         //Neo4j allows constraints on both nodes and relationship. To get the OrientDB class, we have to separate the cases
@@ -268,7 +268,7 @@ class ONeo4jImporterSchemaMigrator {
           //we can get the label with the method getLabel() only if this constraint is associated with a node
           //this is associated with a node
 
-          neo4jLabel = neo4jConstraintDefinition.get("label").toString();
+          neo4jLabel = this.getConstraintLabel(neo4jConstraintDefinition);
           orientDBIndexClass = neo4jLabel;
 
           //create class orientDBIndexClass
@@ -399,5 +399,25 @@ class ONeo4jImporterSchemaMigrator {
       ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
     }
     return neo4jPropKey;
+  }
+
+
+  public String getConstraintType(Map<String, Object> neo4jConstraintDefinition) {
+
+    String constraintDescription = neo4jConstraintDefinition.get("description").toString();
+    if(constraintDescription.contains("IS UNIQUE")) {
+      return "UNIQUENESS";
+    }
+    else {
+      return "UNKNOWN";
+    }
+  }
+
+  private String getConstraintLabel(Map<String, Object> neo4jConstraintDefinition) {
+
+    String constraintDescription = neo4jConstraintDefinition.get("description").toString();
+    String label = constraintDescription.substring(constraintDescription.indexOf("(")+1, constraintDescription.indexOf(")"));
+    label = label.replace(" ", "");
+    return label;
   }
 }
