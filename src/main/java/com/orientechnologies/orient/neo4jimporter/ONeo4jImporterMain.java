@@ -59,16 +59,6 @@ public class ONeo4jImporterMain {
           }
         }, 0, 1000);
 
-        // to delete
-//        String neo4jUrl = "bolt://localhost:7687";
-//        String neo4jUsername = "neo4j";
-//        String neo4jPassword = "admin";
-//        String odbDir = "/Users/gabriele/orientdb-community-2.2.18-SNAPSHOT/databases/neo4jImport";
-//        String odbProtocol = "plocal";
-//        boolean overwriteDB = true;
-//        boolean createIndexOnNeo4jRelID = true;
-//        settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overwriteDB, createIndexOnNeo4jRelID);
-
         final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
         returnValue = neo4jImporter.execute();
 

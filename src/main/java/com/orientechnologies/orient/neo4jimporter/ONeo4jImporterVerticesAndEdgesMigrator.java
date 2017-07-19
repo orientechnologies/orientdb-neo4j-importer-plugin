@@ -5,11 +5,17 @@ import com.orientechnologies.orient.context.ONeo4jImporterStatistics;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.sun.jdi.*;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
+import org.neo4j.driver.internal.value.BooleanValue;
+import org.neo4j.driver.internal.value.FloatValue;
+import org.neo4j.driver.internal.value.IntegerValue;
+import org.neo4j.driver.internal.value.StringValue;
 import org.neo4j.driver.v1.*;
+import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.exceptions.Neo4jException;
 
 import java.text.DecimalFormat;
@@ -212,7 +218,15 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           //gets the node properties
           Map<String, Object> resultMap = currentRecord.get("properties").asMap();
           Map<String, Object> nodeProperties = new LinkedHashMap<String,Object>();
-          nodeProperties.putAll(resultMap);
+//          nodeProperties.putAll(resultMap);
+
+
+          Value properties = currentRecord.get("properties");
+          for(String property: properties.keys()) {
+            Value currValue = properties.get(property);
+            Object convertedValue = this.convertValuetypeFromNeo4jToJava(currValue);
+            nodeProperties.put(property, convertedValue);
+          }
 
           //stores also the original neo4j nodeId in the property map - we will use it when creating the corresponding OrientDB vertex
           nodeProperties.put("neo4jNodeID", currentRecord.get("id").asObject());
@@ -247,11 +261,42 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     }
   }
 
+  private Object convertValuetypeFromNeo4jToJava(Value myPropertyValue) {
+
+    Object convertedValue = null;
+
+    if (null == myPropertyValue || myPropertyValue instanceof StringValue) {
+      convertedValue = myPropertyValue.asString();
+    } else if (myPropertyValue instanceof IntegerValue) {
+      convertedValue = myPropertyValue.asInt();
+    } else if (myPropertyValue instanceof LongValue) {
+      convertedValue = myPropertyValue.asLong();
+    } else if (myPropertyValue instanceof BooleanValue) {
+      convertedValue = myPropertyValue.asBoolean();
+    } else if (myPropertyValue instanceof ByteValue) {
+      convertedValue = myPropertyValue.asByteArray();
+    } else if (myPropertyValue instanceof FloatValue) {
+      convertedValue = myPropertyValue.asFloat();
+    } else if (myPropertyValue instanceof DoubleValue) {
+      convertedValue = myPropertyValue.asDouble();
+    } else if (myPropertyValue instanceof CharValue) {
+      convertedValue = myPropertyValue.asString();
+    } else if (myPropertyValue instanceof ShortValue) {
+      convertedValue = myPropertyValue.asInt();
+    } else {
+      convertedValue = myPropertyValue.asString();
+    }
+
+    return convertedValue;
+  }
+
+
   private void importIndicesOnVertices() {
 
     String logString;
-    double value; /**
+    double value;
 
+    /**
      * Building Indices on Vertex classes:
      *      - two indices on each OrientDB vertex class on properties neo4jNodeID & neo4jLabelList
      *      - index on neo4jNodeID: it will help in speeding up vertices lookup during relationships creation
