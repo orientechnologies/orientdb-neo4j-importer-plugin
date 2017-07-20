@@ -2,16 +2,15 @@ package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
-import com.sun.jdi.*;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.internal.value.BooleanValue;
 import org.neo4j.driver.internal.value.FloatValue;
 import org.neo4j.driver.internal.value.IntegerValue;
 import org.neo4j.driver.internal.value.StringValue;
+import org.neo4j.driver.internal.value.BytesValue;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
@@ -218,20 +217,20 @@ public class ONeo4jImporterUtils {
       myNeo4jPropType = "String";
     } else if (myPropertyValue instanceof IntegerValue) {
       myNeo4jPropType = "Integer";
-    } else if (myPropertyValue instanceof LongValue) {
-      myNeo4jPropType = "Long";
+//    } else if (myPropertyValue instanceof LongValue) {
+//      myNeo4jPropType = "Long";
     } else if (myPropertyValue instanceof BooleanValue) {
       myNeo4jPropType = "Boolean";
-    } else if (myPropertyValue instanceof ByteValue) {
+    } else if (myPropertyValue instanceof BytesValue) {
       myNeo4jPropType = "Byte";
     } else if (myPropertyValue instanceof FloatValue) {
       myNeo4jPropType = "Float";
-    } else if (myPropertyValue instanceof DoubleValue) {
-      myNeo4jPropType = "Double";
-    } else if (myPropertyValue instanceof CharValue) {
-      myNeo4jPropType = "Character";
-    } else if (myPropertyValue instanceof ShortValue) {
-      myNeo4jPropType = "Short";
+//    } else if (myPropertyValue instanceof DoubleValue) {
+//      myNeo4jPropType = "Double";
+//    } else if (myPropertyValue instanceof CharValue) {
+//      myNeo4jPropType = "Character";
+//    } else if (myPropertyValue instanceof ShortValue) {
+//      myNeo4jPropType = "Short";
     } else {
       myNeo4jPropType = "String";
     }

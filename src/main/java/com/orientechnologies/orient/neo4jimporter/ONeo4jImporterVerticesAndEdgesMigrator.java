@@ -5,15 +5,11 @@ import com.orientechnologies.orient.context.ONeo4jImporterStatistics;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.sun.jdi.*;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientEdge;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
-import org.neo4j.driver.internal.value.BooleanValue;
-import org.neo4j.driver.internal.value.FloatValue;
-import org.neo4j.driver.internal.value.IntegerValue;
-import org.neo4j.driver.internal.value.StringValue;
+import org.neo4j.driver.internal.value.*;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.exceptions.Neo4jException;
@@ -269,20 +265,20 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       convertedValue = myPropertyValue.asString();
     } else if (myPropertyValue instanceof IntegerValue) {
       convertedValue = myPropertyValue.asInt();
-    } else if (myPropertyValue instanceof LongValue) {
-      convertedValue = myPropertyValue.asLong();
+//    } else if (myPropertyValue instanceof LongValue) {
+//      convertedValue = myPropertyValue.asLong();
     } else if (myPropertyValue instanceof BooleanValue) {
       convertedValue = myPropertyValue.asBoolean();
-    } else if (myPropertyValue instanceof ByteValue) {
+    } else if (myPropertyValue instanceof BytesValue) {
       convertedValue = myPropertyValue.asByteArray();
     } else if (myPropertyValue instanceof FloatValue) {
       convertedValue = myPropertyValue.asFloat();
-    } else if (myPropertyValue instanceof DoubleValue) {
-      convertedValue = myPropertyValue.asDouble();
-    } else if (myPropertyValue instanceof CharValue) {
-      convertedValue = myPropertyValue.asString();
-    } else if (myPropertyValue instanceof ShortValue) {
-      convertedValue = myPropertyValue.asInt();
+//    } else if (myPropertyValue instanceof DoubleValue) {
+//      convertedValue = myPropertyValue.asDouble();
+//    } else if (myPropertyValue instanceof CharValue) {
+//      convertedValue = myPropertyValue.asString();
+//    } else if (myPropertyValue instanceof ShortValue) {
+//      convertedValue = myPropertyValue.asInt();
     } else {
       convertedValue = myPropertyValue.asString();
     }
