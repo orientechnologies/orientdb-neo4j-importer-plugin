@@ -349,7 +349,7 @@ class ONeo4jImporterSchemaMigrator {
               }
             } catch (Exception e) {
 
-              String mess = "Found an error when trying to create a UNIQUE Index in OrientDB. Correspinding Property in Neo4j is '"
+              String mess = "Found an error when trying to create a UNIQUE Index in OrientDB. Corresponding Property in Neo4j is '"
                   + neo4jPropKey + "' on node label '" + orientDBIndexClass + "': " + e.getMessage();
               ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
               ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");

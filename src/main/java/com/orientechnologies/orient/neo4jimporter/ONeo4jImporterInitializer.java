@@ -66,12 +66,12 @@ class ONeo4jImporterInitializer {
   public Session initConnections() throws Exception {
     String logString;
 
-    initializationStartTime = System.currentTimeMillis();
+    this.initializationStartTime = System.currentTimeMillis();
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\n\n");
     ONeo4jImporterContext.getInstance().getOutputManager().info("Trying connection to Neo4j...");
 
-    ONeo4jConnectionManager connectionManager = new ONeo4jConnectionManager(sourceNeo4jInfo);
+    ONeo4jConnectionManager connectionManager = new ONeo4jConnectionManager(this.sourceNeo4jInfo);
     Session neo4jSession = connectionManager.getSession();
 
     logString = "Trying connection to Neo4j...Neo4j server is alive and connection succeeded.";
@@ -103,21 +103,21 @@ class ONeo4jImporterInitializer {
     // acquiring connection to the just created database
     oDb = ONeo4jImporterContext.getInstance().getOrientDBInstance().open(this.orientDbName, "admin", "admin");
 
-    orientVertexClass = "";
+    this.orientVertexClass = "";
 
     logString = "Initializing OrientDB...Done\n";
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + logString + "\n");
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("Importing Neo4j database from server:");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + sourceNeo4jInfo.getNeo4jUrl() + "'");
+    ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + this.sourceNeo4jInfo.getNeo4jUrl() + "'");
     ONeo4jImporterContext.getInstance().getOutputManager().info("into OrientDB database:");
     ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + orientDbName + "'\n");
 
     logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 1 completed!\n\n";
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
-    initializationStopTime = System.currentTimeMillis();
+    this.initializationStopTime = System.currentTimeMillis();
     return neo4jSession;
   }
 }
