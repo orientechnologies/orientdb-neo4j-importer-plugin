@@ -13,6 +13,7 @@ import org.neo4j.driver.internal.value.*;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.exceptions.Neo4jException;
+import org.neo4j.driver.v1.exceptions.value.LossyCoercion;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -220,7 +221,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           Value properties = currentRecord.get("properties");
           for(String property: properties.keys()) {
             Value currValue = properties.get(property);
-            Object convertedValue = this.convertValuetypeFromNeo4jToJava(currValue);
+            Object convertedValue = this.convertValueTypeFromNeo4jToJava(currValue);
             nodeProperties.put(property, convertedValue);
           }
 
@@ -257,28 +258,30 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     }
   }
 
-  private Object convertValuetypeFromNeo4jToJava(Value myPropertyValue) {
+  private Object convertValueTypeFromNeo4jToJava(Value myPropertyValue) {
 
     Object convertedValue = null;
 
     if (null == myPropertyValue || myPropertyValue instanceof StringValue) {
       convertedValue = myPropertyValue.asString();
     } else if (myPropertyValue instanceof IntegerValue) {
-      convertedValue = myPropertyValue.asInt();
-//    } else if (myPropertyValue instanceof LongValue) {
-//      convertedValue = myPropertyValue.asLong();
+      try {
+        convertedValue = myPropertyValue.asInt();
+      } catch (LossyCoercion e) {
+        // DO NOTHING: we accept losing precision
+      }
     } else if (myPropertyValue instanceof BooleanValue) {
       convertedValue = myPropertyValue.asBoolean();
     } else if (myPropertyValue instanceof BytesValue) {
       convertedValue = myPropertyValue.asByteArray();
     } else if (myPropertyValue instanceof FloatValue) {
-      convertedValue = myPropertyValue.asFloat();
-//    } else if (myPropertyValue instanceof DoubleValue) {
-//      convertedValue = myPropertyValue.asDouble();
-//    } else if (myPropertyValue instanceof CharValue) {
-//      convertedValue = myPropertyValue.asString();
-//    } else if (myPropertyValue instanceof ShortValue) {
-//      convertedValue = myPropertyValue.asInt();
+      try {
+        convertedValue = myPropertyValue.asFloat();
+      } catch (LossyCoercion e) {
+        // DO NOTHING: we accept losing precision
+      }
+    } else if(myPropertyValue instanceof ListValue) {
+      convertedValue = myPropertyValue.asList();
     } else {
       convertedValue = myPropertyValue.asString();
     }

@@ -94,6 +94,7 @@ public class ONeo4jImporter {
     boolean overwriteOrientDBDir = settings.getOverwriteOrientDbDir();
     boolean neo4jRelIdIndex = settings.getCreateIndexOnNeo4jRelID();
 
+    String dbName = orientDbPath;
     if(this.orientdbDatabasesAbsolutePath != null && orientDbProtocol.equals("plocal")) {
       // entered in the work flow through the plugin, so orientDbPath contains just the name, and we must prepend orientdbDatabasesAbsolutePath if we want to connect in plocal
       orientDbPath = this.orientdbDatabasesAbsolutePath + orientDbPath;
@@ -111,14 +112,14 @@ public class ONeo4jImporter {
 
     if (dbExist) {
       if (overwriteOrientDBDir) {
-        logString = "Directory '" + orientDbPath + "' already exists and the overwrite option is 'true'. Directory will be erased";
+        logString = "The '" + dbName + "' database already exists and the overwrite option is 'true'. The database will be erased before the new migration.";
         ONeo4jImporterContext.getInstance().getOutputManager().warn(logString);
         db.drop();
       } else {
 
         //we exit the program
-        logString = "The directory '" + orientDbPath
-            + "' exists and the overwrite option is 'false' (default). Please delete the directory or run the migration with the 'overwrite' option set to true. Exiting.\n\n";
+        logString = "The '" + dbName + "' database already exists and the overwrite option is 'false' (default). "
+            + "Please delete the database or run the migration with the 'overwrite' option set to true. Terminating the migration.\n\n";
 
         ONeo4jImporterContext.getInstance().getOutputManager().error(logString);
         throw new RuntimeException();
@@ -132,7 +133,7 @@ public class ONeo4jImporter {
       //
 
       OSourceNeo4jInfo sourceNeo4jInfo = new OSourceNeo4jInfo(neo4jUrl, neo4jUsername, neo4jPassword);
-      ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, orientDbPath);
+      ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, orientDbPath, dbName);
       Session neo4jSession = initializer.initConnections();
       String orientVertexClass = initializer.getOrientVertexClass();
       OrientGraphNoTx oDb = initializer.getoDb();
@@ -174,16 +175,16 @@ public class ONeo4jImporter {
   private void stopServers(Session neo4jSession, OrientGraphNoTx oDb, OrientGraphFactory oFactory) throws Exception {
 
     String logString;
-    logString = "\nShutting down OrientDB...";
+    logString = "\nShutting down OrientDB connection...";
 
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
     oDb.shutdown();
     oFactory.close();
 
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\rShutting down OrientDB...Done\n");
+    ONeo4jImporterContext.getInstance().getOutputManager().info("\rShutting down OrientDB connection...Done\n");
 
-    logString = "Shutting down Neo4j...";
+    logString = "Shutting down Neo4j connection...";
 
     try {
       if(neo4jSession != null) {
@@ -198,7 +199,7 @@ public class ONeo4jImporter {
 
     ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\rShutting down Neo4j...Done\n");
+    ONeo4jImporterContext.getInstance().getOutputManager().info("\rShutting down Neo4j connection...Done\n");
   }
 
   private void printSummary(long startTime, DecimalFormat df, DecimalFormat dfd, ONeo4jImporterStatistics counters,
