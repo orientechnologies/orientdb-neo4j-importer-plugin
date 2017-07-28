@@ -6,6 +6,7 @@ import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.v1.Session;
@@ -25,7 +26,7 @@ class ONeo4jImporterInitializer {
   private final String               orientDbProtocol;
   private       long               initializationStartTime;
   private       OrientGraphFactory   oFactory;
-  private       OrientGraphNoTx      oDb;
+  private       OrientGraph      oDb;
   private       String               orientVertexClass;
   private       long               initializationStopTime;
 
@@ -55,7 +56,7 @@ class ONeo4jImporterInitializer {
     return oFactory;
   }
 
-  public OrientGraphNoTx getoDb() {
+  public OrientGraph getoDb() {
     return oDb;
   }
 
@@ -97,8 +98,9 @@ class ONeo4jImporterInitializer {
 
     this.oFactory = new OrientGraphFactory(dbUrl, "admin", "admin");
     this.oFactory.declareIntent(new OIntentMassiveInsert());
-    this.oDb = oFactory.getNoTx();
+    this.oDb = oFactory.getTx();
     this.oDb.setStandardElementConstraints(false);
+    this.oDb.setAutoStartTx(false);
 
     this.orientVertexClass = "";
 

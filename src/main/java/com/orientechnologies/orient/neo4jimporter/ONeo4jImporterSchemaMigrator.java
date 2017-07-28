@@ -6,6 +6,7 @@ import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.Neo4jException;
@@ -23,12 +24,12 @@ import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_
 class ONeo4jImporterSchemaMigrator {
   private String                   keepLogString;
   private DecimalFormat            df;
-  private OrientGraphNoTx          oDb;
+  private OrientGraph          oDb;
   private ONeo4jImporterStatistics statistics;
   private long                     importingSchemaStartTime;
   private long                     importingSchemaStopTime;
 
-  public ONeo4jImporterSchemaMigrator(String keepLogString, DecimalFormat df, OrientGraphNoTx oDb, ONeo4jImporterStatistics statistics) {
+  public ONeo4jImporterSchemaMigrator(String keepLogString, DecimalFormat df, OrientGraph oDb, ONeo4jImporterStatistics statistics) {
     this.keepLogString = keepLogString;
     this.df = df;
     this.oDb = oDb;

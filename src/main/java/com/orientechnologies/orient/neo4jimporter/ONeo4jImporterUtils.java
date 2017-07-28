@@ -5,6 +5,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.internal.value.BooleanValue;
 import org.neo4j.driver.internal.value.FloatValue;
@@ -33,7 +34,7 @@ public class ONeo4jImporterUtils {
    * 2. its indices (and corresponding properties) are created
    */
 
-  public static String checkVertexClassCreation(String neo4jLabel, OrientGraphNoTx odb) {
+  public static String checkVertexClassCreation(String neo4jLabel, OrientGraph odb) {
 
     String logString = "";
     String orientDBClassName = neo4jLabel;
@@ -85,7 +86,7 @@ public class ONeo4jImporterUtils {
     return orientDBClassName;
   }
 
-  public static boolean createOrientDBProperty(Session session, String neo4jLabel, String orientDBIndexClass, String neo4jPropKey, OrientGraphNoTx oDb, String myNeo4jConstraintType) {
+  public static boolean createOrientDBProperty(Session session, String neo4jLabel, String orientDBIndexClass, String neo4jPropKey, OrientGraph oDb, String myNeo4jConstraintType) {
 
     //To create a property in OrientDB first we need to understand the Neo4j property data type.
     //To do this we will use java instanceof, as there are no specific methods in the noe4j api to get the data type of a property

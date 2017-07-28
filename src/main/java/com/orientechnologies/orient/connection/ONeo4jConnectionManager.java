@@ -2,6 +2,7 @@ package com.orientechnologies.orient.connection;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.driver.v1.Session;
 
@@ -30,7 +31,8 @@ public class ONeo4jConnectionManager {
     Session session = null;
 
     try {
-      driver = GraphDatabase.driver(this.sourceNeo4jInfo.getNeo4jUrl(), AuthTokens.basic( this.sourceNeo4jInfo.getNeo4jUsername(), this.sourceNeo4jInfo.getNeo4jPassword()) );
+      Config noSSL = Config.build().withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig();
+      driver = GraphDatabase.driver(this.sourceNeo4jInfo.getNeo4jUrl(), AuthTokens.basic( this.sourceNeo4jInfo.getNeo4jUsername(), this.sourceNeo4jInfo.getNeo4jPassword()), noSSL);
       session = driver.session();
     } catch (Exception e) {
       String mess = "";

@@ -25,6 +25,7 @@ import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.util.OFunctionsHandler;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.v1.Session;
@@ -136,7 +137,7 @@ public class ONeo4jImporter {
       ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, orientDbPath, dbName);
       Session neo4jSession = initializer.initConnections();
       String orientVertexClass = initializer.getOrientVertexClass();
-      OrientGraphNoTx oDb = initializer.getoDb();
+      OrientGraph oDb = initializer.getoDb();
       oFactory = initializer.getOFactory();
       ONeo4jImporterStatistics statistics = ONeo4jImporterContext.getInstance().getStatistics();
 
@@ -172,7 +173,7 @@ public class ONeo4jImporter {
     return returnCode;
   }
 
-  private void stopServers(Session neo4jSession, OrientGraphNoTx oDb, OrientGraphFactory oFactory) throws Exception {
+  private void stopServers(Session neo4jSession, OrientGraph oDb, OrientGraphFactory oFactory) throws Exception {
 
     String logString;
     logString = "\nShutting down OrientDB connection...";
