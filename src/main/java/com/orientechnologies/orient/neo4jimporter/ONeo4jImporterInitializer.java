@@ -44,7 +44,7 @@ class ONeo4jImporterInitializer {
   }
 
   public ODatabaseDocument getoDb() {
-    return oDb;
+    return this.oDb;
   }
 
   public String getOrientVertexClass() {

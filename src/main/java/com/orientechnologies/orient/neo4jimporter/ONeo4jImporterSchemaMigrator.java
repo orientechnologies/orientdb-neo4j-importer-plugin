@@ -6,7 +6,6 @@ import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.sql.OCommandSQL;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.Neo4jException;
 

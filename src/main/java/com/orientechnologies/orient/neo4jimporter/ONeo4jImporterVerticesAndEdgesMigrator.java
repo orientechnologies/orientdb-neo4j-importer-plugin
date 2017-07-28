@@ -40,6 +40,9 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
   private       ONeo4jImporterStatistics statistics;
   private       long                     importingRelsStartTime;
   private       long                     importingRelsStopTime;
+  private final int VERTICES_BATCH_SIZE = 1000;
+  private final int EDGES_BATCH_SIZE = 200;
+
 
   public ONeo4jImporterVerticesAndEdgesMigrator(String keepLogString, boolean migrateRels, boolean migrateNodes, DecimalFormat df,
       String orientVertexClass, ODatabaseDocument oDb, ONeo4jImporterStatistics statistics,
@@ -173,6 +176,8 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         String query = "MATCH (node) RETURN properties(node) as properties, ID(node) as id, labels(node) as labels";
         StatementResult result = session.run(query);
 
+        oDb.begin();
+        int cont = 1;
         while(result.hasNext()) {
 
           Record currentRecord = result.next();
@@ -217,10 +222,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           }
 
           //gets the node properties
-          Map<String, Object> resultMap = currentRecord.get("properties").asMap();
           Map<String, Object> nodeProperties = new LinkedHashMap<String,Object>();
-//          nodeProperties.putAll(resultMap);
-
 
           Value properties = currentRecord.get("properties");
           for(String property: properties.keys()) {
@@ -230,23 +232,36 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           }
 
           //stores also the original neo4j nodeId in the property map - we will use it when creating the corresponding OrientDB vertex
-          nodeProperties.put("neo4jNodeID", currentRecord.get("id").asObject());
+          nodeProperties.put("neo4jNodeID", currentRecord.get("id").asLong());    // neo4jNodeID always stored as a Long
 
           //store also the original labels
           nodeProperties.put("neo4jLabelList", multipleLabelsArray);
 
           try {
+
             // store the vertex on OrientDB
             OVertex myVertex = this.addVertexToGraph(oDb, orientVertexClass, nodeProperties);
             ONeo4jImporterContext.getInstance().getOutputManager().debug(myVertex.toString());
             statistics.orientDBImportedVerticesCounter++;
+
+            if(cont % VERTICES_BATCH_SIZE == 0) {
+              oDb.commit();
+              oDb.begin();
+            }
+            cont++;
           } catch (Exception e) {
+            oDb.rollback();
             String mess = "Found an error when trying to store node ('" + currentRecord + "') to OrientDB: " + e.getMessage();
             ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
             ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
           }
         }
+
+        // committing last batch
+        oDb.commit();
+
       } catch (Neo4jException e) {
+        oDb.rollback();
         String mess = "";
         ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
         ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
@@ -319,7 +334,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       try {
 
         //first create the property
-        currentClass.createProperty("neo4jNodeID", OType.LONG);
+        currentClass.createProperty("neo4jNodeID", OType.LONG);   // neo4jNodeID always stored as a Long
 
         //creates the index if the property creation was successful
         try {
@@ -356,7 +371,8 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
               "Found an error when trying to create a NOT UNIQUE Index in OrientDB on the 'neo4jLabelList' Property of the vertex Class '"
                   + currentClass.getName() + "': " + e.getMessage();
           ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
-          ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");          }
+          ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
+        }
       } catch (Exception e) {
         String mess = "Found an error when trying to create the 'neo4jLabelList' Property in OrientDB on the vertex Class '"
             + currentClass.getName() + "': " + e.getMessage();
@@ -407,8 +423,18 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
       try {
 
-        String query = "MATCH (a)-[r]->(b) RETURN ID(a) as outVertexID, r as relationship, ID(b) as inVertexID, ID(r) as relationshipId, properties(r) as relationshipProps, type(r) as relationshipType";
+        String query = "MATCH (a)-[r]->(b) RETURN ID(a) as outVertexID, r as relationship, ID(b) as inVertexID, ID(r) as relationshipId, "
+            + "labels(a) as outVertexLabels, labels(b) as inVertexLabels, properties(r) as relationshipProps, type(r) as relationshipType";
         StatementResult result = session.run(query);
+
+        oDb.begin();
+        int cont = 1;
+
+
+        Date beforeOutVertexFetching;
+        Date afterOutVertexFetching;
+        Date beforeInVertexFetching;
+        Date afterInVertexFetching;
 
         while(result.hasNext()) {
 
@@ -424,15 +450,23 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           relationshipProperties.putAll(resultMap);
 
           //store also the original neo4j relationship id
-          relationshipProperties.put("neo4jRelID", currentRecord.get("relationshipId").asObject());
+          relationshipProperties.put("neo4jRelID", currentRecord.get("relationshipId").asLong());
 
           ONeo4jImporterContext.getInstance().getOutputManager().debug("Neo:" + currentRecord.get("outVertexID") +"-"+ currentRelationshipType  +"->"+ currentRecord.get("inVertexID"));
 
           //lookup the corresponding outVertex in OrientDB
+          List<Object> outVertexLabels = currentRecord.get("outVertexLabels").asList();
+          String outVertexClass;
+          if(outVertexLabels.size() > 1) {
+            outVertexClass = "MultipleLabelNeo4jConversion";
+          }
+          else {
+            outVertexClass = (String) outVertexLabels.get(0);
+          }
           String[] propertyOfKey = {"neo4jNodeID"};
 //          Object[] valueOfKey = {this.getNeo4jRecordValue(currentRecord, "outVertexID", session)};
-          Object[] valueOfKey = {currentRecord.get("outVertexID").asObject()};
-          OResultSet vertices = OGraphCommands.getVertices(oDb, propertyOfKey, valueOfKey);   // we can optimize the lookup by specifying the vertex class !!!
+          Object[] valueOfKey = new Object[] {currentRecord.get("outVertexID").asObject()};
+          OResultSet vertices = OGraphCommands.getVertices(oDb, outVertexClass, propertyOfKey, valueOfKey);   // we can optimize the lookup by specifying the vertex class !!!
           if(!vertices.hasNext()) {
             throw new Exception("Out vertex lookup for the current relationship did not return any vertex.");
           }
@@ -443,8 +477,16 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           vertices.close();
 
           //lookup the corresponding inVertex in OrientDB
+          List<Object> inVertexLabels = currentRecord.get("inVertexLabels").asList();
+          String inVertexClass;
+          if(inVertexLabels.size() > 1) {
+            inVertexClass = "MultipleLabelNeo4jConversion";
+          }
+          else {
+            inVertexClass = (String) inVertexLabels.get(0);
+          }
           valueOfKey[0] = currentRecord.get("inVertexID").asObject();
-          vertices = OGraphCommands.getVertices(oDb, propertyOfKey, valueOfKey);   // we can optimize the lookup by specifying the vertex class !!!
+          vertices = OGraphCommands.getVertices(oDb, inVertexClass, propertyOfKey, valueOfKey);   // we can optimize the lookup by specifying the vertex class !!!
           if(!vertices.hasNext()) {
             throw new Exception("In vertex lookup for the current relationship did not return any vertex.");
           }
@@ -485,16 +527,30 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           try {
             OEdge currentEdge = this.addEdgeToGraph(oDb, outVertex, inVertex, orientEdgeClassName, relationshipProperties);
             statistics.orientDBImportedEdgesCounter++;
-
             ONeo4jImporterContext.getInstance().getOutputManager().debug("Orient:" + outVertex.getProperty("@rid") +"-"+ currentRelationshipType  +"->"+ inVertex.getProperty("@rid"));
+//            if(cont % 10000 == 0) {
+//              System.out.println("Added edges: " + cont);
+//            }
+
+            if(cont % EDGES_BATCH_SIZE == 0) {
+              oDb.commit();
+              oDb.begin();
+            }
+            cont++;
           } catch (Exception e) {
+            oDb.rollback();
             String mess = "Found an error when trying to create an Edge in OrientDB. Corresponding Relationship in Neo4j is '"
                 + currentRecord + "': " + e.getMessage();
             ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
             ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
           }
         }
+
+        // committing last batch
+        oDb.commit();
+
       } catch (Neo4jException e) {
+        oDb.rollback();
         String mess = "";
         ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
         ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");

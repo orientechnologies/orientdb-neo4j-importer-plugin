@@ -25,7 +25,6 @@ import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.util.OFunctionsHandler;
 import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.exceptions.Neo4jException;
 
 import java.text.DecimalFormat;
 

@@ -8,6 +8,7 @@ import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.internal.value.BooleanValue;
 import org.neo4j.driver.internal.value.FloatValue;
