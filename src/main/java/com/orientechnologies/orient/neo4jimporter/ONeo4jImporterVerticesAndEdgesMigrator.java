@@ -6,8 +6,7 @@ import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.orient.OrientEdge;
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientBaseGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientVertex;
 import org.neo4j.driver.internal.value.*;
 import org.neo4j.driver.v1.*;
@@ -29,19 +28,18 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
   private final boolean                  migrateNodes;
   private final boolean                  relSampleOnly;
   private final boolean                  neo4jRelIdIndex;
-  private final DecimalFormat            df;
   private       String                   keepLogString;
   private       String                   orientVertexClass;
-  private       OrientGraph              oDb;
+  private       OrientBaseGraph              oDb;
   private       ONeo4jImporterStatistics statistics;
   private       long                     importingRelsStartTime;
   private       long                     importingRelsStopTime;
   private final int VERTICES_BATCH_SIZE = 1000;
-  private final int EDGES_BATCH_SIZE = 200;
+  private final int EDGES_BATCH_SIZE = 300;
 
 
   public ONeo4jImporterVerticesAndEdgesMigrator(String keepLogString, boolean migrateRels, boolean migrateNodes, DecimalFormat df,
-      String orientVertexClass, OrientGraph oDb, ONeo4jImporterStatistics statistics,
+      String orientVertexClass, OrientBaseGraph oDb, ONeo4jImporterStatistics statistics,
       boolean relSampleOnly, boolean neo4jRelIdIndex) {
 
     this.keepLogString = keepLogString;
@@ -49,7 +47,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     this.migrateNodes = migrateNodes;
     this.relSampleOnly = relSampleOnly;
     this.neo4jRelIdIndex = neo4jRelIdIndex;
-    this.df = df;
     this.orientVertexClass = orientVertexClass;
     this.oDb = oDb;
     this.statistics = statistics;
@@ -242,6 +239,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
             if(cont % VERTICES_BATCH_SIZE == 0) {
               oDb.commit();
+              oDb.getRawGraph().getLocalCache().clear();
               oDb.begin();
             }
             cont++;
@@ -255,6 +253,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
         // committing last batch
         oDb.commit();
+        oDb.getRawGraph().getLocalCache().clear();
 
       } catch (Neo4jException e) {
         oDb.rollback();
@@ -426,12 +425,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         oDb.begin();
         int cont = 1;
 
-
-        Date beforeOutVertexFetching;
-        Date afterOutVertexFetching;
-        Date beforeInVertexFetching;
-        Date afterInVertexFetching;
-
         while(result.hasNext()) {
 
           Record currentRecord = result.next();
@@ -459,13 +452,11 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           else {
             outVertexClass = (String) outVertexLabels.get(0);
           }
-//          beforeOutVertexFetching = new Date();
           String[] keys = new String[] { "neo4jNodeID" };
           Long[] values = new Long[] {currentRecord.get("outVertexID").asLong()};
           Iterator<Vertex> it = oDb.getVertices(outVertexClass, keys, values).iterator();   // neo4jNodeID always stored as a Long
 
           Vertex outVertex = it.next();   // id in unique, thus the query contains just a vertex
-//          afterOutVertexFetching = new Date();
 
           if(it.hasNext()) {
             throw new Exception("Out vertex lookup for the current relationship returned more than one vertex.");
@@ -480,12 +471,10 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           else {
             inVertexClass = (String) inVertexLabels.get(0);
           }
-//          beforeInVertexFetching = new Date();
           values = new Long[] {currentRecord.get("inVertexID").asLong()};
           it = oDb.getVertices(inVertexClass, keys, values).iterator();   // neo4jNodeID always stored as a Long
 
           Vertex inVertex = it.next();
-//          afterInVertexFetching = new Date();
 
           if(it.hasNext()) {
             throw new Exception("In vertex lookup for the current relationship returned more than one vertex.");
@@ -538,17 +527,16 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           }
 
           try {
-            OrientEdge currentEdge = outOrientVertex.addEdge(orientEdgeClassName, inOrientVertex, edgeProps);
+            outOrientVertex.addEdge(orientEdgeClassName, inOrientVertex, edgeProps);
             statistics.orientDBImportedEdgesCounter++;
             ONeo4jImporterContext.getInstance().getOutputManager().debug("Orient:" + outOrientVertex.getProperty("@rid") +"-"+ currentRelationshipType  +"->"+ inOrientVertex.getProperty("@rid"));
-//            if(cont % 10000 == 0) {
-//              System.out.println("Added edges: " + cont);
-//            }
-            //  System.out.print("Out Vertex requested fetching time: " + (afterOutVertexFetching.getTime() - beforeOutVertexFetching.getTime()) + " ms\t\t");
-            //  System.out.println("In Vertex requested fetching time: " + (afterInVertexFetching.getTime() - beforeInVertexFetching.getTime()) + " ms");
+            if(cont % 10000 == 0) {
+              System.out.println("Added edges: " + cont);
+            }
 
             if(cont % EDGES_BATCH_SIZE == 0) {
               oDb.commit();
+              oDb.getRawGraph().getLocalCache().clear();
               oDb.begin();
             }
             cont++;
@@ -563,6 +551,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
         // committing last batch
         oDb.commit();
+        oDb.getRawGraph().getLocalCache().clear();
 
       } catch (Neo4jException e) {
         oDb.rollback();

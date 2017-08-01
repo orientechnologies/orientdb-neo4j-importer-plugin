@@ -25,6 +25,7 @@ import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.util.OFunctionsHandler;
+import com.tinkerpop.blueprints.impls.orient.OrientBaseGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
@@ -94,6 +95,7 @@ public class ONeo4jImporter {
     String orientDbProtocol = settings.getOrientDbProtocol();
     boolean overwriteOrientDBDir = settings.getOverwriteOrientDbDir();
     boolean neo4jRelIdIndex = settings.getCreateIndexOnNeo4jRelID();
+    OrientTransactionality transactionality = settings.getTransactionality();
 
     String dbName = orientDbPath;
     if(this.orientdbDatabasesAbsolutePath != null && orientDbProtocol.equals("plocal")) {
@@ -135,9 +137,9 @@ public class ONeo4jImporter {
 
       OSourceNeo4jInfo sourceNeo4jInfo = new OSourceNeo4jInfo(neo4jUrl, neo4jUsername, neo4jPassword);
       ONeo4jImporterInitializer initializer = new ONeo4jImporterInitializer(sourceNeo4jInfo, orientDbProtocol, orientDbPath, dbName);
-      Session neo4jSession = initializer.initConnections();
+      Session neo4jSession = initializer.initConnections(transactionality);
       String orientVertexClass = initializer.getOrientVertexClass();
-      OrientGraph oDb = initializer.getoDb();
+      OrientBaseGraph oDb = initializer.getoDb();
       oFactory = initializer.getOFactory();
       ONeo4jImporterStatistics statistics = ONeo4jImporterContext.getInstance().getStatistics();
 
@@ -173,7 +175,7 @@ public class ONeo4jImporter {
     return returnCode;
   }
 
-  private void stopServers(Session neo4jSession, OrientGraph oDb, OrientGraphFactory oFactory) throws Exception {
+  private void stopServers(Session neo4jSession, OrientBaseGraph oDb, OrientGraphFactory oFactory) throws Exception {
 
     String logString;
     logString = "\nShutting down OrientDB connection...";

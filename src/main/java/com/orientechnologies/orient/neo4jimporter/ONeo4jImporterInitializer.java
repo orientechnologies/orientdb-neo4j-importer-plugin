@@ -4,15 +4,10 @@ import com.orientechnologies.orient.connection.ONeo4jConnectionManager;
 import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.OConstants;
-import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.intent.OIntentMassiveInsert;
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientBaseGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
-import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
 import org.neo4j.driver.v1.Session;
-
-import java.io.File;
-import java.util.logging.Level;
 
 import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
 
@@ -21,13 +16,13 @@ import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_
  */
 class ONeo4jImporterInitializer {
 
-  private final String               orientDbFolder;
-  private String                     dbName;
-  private final String               orientDbProtocol;
+  private final String             orientDbFolder;
+  private       String             dbName;
+  private final String             orientDbProtocol;
   private       long               initializationStartTime;
-  private       OrientGraphFactory   oFactory;
-  private       OrientGraph      oDb;
-  private       String               orientVertexClass;
+  private       OrientGraphFactory oFactory;
+  private       OrientBaseGraph    oDb;
+  private       String             orientVertexClass;
   private       long               initializationStopTime;
 
   private OSourceNeo4jInfo sourceNeo4jInfo;
@@ -56,7 +51,7 @@ class ONeo4jImporterInitializer {
     return oFactory;
   }
 
-  public OrientGraph getoDb() {
+  public OrientBaseGraph getoDb() {
     return oDb;
   }
 
@@ -76,7 +71,7 @@ class ONeo4jImporterInitializer {
     this.neo4jSession = neo4jSession;
   }
 
-  public Session initConnections() throws Exception {
+  public Session initConnections(OrientTransactionality rule) throws Exception {
     String logString;
 
     this.initializationStartTime = System.currentTimeMillis();
@@ -98,7 +93,14 @@ class ONeo4jImporterInitializer {
 
     this.oFactory = new OrientGraphFactory(dbUrl, "admin", "admin");
     this.oFactory.declareIntent(new OIntentMassiveInsert());
-    this.oDb = oFactory.getTx();
+
+    if(rule.equals(OrientTransactionality.TX)) {
+      this.oDb = oFactory.getTx();
+    }
+    else if(rule.equals(OrientTransactionality.NoTX)) {
+      this.oDb = oFactory.getNoTx();
+    }
+
     this.oDb.setStandardElementConstraints(false);
     this.oDb.setAutoStartTx(false);
 
@@ -119,4 +121,5 @@ class ONeo4jImporterInitializer {
     this.initializationStopTime = System.currentTimeMillis();
     return neo4jSession;
   }
+
 }

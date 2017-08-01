@@ -18,6 +18,7 @@
 
 package com.orientechnologies.orient.neo4jimporter;
 
+
 /**
  * OrientDB's Neo4j Importer - Settings Class
  *
@@ -33,13 +34,14 @@ public class ONeo4jImporterSettings {
   private String orientDbProtocol;
   private boolean overwriteOrientDbDir = false;
   private boolean createIndexOnNeo4jRelID = false;
+  private OrientTransactionality transactionality;
 
   private int logLevel;
 
   public ONeo4jImporterSettings() {}
 
   public ONeo4jImporterSettings(String neo4jUrl, String neo4jUsername, String neo4jPassword, String orientDbPath, String orientDbProtocol,
-      boolean overwriteOrientDbDir, boolean createIndexOnNeo4jRelID) {
+      boolean overwriteOrientDbDir, boolean createIndexOnNeo4jRelID, OrientTransactionality transactionality) {
 
     this.neo4jUrl = neo4jUrl;
     this.neo4jUsername = neo4jUsername;
@@ -48,6 +50,13 @@ public class ONeo4jImporterSettings {
     this.orientDbProtocol = orientDbProtocol;
     this.overwriteOrientDbDir = overwriteOrientDbDir;
     this.createIndexOnNeo4jRelID = createIndexOnNeo4jRelID;
+
+    if(transactionality == null) {
+      this.transactionality = OrientTransactionality.TX;
+    }
+    else {
+      this.transactionality = transactionality;
+    }
   }
 
   public String getNeo4jUrl() {
@@ -112,5 +121,13 @@ public class ONeo4jImporterSettings {
 
   public void setLogLevel(int logLevel) {
     this.logLevel = logLevel;
+  }
+
+  public OrientTransactionality getTransactionality() {
+    return transactionality;
+  }
+
+  public void setTransactionality(OrientTransactionality transactionality) {
+    this.transactionality = transactionality;
   }
 }

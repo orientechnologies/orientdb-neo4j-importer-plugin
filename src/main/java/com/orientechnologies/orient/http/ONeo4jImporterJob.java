@@ -1,10 +1,7 @@
 package com.orientechnologies.orient.http;
 
 import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.neo4jimporter.ONeo4jImporter;
-import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterCommandLineParser;
-import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterPlugin;
-import com.orientechnologies.orient.neo4jimporter.ONeo4jImporterSettings;
+import com.orientechnologies.orient.neo4jimporter.*;
 import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
 import com.orientechnologies.orient.server.OServer;
 
@@ -50,9 +47,11 @@ public class ONeo4jImporterJob  implements Runnable {
     boolean indexesOnRelationships = cfg.field("indexesOnRelationships");
     int logLevel = cfg.field("logLevel");
 
+    OrientTransactionality transactionality = OrientTransactionality.TX;
+
     status = Status.RUNNING;
 
-    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbName, odbProtocol, overrideDB, indexesOnRelationships);
+    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbName, odbProtocol, overrideDB, indexesOnRelationships, transactionality);
     final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
 
     try {
