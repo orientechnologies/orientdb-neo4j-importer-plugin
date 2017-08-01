@@ -18,6 +18,7 @@
 
 package com.orientechnologies.orient.neo4jimporter;
 
+
 /**
  * OrientDB's Neo4j Importer - Settings Class
  *
@@ -113,4 +114,5 @@ public class ONeo4jImporterSettings {
   public void setLogLevel(int logLevel) {
     this.logLevel = logLevel;
   }
+
 }

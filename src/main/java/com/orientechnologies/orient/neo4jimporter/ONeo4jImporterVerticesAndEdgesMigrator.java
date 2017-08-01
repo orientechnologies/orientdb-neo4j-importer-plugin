@@ -33,7 +33,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
   private final boolean                  migrateNodes;
   private final boolean                  relSampleOnly;
   private final boolean                  neo4jRelIdIndex;
-  private final DecimalFormat            df;
   private       String                   keepLogString;
   private       String                   orientVertexClass;
   private       ODatabaseDocument        oDb;
@@ -41,7 +40,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
   private       long                     importingRelsStartTime;
   private       long                     importingRelsStopTime;
   private final int VERTICES_BATCH_SIZE = 1000;
-  private final int EDGES_BATCH_SIZE = 200;
+  private final int EDGES_BATCH_SIZE = 300;
 
 
   public ONeo4jImporterVerticesAndEdgesMigrator(String keepLogString, boolean migrateRels, boolean migrateNodes, DecimalFormat df,
@@ -53,7 +52,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     this.migrateNodes = migrateNodes;
     this.relSampleOnly = relSampleOnly;
     this.neo4jRelIdIndex = neo4jRelIdIndex;
-    this.df = df;
     this.orientVertexClass = orientVertexClass;
     this.oDb = oDb;
     this.statistics = statistics;
@@ -246,6 +244,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
             if(cont % VERTICES_BATCH_SIZE == 0) {
               oDb.commit();
+              oDb.getLocalCache().clear();
               oDb.begin();
             }
             cont++;
@@ -259,6 +258,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
         // committing last batch
         oDb.commit();
+        oDb.getLocalCache().clear();
 
       } catch (Neo4jException e) {
         oDb.rollback();
@@ -430,12 +430,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
         oDb.begin();
         int cont = 1;
 
-
-        Date beforeOutVertexFetching;
-        Date afterOutVertexFetching;
-        Date beforeInVertexFetching;
-        Date afterInVertexFetching;
-
         while(result.hasNext()) {
 
           Record currentRecord = result.next();
@@ -534,6 +528,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
             if(cont % EDGES_BATCH_SIZE == 0) {
               oDb.commit();
+              oDb.getLocalCache().clear();
               oDb.begin();
             }
             cont++;
@@ -548,6 +543,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
         // committing last batch
         oDb.commit();
+        oDb.getLocalCache().clear();
 
       } catch (Neo4jException e) {
         oDb.rollback();

@@ -120,4 +120,5 @@ class ONeo4jImporterInitializer {
     this.initializationStopTime = System.currentTimeMillis();
     return neo4jSession;
   }
+
 }

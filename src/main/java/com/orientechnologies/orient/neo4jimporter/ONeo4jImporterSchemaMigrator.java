@@ -6,6 +6,7 @@ import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.index.OIndex;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.record.impl.ODocument;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.Neo4jException;
 
@@ -329,7 +330,7 @@ class ONeo4jImporterSchemaMigrator {
 
             try {
 
-              //unique constratins can be only on nodes. with this check we avoid odd things in very odd situations that may happen
+              //unique constraints can be only on nodes. with this check we avoid odd things in very odd situations that may happen
               if (isConstraintsOnNode) {
 
                 //we check that orientDBIndexClass is a vertex class; with this check we avoid odd things in very odd situations that may happen, e.g. node labels = rel types.  nodes with multiple types (that are imported in a single class). In such case it may happen that it try to create an index on the class, but that class does not exist as vertex class (because all nodes were imported into another class - but it exists as edge class)
@@ -337,10 +338,14 @@ class ONeo4jImporterSchemaMigrator {
                     .isSubClassOf(oDb.getMetadata().getSchema().getClass("V"))) {
 
                   //we map Neo4j constraints of type UNIQUENESS to UNIQUE indices in Neo4j
-                  OIndex OrientDBIndex = oDb.getMetadata().getSchema().getClass(orientDBIndexClass)
-                      .getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.UNIQUE);
+                  OIndex orientDBIndex = null;
+                  if(!oDb.getMetadata().getSchema().getClass(orientDBIndexClass).areIndexed(neo4jPropKey)) {
+                    orientDBIndex = oDb.getMetadata().getSchema().getClass(orientDBIndexClass).getProperty(neo4jPropKey)
+                        .createIndex(OClass.INDEX_TYPE.UNIQUE, new ODocument().field("ignoreNullValues", true));
+                    ONeo4jImporterContext.getInstance().getOutputManager().debug("\nCreated index: " + orientDBIndex);
+                  }
 
-                  ONeo4jImporterContext.getInstance().getOutputManager().debug("\nCreated index: " + OrientDBIndex);
+                  ONeo4jImporterContext.getInstance().getOutputManager().debug("\nIndex already exists: " + orientDBIndex);
 
                   statistics.orientDBImportedUniqueConstraintsCounter++;
                   statistics.orientDBImportedConstraintsCounter++;
@@ -359,8 +364,8 @@ class ONeo4jImporterSchemaMigrator {
                 logString = "Trying to create a NOT UNIQUE Index as workaround...";
                 ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
 
-                OIndex OrientDBIndex = oDb.getMetadata().getSchema().getClass(orientDBIndexClass)
-                    .getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE);
+                OIndex orientDBIndex = oDb.getMetadata().getSchema().getClass(orientDBIndexClass)
+                    .getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE, new ODocument().field("ignoreNullValues",true));
 
                 statistics.orientDBImportedNotUniqueWorkaroundCounter++;
 

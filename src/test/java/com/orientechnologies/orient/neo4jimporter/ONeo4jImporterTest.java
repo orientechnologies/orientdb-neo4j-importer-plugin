@@ -319,15 +319,14 @@ public class ONeo4jImporterTest {
     db.close();
   }
 
-
+  @Ignore
   @Test
   public void basicImportingTest() throws Exception {
-
 
     String neo4jUrl = "bolt://localhost:7687";
     String neo4jUsername = "neo4j";
     String neo4jPassword = "admin";
-    String odbDir = "/Users/gabriele/orientdb-community-2.2.25-SNAPSHOT/databases/neo4jImport";
+    String odbDir = "/Users/gabriele/orientdb-community-2.2.25-SNAPSHOT/databases/neo4jImportTX";
     String odbProtocol = "plocal";
     boolean overwriteDB = true;
     boolean createIndexOnNeo4jRelID = true;
