@@ -530,9 +530,6 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             outOrientVertex.addEdge(orientEdgeClassName, inOrientVertex, edgeProps);
             statistics.orientDBImportedEdgesCounter++;
             ONeo4jImporterContext.getInstance().getOutputManager().debug("Orient:" + outOrientVertex.getProperty("@rid") +"-"+ currentRelationshipType  +"->"+ inOrientVertex.getProperty("@rid"));
-            if(cont % 10000 == 0) {
-              System.out.println("Added edges: " + cont);
-            }
 
             if(cont % EDGES_BATCH_SIZE == 0) {
               oDb.commit();
