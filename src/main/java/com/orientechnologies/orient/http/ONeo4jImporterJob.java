@@ -46,7 +46,12 @@ public class ONeo4jImporterJob  implements Runnable {
     String odbProtocol = cfg.field("odbProtocol");
     boolean overrideDB = cfg.field("overwriteDB");
     boolean indexesOnRelationships = cfg.field("indexesOnRelationships");
-    int logLevel = cfg.field("logLevel");
+    int logLevel = Integer.parseInt((String)cfg.field("logLevel"));
+
+    // disabling debug level
+    if(logLevel > 0) {
+      logLevel++;
+    }
 
     status = Status.RUNNING;
 
