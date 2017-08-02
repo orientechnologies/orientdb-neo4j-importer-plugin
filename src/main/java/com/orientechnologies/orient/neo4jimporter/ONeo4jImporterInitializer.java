@@ -110,8 +110,8 @@ class ONeo4jImporterInitializer {
 
     ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + logString + "\n");
 
-    ONeo4jImporterContext.getInstance().getOutputManager().info("Importing Neo4j database from server:");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + this.sourceNeo4jInfo.getNeo4jUrl() + "'");
+    ONeo4jImporterContext.getInstance().getOutputManager().info("Importing Neo4j database from server: ");
+    ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + this.sourceNeo4jInfo.getNeo4jUrl() + "' ");
     ONeo4jImporterContext.getInstance().getOutputManager().info("into OrientDB database:");
     ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + this.dbName + "' (Path: " + this.orientDbFolder + ")\n");
 
