@@ -522,9 +522,9 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             OEdge currentEdge = this.addEdgeToGraph(oDb, outVertex, inVertex, orientEdgeClassName, relationshipProperties);
             statistics.orientDBImportedEdgesCounter++;
             ONeo4jImporterContext.getInstance().getOutputManager().debug("Orient:" + outVertex.getProperty("@rid") +"-"+ currentRelationshipType  +"->"+ inVertex.getProperty("@rid"));
-//            if(cont % 10000 == 0) {
-//              System.out.println("Added edges: " + cont);
-//            }
+            if(cont % 10000 == 0) {
+              System.out.println("Added edges: " + cont);
+            }
 
             if(cont % EDGES_BATCH_SIZE == 0) {
               oDb.commit();
@@ -646,7 +646,9 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     try {
       if (classAndClusterName != null) {
         if (!oDb.getMetadata().getSchema().existsClass(classAndClusterName)) {
+          oDb.commit();
           oDb.createVertexClass(classAndClusterName);
+          oDb.begin();
         }
         vertex = orientGraph.newVertex(classAndClusterName);
         if(properties != null) {
@@ -669,7 +671,9 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     boolean alreadySaved = false;
     try {
       if (!oDb.getMetadata().getSchema().existsClass(edgeType)) {
+        oDb.commit();
         oDb.createEdgeClass(edgeType);
+        oDb.begin();
       }
       edge = orientGraph.newEdge(currentOutVertex, currentInVertex, edgeType);
       if(properties != null) {
