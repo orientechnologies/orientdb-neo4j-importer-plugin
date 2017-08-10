@@ -319,6 +319,7 @@ public class ONeo4jImporterTest {
     db.close();
   }
 
+  @Ignore
   @Test
   public void basicImportingTest() throws Exception {
 
