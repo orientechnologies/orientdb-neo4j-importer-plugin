@@ -458,17 +458,17 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             outVertexClass = (String) outVertexLabels.get(0);
           }
           String[] propertyOfKey = {"neo4jNodeID"};
-//          Object[] valueOfKey = {this.getNeo4jRecordValue(currentRecord, "outVertexID", session)};
           Object[] valueOfKey = new Object[] {currentRecord.get("outVertexID").asObject()};
-          OResultSet vertices = OGraphCommands.getVertices(oDb, outVertexClass, propertyOfKey, valueOfKey);   // we can optimize the lookup by specifying the vertex class !!!
-          if(!vertices.hasNext()) {
-            throw new Exception("Out vertex lookup for the current relationship did not return any vertex.");
-          }
-          OVertex outVertex = vertices.next().getVertex().orElse(null);   // id in unique, thus the query contains just a vertex
-          if(vertices.hasNext()) {
-            throw new Exception("Out vertex lookup for the current relationship returned more than one vertex.");
-          }
-          vertices.close();
+//          OResultSet vertices = OGraphCommands.getVertices(oDb, outVertexClass, propertyOfKey, valueOfKey);   // we can optimize the lookup by specifying the vertex class !!!
+//          if(!vertices.hasNext()) {
+//            throw new Exception("Out vertex lookup for the current relationship did not return any vertex.");
+//          }
+//          OVertex outVertex = vertices.next().getVertex().orElse(null);   // id in unique, thus the query contains just a vertex
+//          if(vertices.hasNext()) {
+//            throw new Exception("Out vertex lookup for the current relationship returned more than one vertex.");
+//          }
+//          vertices.close();
+          OVertex outVertex = OGraphCommands.getVertex(oDb, outVertexClass, propertyOfKey[0], valueOfKey[0]);
 
           //lookup the corresponding inVertex in OrientDB
           List<Object> inVertexLabels = currentRecord.get("inVertexLabels").asList();
@@ -480,15 +480,16 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             inVertexClass = (String) inVertexLabels.get(0);
           }
           valueOfKey[0] = currentRecord.get("inVertexID").asObject();
-          vertices = OGraphCommands.getVertices(oDb, inVertexClass, propertyOfKey, valueOfKey);   // we can optimize the lookup by specifying the vertex class !!!
-          if(!vertices.hasNext()) {
-            throw new Exception("In vertex lookup for the current relationship did not return any vertex.");
-          }
-          OVertex inVertex = vertices.next().getVertex().orElse(null);
-          if(vertices.hasNext()) {
-            throw new Exception("In vertex lookup for the current relationship returned more than one vertex.");
-          }
-          vertices.close();
+//          vertices = OGraphCommands.getVertices(oDb, inVertexClass, propertyOfKey, valueOfKey);   // we can optimize the lookup by specifying the vertex class !!!
+//          if(!vertices.hasNext()) {
+//            throw new Exception("In vertex lookup for the current relationship did not return any vertex.");
+//          }
+//          OVertex inVertex = vertices.next().getVertex().orElse(null);
+//          if(vertices.hasNext()) {
+//            throw new Exception("In vertex lookup for the current relationship returned more than one vertex.");
+//          }
+//          vertices.close();
+          OVertex inVertex = OGraphCommands.getVertex(oDb, outVertexClass, propertyOfKey[0], valueOfKey[0]);
 
           String orientEdgeClassName = currentRelationshipType;
 

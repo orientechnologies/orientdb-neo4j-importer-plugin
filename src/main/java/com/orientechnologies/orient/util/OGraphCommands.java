@@ -19,6 +19,9 @@
 package com.orientechnologies.orient.util;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.db.record.OIdentifiable;
+import com.orientechnologies.orient.core.index.OIndex;
+import com.orientechnologies.orient.core.record.OElement;
 import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
@@ -90,5 +93,24 @@ public class OGraphCommands {
       query += " and " + keys[i] + " = ?";
     }
     return orientGraph.command(query, params);
+  }
+
+
+  /**
+   * Performs the lookup in the specified vertex class.
+   * @param orientGraph
+   * @param key
+   * @param value
+   * @return
+   */
+  public static OVertex getVertex(ODatabaseDocument orientGraph, String vertexClassName, String key, Object value) {
+
+    // check index has just a key
+    // TODO
+
+    OIndex<?> index = orientGraph.getClass(vertexClassName).getProperty(key).getAllIndexes().iterator().next();
+    OIdentifiable id = (OIdentifiable) index.get(value);
+    return ((OElement)id.getRecord()).asVertex().get();
+
   }
 }
