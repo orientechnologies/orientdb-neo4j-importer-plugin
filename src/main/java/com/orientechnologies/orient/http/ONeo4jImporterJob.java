@@ -99,7 +99,10 @@ public class ONeo4jImporterJob  implements Runnable {
       status.field("cfg", cfg);
       status.field("status", this.status);
 
-      String lastBatchLog = extractBatchLog();
+      String lastBatchLog = "";
+      if(this.outputMgr != null) {
+        lastBatchLog = extractBatchLog();
+      }
       status.field("log", lastBatchLog);
 
       if (this.status == Status.FINISHED) {
