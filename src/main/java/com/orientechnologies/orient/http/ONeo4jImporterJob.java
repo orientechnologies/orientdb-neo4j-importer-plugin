@@ -1,5 +1,6 @@
 package com.orientechnologies.orient.http;
 
+import com.orientechnologies.common.log.OLogManager;
 import com.orientechnologies.orient.core.db.OrientDB;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.neo4jimporter.*;
@@ -22,6 +23,7 @@ public class ONeo4jImporterJob  implements Runnable {
 
   public  PrintStream           stream;
   private ByteArrayOutputStream baos;
+  private OOutputStreamManager outputMgr;
 
   private OServer currentServerInstance;
 
@@ -54,6 +56,8 @@ public class ONeo4jImporterJob  implements Runnable {
     }
 
     status = Status.RUNNING;
+    this.outputMgr = new OOutputStreamManager(this.stream, logLevel);
+
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbName, odbProtocol, overrideDB, indexesOnRelationships);
     final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
@@ -65,7 +69,7 @@ public class ONeo4jImporterJob  implements Runnable {
         databaseDirectory = this.currentServerInstance.getDatabaseDirectory();
         orientDBInstance = currentServerInstance.getContext();
       }
-      neo4jImporterPlugin.executeJob(settings, new OOutputStreamManager(this.stream, logLevel), databaseDirectory, orientDBInstance);
+      neo4jImporterPlugin.executeJob(settings, this.outputMgr, databaseDirectory, orientDBInstance);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -95,13 +99,39 @@ public class ONeo4jImporterJob  implements Runnable {
       ODocument status = new ODocument();
       status.field("cfg", cfg);
       status.field("status", this.status);
-      status.field("log", baos.toString());
+
+      String lastBatchLog = extractBatchLog();
+      status.field("log", lastBatchLog);
+
       if (this.status == Status.FINISHED) {
         listener.notifyAll();
       }
       return status;
     }
 
+  }
+
+  private String extractBatchLog() {
+
+    String lastBatchLog = "Current status not correctly loaded.";
+
+    synchronized (this.outputMgr) {
+
+      // filling the last log batch
+      int baosInitSize = baos.size();
+      try {
+        lastBatchLog = baos.toString("UTF-8");
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      int baosFinalSize = baos.size();
+      if (baosFinalSize - baosInitSize > 0) {
+        OLogManager.instance().info(this, "Losing some buffer info.");
+      } else {
+        baos.reset();
+      }
+    }
+    return lastBatchLog;
   }
 
   public enum Status {
