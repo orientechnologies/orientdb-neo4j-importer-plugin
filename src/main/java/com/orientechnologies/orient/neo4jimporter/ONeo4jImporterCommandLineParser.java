@@ -153,8 +153,8 @@ public class ONeo4jImporterCommandLineParser {
       throws IllegalArgumentException {
 
     if (!options.containsKey(option)) {
-      ONeo4jImporterContext.getInstance().getOutputManager().warn(String.format("WARNING: '%s' option not found. Defaulting to '%s'.", option, value));
-      ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
+      ONeo4jImporterContext.getInstance().getMessageHandler().warn(String.format("WARNING: '%s' option not found. Defaulting to '%s'.", option, value));
+      ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
       options.put(option, value);
     }
 

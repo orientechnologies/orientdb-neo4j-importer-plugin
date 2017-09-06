@@ -326,7 +326,7 @@ public class ONeo4jImporterTest {
     String neo4jUrl = "bolt://localhost:7687";
     String neo4jUsername = "neo4j";
     String neo4jPassword = "admin";
-    String odbDir = "/Users/gabriele/orientdb-community-2.2.25-SNAPSHOT/databases/neo4jImportTX";
+    String odbDir = "/Users/gabriele/orientdb-community-2.2.27-SNAPSHOT/databases/neo4jImportTX";
     String odbProtocol = "plocal";
     boolean overwriteDB = true;
     boolean createIndexOnNeo4jRelID = true;
@@ -337,8 +337,8 @@ public class ONeo4jImporterTest {
       ONeo4jImporterMain.executeJob(settings);
     } catch(Exception e) {
       fail();
-      ONeo4jImporterContext.getInstance().getOutputManager().info("Exception message: " + e.getMessage());
-      ONeo4jImporterContext.getInstance().getOutputManager().info("Stacktrace:\n" + e.getStackTrace());
+      ONeo4jImporterContext.getInstance().getMessageHandler().info("Exception message: " + e.getMessage());
+      ONeo4jImporterContext.getInstance().getMessageHandler().info("Stacktrace:\n" + e.getStackTrace());
     }
   }
 

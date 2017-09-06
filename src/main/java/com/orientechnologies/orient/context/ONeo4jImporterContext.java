@@ -1,6 +1,6 @@
 package com.orientechnologies.orient.context;
 
-import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
+import com.orientechnologies.orient.output.OPluginMessageHandler;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -13,7 +13,7 @@ public class ONeo4jImporterContext {
 
   private static ONeo4jImporterContext instance = null;
 
-  private OOutputStreamManager     outputManager;
+  private OPluginMessageHandler    messageHandler;
   private ONeo4jImporterStatistics statistics;
 
   public ONeo4jImporterContext() {
@@ -52,16 +52,16 @@ public class ONeo4jImporterContext {
 
     switch (level) {
     case "debug":
-      this.outputManager.debug(message);
+      this.messageHandler.debug(message);
       break;
     case "info":
-      this.outputManager.info(message);
+      this.messageHandler.info(message);
       break;
     case "warn":
-      this.outputManager.warn(message);
+      this.messageHandler.warn(message);
       break;
     case "error":
-      this.outputManager.error(message);
+      this.messageHandler.error(message);
       break;
     }
 
@@ -85,28 +85,28 @@ public class ONeo4jImporterContext {
 
     switch (level) {
     case "debug":
-      this.outputManager.debug("\n" + s + "\n");
+      this.messageHandler.debug("\n" + s + "\n");
       break;
     case "info":
-      this.outputManager.info("\n" + s + "\n");
+      this.messageHandler.info("\n" + s + "\n");
       break;
     case "warn":
-      this.outputManager.warn("\n" + s + "\n");
+      this.messageHandler.warn("\n" + s + "\n");
       break;
     case "error":
-      this.outputManager.error("\n" + s + "\n");
+      this.messageHandler.error("\n" + s + "\n");
       break;
     }
 
     return s;
   }
 
-  public OOutputStreamManager getOutputManager() {
-    return this.outputManager;
+  public OPluginMessageHandler getMessageHandler() {
+    return this.messageHandler;
   }
 
-  public void setOutputManager(OOutputStreamManager outputManager) {
-    this.outputManager = outputManager;
+  public void setMessageHandler(OPluginMessageHandler messageHandler) {
+    this.messageHandler = messageHandler;
   }
 
   public ONeo4jImporterStatistics getStatistics() {

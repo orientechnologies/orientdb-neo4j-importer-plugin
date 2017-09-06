@@ -1,9 +1,11 @@
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
+import com.orientechnologies.orient.context.ONeo4jImporterMessageHandler;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.listener.OProgressMonitor;
-import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
+import com.orientechnologies.orient.output.OOutputStreamManager;
+import com.orientechnologies.orient.output.OPluginMessageHandler;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -15,7 +17,8 @@ import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_
  */
 public class ONeo4jImporterMain {
 
-  private static OOutputStreamManager outputManager = new OOutputStreamManager(2);
+  private static OPluginMessageHandler messageHandler = new ONeo4jImporterMessageHandler(2);
+
 
   public static void main(String[] args) throws Exception {
 
@@ -34,10 +37,10 @@ public class ONeo4jImporterMain {
 
   public static int executeJob(ONeo4jImporterSettings settings) {
 
-    ONeo4jImporterContext.getInstance().setOutputManager(outputManager);
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info(String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.ORIENT_VERSION, OConstants.COPYRIGHT));
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
+    ONeo4jImporterContext.getInstance().setMessageHandler(messageHandler);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.ORIENT_VERSION, OConstants.COPYRIGHT));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
 
     //parses the command line parameters, and starts the import (.execute). Then exits
     int returnValue = 1;

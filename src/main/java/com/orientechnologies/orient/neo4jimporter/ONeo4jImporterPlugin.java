@@ -5,7 +5,7 @@ import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.exception.OConfigurationException;
 import com.orientechnologies.orient.http.OServerCommandNeo4jImporter;
 import com.orientechnologies.orient.listener.OProgressMonitor;
-import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
+import com.orientechnologies.orient.output.OPluginMessageHandler;
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.config.OServerParameterConfiguration;
 import com.orientechnologies.orient.server.network.OServerNetworkListener;
@@ -26,13 +26,13 @@ public class ONeo4jImporterPlugin extends OServerPluginAbstract {
 
   public ONeo4jImporterPlugin() {}
 
-  public void executeJob(ONeo4jImporterSettings settings, OOutputStreamManager outputManager, String orientdbDatabasesAbsolutePath) throws Exception {
+  public void executeJob(ONeo4jImporterSettings settings, OPluginMessageHandler messageHandler, String orientdbDatabasesAbsolutePath) throws Exception {
 
     final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings, orientdbDatabasesAbsolutePath);
-    ONeo4jImporterContext.newInstance().setOutputManager(outputManager);
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info(String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.ORIENT_VERSION, OConstants.COPYRIGHT));
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
+    ONeo4jImporterContext.newInstance().setMessageHandler(messageHandler);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.ORIENT_VERSION, OConstants.COPYRIGHT));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
 
     try {
 
