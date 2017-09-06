@@ -337,8 +337,8 @@ public class ONeo4jImporterTest {
       ONeo4jImporterMain.executeJob(settings);
     } catch(Exception e) {
       fail();
-      ONeo4jImporterContext.getInstance().getOutputManager().info("Exception message: " + e.getMessage());
-      ONeo4jImporterContext.getInstance().getOutputManager().info("Stacktrace:\n" + e.getStackTrace());
+      ONeo4jImporterContext.getInstance().getMessageHandler().info("Exception message: " + e.getMessage());
+      ONeo4jImporterContext.getInstance().getMessageHandler().info("Stacktrace:\n" + e.getStackTrace());
     }
   }
 

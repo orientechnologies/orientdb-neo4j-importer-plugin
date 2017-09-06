@@ -2,15 +2,14 @@ package com.orientechnologies.orient.http;
 
 import com.orientechnologies.common.log.OLogManager;
 import com.orientechnologies.orient.core.db.OrientDB;
+import com.orientechnologies.orient.context.ONeo4jImporterMessageHandler;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.neo4jimporter.*;
-import com.orientechnologies.orient.outputmanager.OOutputStreamManager;
+import com.orientechnologies.orient.output.OPluginMessageHandler;
 import com.orientechnologies.orient.server.OServer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by gabriele on 27/02/17.
@@ -21,9 +20,9 @@ public class ONeo4jImporterJob  implements Runnable {
   private       ONeo4ImporterListener listener;
   public Status      status;
 
-  public  PrintStream           stream;
-  private ByteArrayOutputStream baos;
-  private OOutputStreamManager outputMgr;
+  public    PrintStream           stream;
+  private   ByteArrayOutputStream baos;
+  private OPluginMessageHandler messageHandler;
 
   private OServer currentServerInstance;
 
@@ -56,7 +55,7 @@ public class ONeo4jImporterJob  implements Runnable {
     }
 
     status = Status.RUNNING;
-    this.outputMgr = new OOutputStreamManager(this.stream, logLevel);
+    this.messageHandler = new ONeo4jImporterMessageHandler(this.stream, logLevel);
 
 
     ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbName, odbProtocol, overrideDB, indexesOnRelationships);
@@ -69,7 +68,7 @@ public class ONeo4jImporterJob  implements Runnable {
         databaseDirectory = this.currentServerInstance.getDatabaseDirectory();
         orientDBInstance = currentServerInstance.getContext();
       }
-      neo4jImporterPlugin.executeJob(settings, this.outputMgr, databaseDirectory, orientDBInstance);
+      neo4jImporterPlugin.executeJob(settings, this.messageHandler, databaseDirectory, orientDBInstance);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -101,7 +100,7 @@ public class ONeo4jImporterJob  implements Runnable {
       status.field("status", this.status);
 
       String lastBatchLog = "";
-      if(this.outputMgr != null) {
+      if(this.messageHandler != null) {
         lastBatchLog = extractBatchLog();
       }
       status.field("log", lastBatchLog);
@@ -118,7 +117,7 @@ public class ONeo4jImporterJob  implements Runnable {
 
     String lastBatchLog = "Current status not correctly loaded.";
 
-    synchronized (this.outputMgr) {
+    synchronized (this.messageHandler) {
 
       // filling the last log batch
       int baosInitSize = baos.size();

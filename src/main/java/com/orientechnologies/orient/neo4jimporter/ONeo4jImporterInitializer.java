@@ -68,18 +68,18 @@ class ONeo4jImporterInitializer {
 
     this.initializationStartTime = System.currentTimeMillis();
 
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\n\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("Trying connection to Neo4j...");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("Trying connection to Neo4j...");
 
     ONeo4jConnectionManager connectionManager = new ONeo4jConnectionManager(this.sourceNeo4jInfo);
     Session neo4jSession = connectionManager.getSession();
 
     logString = "Trying connection to Neo4j...Neo4j server is alive and connection succeeded.";
 
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("\r" + logString);
 
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\n");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("Initializing OrientDB...");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("Initializing OrientDB...");
 
     // creating orientdb graph database
     switch(this.orientDbProtocol) {
@@ -107,15 +107,15 @@ class ONeo4jImporterInitializer {
 
     logString = "Initializing OrientDB...Done\n";
 
-    ONeo4jImporterContext.getInstance().getOutputManager().info("\r" + logString + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("\r" + logString + "\n");
 
-    ONeo4jImporterContext.getInstance().getOutputManager().info("Importing Neo4j database from server: ");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + this.sourceNeo4jInfo.getNeo4jUrl() + "' ");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("into OrientDB database:");
-    ONeo4jImporterContext.getInstance().getOutputManager().info("  '" + orientDbName + "'\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("Importing Neo4j database from server: ");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("  '" + this.sourceNeo4jInfo.getNeo4jUrl() + "' ");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("into OrientDB database:");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info("  '" + orientDbName + "'\n");
 
     logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 1 completed!\n\n";
-    ONeo4jImporterContext.getInstance().getOutputManager().info(logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
 
     this.initializationStopTime = System.currentTimeMillis();
     return neo4jSession;
