@@ -1,19 +1,21 @@
 /*
  *
- *  * Copyright 2014 Orient Technologies.
+ *  *  Copyright 2010-2017 OrientDB LTD (http://orientdb.com)
  *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
+ *  *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  *  you may not use this file except in compliance with the License.
+ *  *  You may obtain a copy of the License at
  *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *       http://www.apache.org/licenses/LICENSE-2.0
  *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- *  
+ *  *  Unless required by applicable law or agreed to in writing, software
+ *  *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  *  See the License for the specific language governing permissions and
+ *  *  limitations under the License.
+ *  *
+ *  * For more information: http://orientdb.com
+ *
  */
 
 package com.orientechnologies.orient.neo4jimporter;
@@ -78,7 +80,7 @@ public class ONeo4jImporter {
     DecimalFormat dfd = new DecimalFormat("#.##");
 
     logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " started!\n\n";
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
     // parameters
     String neo4jUrl = settings.getNeo4jUrl();
@@ -107,14 +109,14 @@ public class ONeo4jImporter {
     if (ONeo4jImporterContext.getInstance().getOrientDBInstance().exists(dbName)) {
       if (overwriteOrientDBDir) {
         logString = "The '" + dbName + "' database already exists and the overwrite option is 'true'. The database will be erased before the new migration.";
-        ONeo4jImporterContext.getInstance().getMessageHandler().warn(logString);
+        ONeo4jImporterContext.getInstance().getMessageHandler().warn(this, logString);
         ONeo4jImporterContext.getInstance().getOrientDBInstance().drop(dbName);
       } else {
 
         //we exit the program
         logString = "The '" + dbName + "' database already exists and the overwrite option is 'false' (default). "
             + "Please delete the database or run the migration with the 'overwrite' option set to true. Terminating the migration.\n\n";
-        ONeo4jImporterContext.getInstance().getMessageHandler().error(logString);
+        ONeo4jImporterContext.getInstance().getMessageHandler().error(this, logString);
         throw new RuntimeException(logString);
       }
     }
@@ -167,9 +169,9 @@ public class ONeo4jImporter {
 
     String logString;
     logString = "\nShutting down OrientDB connection...";
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
     oDb.close();
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\rShutting down OrientDB connection...Done\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\rShutting down OrientDB connection...Done\n");
 
     logString = "Shutting down Neo4j connection...";
 
@@ -183,8 +185,8 @@ public class ONeo4jImporter {
       ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
       throw new RuntimeException(e.getMessage());
     }
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\rShutting down Neo4j connection...Done\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\rShutting down Neo4j connection...Done\n");
   }
 
   private void printSummary(long startTime, DecimalFormat df, DecimalFormat dfd, ONeo4jImporterStatistics counters,
@@ -219,102 +221,102 @@ public class ONeo4jImporter {
     double neo4jTotalInternalIndicesCounter = counters.neo4jInternalVertexIndicesCounter + counters.neo4jInternalEdgeIndicesCounter;
 
     String format = "%-100s %s";
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("===============");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("Import Summary:");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("===============");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Found Neo4j Nodes", ": " + df.format(counters.neo4jNodeCounter) + "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "-- With at least one Label", ": " + df.format(counters.neo4jNodeMultipleLabelsCounter) + "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "-- With multiple Labels", ": " + df.format(counters.neo4jNodeMultipleLabelsCounter) + "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "-- Without Labels", ": " + df.format(counters.neo4jNodeNoLabelCounter) + "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Imported OrientDB Vertices", ": " + df.format(counters.orientDBImportedVerticesCounter));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "===============");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Import Summary:");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "===============");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Found Neo4j Nodes", ": " + df.format(counters.neo4jNodeCounter) + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- With at least one Label", ": " + df.format(counters.neo4jNodeMultipleLabelsCounter) + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- With multiple Labels", ": " + df.format(counters.neo4jNodeMultipleLabelsCounter) + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- Without Labels", ": " + df.format(counters.neo4jNodeNoLabelCounter) + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Imported OrientDB Vertices", ": " + df.format(counters.orientDBImportedVerticesCounter));
     if (counters.neo4jNodeCounter > 0) {
       value = (counters.orientDBImportedVerticesCounter / counters.neo4jNodeCounter) * 100;
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + df.format(value) + "%)");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + df.format(value) + "%)");
     }
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Found Neo4j Relationships", ": " + df.format(counters.neo4jRelCounter) + "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Imported OrientDB Edges", ": " + df.format(counters.orientDBImportedEdgesCounter));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Found Neo4j Relationships", ": " + df.format(counters.neo4jRelCounter) + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Imported OrientDB Edges", ": " + df.format(counters.orientDBImportedEdgesCounter));
     if (counters.neo4jRelCounter > 0) {
       value = (counters.orientDBImportedEdgesCounter / counters.neo4jRelCounter) * 100;
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + df.format(value) + "%)");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + df.format(value) + "%)");
     }
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Found Neo4j Constraints", ": " + df.format(counters.neo4jConstraintsCounter) +"\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Imported OrientDB Constraints (UNIQUE Indices created)", ": " + df.format(counters.orientDBImportedConstraintsCounter));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Found Neo4j Constraints", ": " + df.format(counters.neo4jConstraintsCounter) +"\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Imported OrientDB Constraints (UNIQUE Indices created)", ": " + df.format(counters.orientDBImportedConstraintsCounter));
     if (counters.neo4jConstraintsCounter > 0) {
       value = (counters.orientDBImportedConstraintsCounter / counters.neo4jConstraintsCounter) * 100;
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + df.format(value) + "%)");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + df.format(value) + "%)");
     }
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- NOT UNIQUE Indices created due to failure in creating UNIQUE Indices", ": " + df.format(counters.orientDBImportedNotUniqueWorkaroundCounter));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- NOT UNIQUE Indices created due to failure in creating UNIQUE Indices", ": " + df.format(counters.orientDBImportedNotUniqueWorkaroundCounter));
     if (counters.neo4jConstraintsCounter > 0) {
       value = (counters.orientDBImportedNotUniqueWorkaroundCounter / counters.neo4jConstraintsCounter) * 100;
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + df.format(value) + "%)");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + df.format(value) + "%)");
     }
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Found Neo4j (non-constraint) Indices", ": " + df.format(counters.neo4jNonConstraintsIndicesCounter) +"\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Imported OrientDB Indices", ": " + df.format(counters.orientDBImportedIndicesCounter));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Found Neo4j (non-constraint) Indices", ": " + df.format(counters.neo4jNonConstraintsIndicesCounter) +"\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Imported OrientDB Indices", ": " + df.format(counters.orientDBImportedIndicesCounter));
     if (counters.neo4jNonConstraintsIndicesCounter > 0) {
       value = (counters.orientDBImportedIndicesCounter / counters.neo4jNonConstraintsIndicesCounter) * 100;
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + df.format(value) + "%)");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + df.format(value) + "%)");
     }
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
 
-    //ONeo4jImporterContext.getInstance().getMessageHandler().info("- Additional created Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')          : " + df.format(counters.neo4jInternalIndicesCounter));
+    //ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "- Additional created Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')          : " + df.format(counters.neo4jInternalIndicesCounter));
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Additional internal Indices created", ": " + df.format(neo4jTotalInternalIndicesCounter) + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Additional internal Indices created", ": " + df.format(neo4jTotalInternalIndicesCounter) + "\n");
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "- Total Import time:", ": " + OFunctionsHandler.getHMSFormat(elapsedTime) + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Total Import time:", ": " + OFunctionsHandler.getHMSFormat(elapsedTime) + "\n");
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "-- Initialization time", ": " + OFunctionsHandler.getHMSFormat(initializationElapsedTime) + "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "-- Time to Import Nodes", ": " + OFunctionsHandler.getHMSFormat(importingNodesElapsedTime));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- Initialization time", ": " + OFunctionsHandler.getHMSFormat(initializationElapsedTime) + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- Time to Import Nodes", ": " + OFunctionsHandler.getHMSFormat(importingNodesElapsedTime));
     if (importingNodesElapsedTimeSeconds > 0) {
       value = (counters.orientDBImportedVerticesCounter / importingNodesElapsedTimeSeconds);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + dfd.format(value) + " nodes/sec)");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + dfd.format(value) + " nodes/sec)");
     }
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "-- Time to Import Relationships", ": " + OFunctionsHandler.getHMSFormat(importingRelsElapsedTime));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- Time to Import Relationships", ": " + OFunctionsHandler.getHMSFormat(importingRelsElapsedTime));
     if (importingRelsElapsedTimeSeconds > 0) {
       value = (counters.orientDBImportedEdgesCounter / importingRelsElapsedTimeSeconds);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + dfd.format(value) + " rels/sec)");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + dfd.format(value) + " rels/sec)");
     }
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "-- Time to Import Constraints and Indices", ": " + OFunctionsHandler.getHMSFormat(importingSchemaElapsedTime));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- Time to Import Constraints and Indices", ": " + OFunctionsHandler.getHMSFormat(importingSchemaElapsedTime));
     if (importingSchemaElapsedTimeSeconds > 0) {
       value = ((counters.orientDBImportedConstraintsCounter + counters.orientDBImportedIndicesCounter)
           / importingSchemaElapsedTimeSeconds);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + dfd.format(value) + " indices/sec)");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + dfd.format(value) + " indices/sec)");
     }
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "-- Time to Create Internal Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')", ": " + OFunctionsHandler.getHMSFormat(internalVertexIndicesElapsedTime));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- Time to Create Internal Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')", ": " + OFunctionsHandler.getHMSFormat(internalVertexIndicesElapsedTime));
     if (internalVertexIndicesElapsedTimeSeconds > 0) {
       value = (counters.neo4jInternalVertexIndicesCounter / internalVertexIndicesElapsedTimeSeconds);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + dfd.format(value) + " indices/sec)");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + dfd.format(value) + " indices/sec)");
     }
 
     if (neo4jRelIdIndex) {
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(format, "-- Time to Create Internal Indices (on edge property 'neo4jRelID')", ": " + OFunctionsHandler.getHMSFormat(internalEdgeIndicesElapsedTime));
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- Time to Create Internal Indices (on edge property 'neo4jRelID')", ": " + OFunctionsHandler.getHMSFormat(internalEdgeIndicesElapsedTime));
       if (internalEdgeIndicesElapsedTimeSeconds > 0) {
         value = (counters.neo4jInternalEdgeIndicesCounter / internalEdgeIndicesElapsedTimeSeconds);
-        ONeo4jImporterContext.getInstance().getMessageHandler().info(" (" + dfd.format(value) + " indices/sec)");
+        ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + dfd.format(value) + " indices/sec)");
       }
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
     }
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
     logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 4 completed!\n\n";
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
   }
 
 }

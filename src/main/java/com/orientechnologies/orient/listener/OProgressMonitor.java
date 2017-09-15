@@ -1,3 +1,23 @@
+/*
+ *
+ *  *  Copyright 2010-2017 OrientDB LTD (http://orientdb.com)
+ *  *
+ *  *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  *  you may not use this file except in compliance with the License.
+ *  *  You may obtain a copy of the License at
+ *  *
+ *  *       http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  *  Unless required by applicable law or agreed to in writing, software
+ *  *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  *  See the License for the specific language governing permissions and
+ *  *  limitations under the License.
+ *  *
+ *  * For more information: http://orientdb.com
+ *
+ */
+
 package com.orientechnologies.orient.listener;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
@@ -65,13 +85,13 @@ public class OProgressMonitor implements OStatisticsListener {
     if (statistics.orientDBImportedVerticesCounter == 0) {
       keepLogString = "Added OrientDB Vertices: " + df.format(statistics.orientDBImportedVerticesCounter) + " (0% done)";
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     else {
       double value = 100.0 * (statistics.orientDBImportedVerticesCounter / statistics.neo4jTotalNodes);
       keepLogString = "Added OrientDB Vertices: " + df.format(statistics.orientDBImportedVerticesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     return keepLogString;
   }
@@ -83,13 +103,13 @@ public class OProgressMonitor implements OStatisticsListener {
     if (statistics.neo4jInternalVertexIndicesCounter == 0) {
       keepLogString = "Built OrientDB Indices: " + df.format(statistics.neo4jInternalVertexIndicesCounter) + " (0% done)";
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     else {
       double value = 100.0 * (statistics.neo4jInternalVertexIndicesCounter / (statistics.orientDBVerticesClassCount * 2));
       keepLogString = "Built OrientDB Indices: " + df.format(statistics.neo4jInternalVertexIndicesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     return keepLogString;
   }
@@ -102,13 +122,13 @@ public class OProgressMonitor implements OStatisticsListener {
     if (statistics.orientDBImportedEdgesCounter == 0) {
       keepLogString = "Added OrientDB Edges: " + df.format(statistics.orientDBImportedEdgesCounter) + " (0% done)";
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     else {
       double value = 100 * (statistics.orientDBImportedEdgesCounter / statistics.neo4jTotalRels);
       keepLogString = "Added OrientDB Edges: " + df.format(statistics.orientDBImportedEdgesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     return keepLogString;
   }
@@ -121,13 +141,13 @@ public class OProgressMonitor implements OStatisticsListener {
     if (statistics.neo4jInternalEdgeIndicesCounter == 0) {
       keepLogString =  "Built OrientDB Indices: " + df.format(statistics.neo4jInternalEdgeIndicesCounter) + " (0% done)";
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     else {
       double value = 100.0 * (statistics.neo4jInternalEdgeIndicesCounter / (statistics.orientDBEdgeClassesCount));
       keepLogString = "Built OrientDB Indices: " + df.format(statistics.neo4jInternalEdgeIndicesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     return keepLogString;
   }
@@ -145,7 +165,7 @@ public class OProgressMonitor implements OStatisticsListener {
         keepLogString += " (0% done)";
       }
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     else {
       double value = 100 * (statistics.neo4jConstraintsCounter / statistics.neo4jTotalConstraints);
@@ -154,7 +174,7 @@ public class OProgressMonitor implements OStatisticsListener {
       // TODO: discerning behaviour according to constraints' type (not present in old version too)
 
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
 
     return keepLogString;
@@ -174,13 +194,13 @@ public class OProgressMonitor implements OStatisticsListener {
 
       }
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     else {
       double value = 100 * (statistics.neo4jNonConstraintsIndicesCounter / (statistics.neo4jTotalIndices - statistics.neo4jTotalUniqueConstraints));
       keepLogString = "Built OrientDB Indices: " + df.format(statistics.orientDBImportedIndicesCounter) + " (" + df.format(value) + "% done)";
       String message = String.format(format, keepLogString);
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(message);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, message);
     }
     return keepLogString;
   }

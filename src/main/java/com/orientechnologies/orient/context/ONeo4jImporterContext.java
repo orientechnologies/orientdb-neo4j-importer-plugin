@@ -1,3 +1,23 @@
+/*
+ *
+ *  *  Copyright 2010-2017 OrientDB LTD (http://orientdb.com)
+ *  *
+ *  *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  *  you may not use this file except in compliance with the License.
+ *  *  You may obtain a copy of the License at
+ *  *
+ *  *       http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  *  Unless required by applicable law or agreed to in writing, software
+ *  *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  *  See the License for the specific language governing permissions and
+ *  *  limitations under the License.
+ *  *
+ *  * For more information: http://orientdb.com
+ *
+ */
+
 package com.orientechnologies.orient.context;
 
 import com.orientechnologies.orient.core.db.OrientDB;
@@ -64,16 +84,16 @@ public class ONeo4jImporterContext {
 
     switch (level) {
     case "debug":
-      this.messageHandler.debug(message);
+      this.messageHandler.debug(this, message);
       break;
     case "info":
-      this.messageHandler.info(message);
+      this.messageHandler.info(this, message);
       break;
     case "warn":
-      this.messageHandler.warn(message);
+      this.messageHandler.warn(this, message);
       break;
     case "error":
-      this.messageHandler.error(message);
+      this.messageHandler.error(this, message);
       break;
     }
 
@@ -97,16 +117,16 @@ public class ONeo4jImporterContext {
 
     switch (level) {
     case "debug":
-      this.messageHandler.debug("\n" + s + "\n");
+      this.messageHandler.debug(this, "\n" + s + "\n");
       break;
     case "info":
-      this.messageHandler.info("\n" + s + "\n");
+      this.messageHandler.info(this, "\n" + s + "\n");
       break;
     case "warn":
-      this.messageHandler.warn("\n" + s + "\n");
+      this.messageHandler.warn(this, "\n" + s + "\n");
       break;
     case "error":
-      this.messageHandler.error("\n" + s + "\n");
+      this.messageHandler.error(this, "\n" + s + "\n");
       break;
     }
 
