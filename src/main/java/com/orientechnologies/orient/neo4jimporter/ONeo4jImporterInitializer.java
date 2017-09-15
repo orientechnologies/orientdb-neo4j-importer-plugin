@@ -1,3 +1,23 @@
+/*
+ *
+ *  *  Copyright 2010-2017 OrientDB LTD (http://orientdb.com)
+ *  *
+ *  *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  *  you may not use this file except in compliance with the License.
+ *  *  You may obtain a copy of the License at
+ *  *
+ *  *       http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  *  Unless required by applicable law or agreed to in writing, software
+ *  *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  *  See the License for the specific language governing permissions and
+ *  *  limitations under the License.
+ *  *
+ *  * For more information: http://orientdb.com
+ *
+ */
+
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.connection.ONeo4jConnectionManager;
@@ -76,18 +96,18 @@ class ONeo4jImporterInitializer {
 
     this.initializationStartTime = System.currentTimeMillis();
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("Trying connection to Neo4j...");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Trying connection to Neo4j...");
 
     ONeo4jConnectionManager connectionManager = new ONeo4jConnectionManager(this.sourceNeo4jInfo);
     Session neo4jSession = connectionManager.getSession();
 
     logString = "Trying connection to Neo4j...Neo4j server is alive and connection succeeded.";
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\r" + logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\r" + logString);
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("Initializing OrientDB...");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Initializing OrientDB...");
 
     String dbUrl = this.orientDbProtocol + ":" + this.orientDbFolder;
 
@@ -108,15 +128,15 @@ class ONeo4jImporterInitializer {
 
     logString = "Initializing OrientDB...Done\n";
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("\r" + logString + "\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\r" + logString + "\n");
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("Importing Neo4j database from server: ");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("  '" + this.sourceNeo4jInfo.getNeo4jUrl() + "' ");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("into OrientDB database:");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info("  '" + this.dbName + "' (Path: " + this.orientDbFolder + ")\n");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Importing Neo4j database from server: ");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "  '" + this.sourceNeo4jInfo.getNeo4jUrl() + "' ");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "into OrientDB database:");
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "  '" + this.dbName + "' (Path: " + this.orientDbFolder + ")\n");
 
     logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 1 completed!\n\n";
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
     this.initializationStopTime = System.currentTimeMillis();
     return neo4jSession;

@@ -1,3 +1,23 @@
+/*
+ *
+ *  *  Copyright 2010-2017 OrientDB LTD (http://orientdb.com)
+ *  *
+ *  *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  *  you may not use this file except in compliance with the License.
+ *  *  You may obtain a copy of the License at
+ *  *
+ *  *       http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  *  Unless required by applicable law or agreed to in writing, software
+ *  *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  *  See the License for the specific language governing permissions and
+ *  *  limitations under the License.
+ *  *
+ *  * For more information: http://orientdb.com
+ *
+ */
+
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
@@ -83,7 +103,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       this.statistics.importingElements = "vertices";
       this.importVertices(neo4jSession);
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("\nDone\n\n");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
 
@@ -94,7 +114,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       this.statistics.importingElements = "indices-on-vertices";
       this.importIndicesOnVertices();
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("\nDone\n\n");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
 
@@ -104,7 +124,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       this.statistics.importingElements = "edges";
       this.importEdges(neo4jSession);
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("\nDone\n\n");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
 
@@ -115,7 +135,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       this.statistics.importingElements = "indices-on-edges";
       this.buildIndicesOnEdges();
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("\nDone\n\n");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
     } catch (Exception e) {
@@ -123,7 +143,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     }
 
     logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 2 completed!\n\n";
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
   }
 
 
@@ -141,7 +161,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
     if (migrateNodes) {
 
       logString = "Getting all Nodes from Neo4j and creating corresponding Vertices in OrientDB...\n";
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
 
       /**
@@ -201,7 +221,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             statistics.neo4jNodeMultipleLabelsCounter++;
             logString = "Found node ('" + currentRecord + "') with multiple labels. Only the first (" + orientVertexClass
                 + ") will be used as Class when importing this node in OrientDB";
-            ONeo4jImporterContext.getInstance().getMessageHandler().debug(logString);
+            ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, logString);
           }
 
           // if numberOfLabels=0 the neo4j node has no label
@@ -211,7 +231,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
             orientVertexClass = "GenericClassNeo4jConversion";
             logString = "Found node ('" + currentRecord
                 + "') with no labels. Class 'GenericClassNeo4jConversion' will be used when importing this node in OrientDB";
-            ONeo4jImporterContext.getInstance().getMessageHandler().debug(logString);
+            ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, logString);
           }
 
           //gets the node properties
@@ -234,7 +254,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
             // store the vertex on OrientDB
             Vertex myVertex = oDb.addVertex("class:" + orientVertexClass, nodeProperties);
-            ONeo4jImporterContext.getInstance().getMessageHandler().debug(myVertex.toString());
+            ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, myVertex.toString());
             statistics.orientDBImportedVerticesCounter++;
 
             if(cont % VERTICES_BATCH_SIZE == 0) {
@@ -318,7 +338,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
     statistics.internalVertexIndicesStartTime = System.currentTimeMillis();
     logString = "Creating internal Indices on properties 'neo4jNodeID' & 'neo4jLabelList' on all OrientDB Vertices Classes...\n";
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
     Collection<OClass> vertexClasses = oDb.getRawGraph().getMetadata().getSchema().getClass("V").getAllSubclasses();
     statistics.orientDBVerticesClassCount = (double) vertexClasses.size();
@@ -395,7 +415,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
       logString = "Getting all Relationships from Neo4j and creating corresponding Edges in OrientDB...\n";
 
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
       //counting Neo4j Relationships so that we can show a % on OrientDB Edges creation
       try {
@@ -431,7 +451,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           statistics.neo4jRelCounter++;
 
           String currentRelationshipType = currentRecord.get("relationshipType").asString();
-          ONeo4jImporterContext.getInstance().getMessageHandler().debug("Current relationship type: " + currentRelationshipType);
+          ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, "Current relationship type: " + currentRelationshipType);
 
           //get the relationship properties
           Map<String, Object> resultMap = currentRecord.get("relationshipProps").asMap();
@@ -441,7 +461,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           //store also the original neo4j relationship id
           relationshipProperties.put("neo4jRelID", currentRecord.get("relationshipId").asLong());
 
-          ONeo4jImporterContext.getInstance().getMessageHandler().debug("Neo:" + currentRecord.get("outVertexID") +"-"+ currentRelationshipType  +"->"+ currentRecord.get("inVertexID"));
+          ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, "Neo:" + currentRecord.get("outVertexID") +"-"+ currentRelationshipType  +"->"+ currentRecord.get("inVertexID"));
 
           //lookup the corresponding outVertex in OrientDB
           List<Object> outVertexLabels = currentRecord.get("outVertexLabels").asList();
@@ -486,7 +506,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
 
           String orientEdgeClassName = currentRelationshipType;
 
-          ONeo4jImporterContext.getInstance().getMessageHandler().debug("\nOrientDb Edge class name: " + orientEdgeClassName);
+          ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, "\nOrientDb Edge class name: " + orientEdgeClassName);
 
           /*
            * In neo4j we can have labels on nodes and relationship with the same name, but in OrientDB we cannot have vertex and edges classes with the same name.
@@ -506,7 +526,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
                     "Found a Neo4j Relationship Type ('" + orientEdgeClassName + "') with same name of a Neo4j node Label ('"
                         + currentClass.getName() + "'). Importing in OrientDB relationships of this type as 'E_"
                         + orientEdgeClassName;
-                ONeo4jImporterContext.getInstance().getMessageHandler().warn(logString);
+                ONeo4jImporterContext.getInstance().getMessageHandler().warn(this, logString);
               }
               orientEdgeClassName = "E_" + orientEdgeClassName;
             }
@@ -529,7 +549,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
           try {
             outOrientVertex.addEdge(orientEdgeClassName, inOrientVertex, edgeProps);
             statistics.orientDBImportedEdgesCounter++;
-            ONeo4jImporterContext.getInstance().getMessageHandler().debug("Orient:" + outOrientVertex.getProperty("@rid") +"-"+ currentRelationshipType  +"->"+ inOrientVertex.getProperty("@rid"));
+            ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, "Orient:" + outOrientVertex.getProperty("@rid") +"-"+ currentRelationshipType  +"->"+ inOrientVertex.getProperty("@rid"));
 
             if(cont % EDGES_BATCH_SIZE == 0) {
               oDb.commit();
@@ -581,7 +601,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       if (migrateRels) {
 
         logString = "Creating internal Indices on properties 'neo4jRelID' on all OrientDB Edge Classes...\n";
-        ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+        ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
         Collection<OClass> edgeClasses = oDb.getRawGraph().getMetadata().getSchema().getClass("E").getAllSubclasses();
         statistics.orientDBEdgeClassesCount = (double) edgeClasses.size();

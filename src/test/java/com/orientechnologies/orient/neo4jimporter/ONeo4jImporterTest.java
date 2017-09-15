@@ -1,3 +1,23 @@
+/*
+ *
+ *  *  Copyright 2010-2017 OrientDB LTD (http://orientdb.com)
+ *  *
+ *  *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  *  you may not use this file except in compliance with the License.
+ *  *  You may obtain a copy of the License at
+ *  *
+ *  *       http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  *  Unless required by applicable law or agreed to in writing, software
+ *  *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  *  See the License for the specific language governing permissions and
+ *  *  limitations under the License.
+ *  *
+ *  * For more information: http://orientdb.com
+ *
+ */
+
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
@@ -326,7 +346,7 @@ public class ONeo4jImporterTest {
     String neo4jUrl = "bolt://localhost:7687";
     String neo4jUsername = "neo4j";
     String neo4jPassword = "admin";
-    String odbDir = "/Users/gabriele/orientdb-community-2.2.27-SNAPSHOT/databases/neo4jImportTX";
+    String odbDir = "/Users/gabriele/orientdb-community-2.2.28-SNAPSHOT/databases/neo4jImportTX";
     String odbProtocol = "plocal";
     boolean overwriteDB = true;
     boolean createIndexOnNeo4jRelID = true;
@@ -337,8 +357,8 @@ public class ONeo4jImporterTest {
       ONeo4jImporterMain.executeJob(settings);
     } catch(Exception e) {
       fail();
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("Exception message: " + e.getMessage());
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("Stacktrace:\n" + e.getStackTrace());
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Exception message: " + e.getMessage());
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Stacktrace:\n" + e.getStackTrace());
     }
   }
 

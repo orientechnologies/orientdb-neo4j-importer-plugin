@@ -1,3 +1,23 @@
+/*
+ *
+ *  *  Copyright 2010-2017 OrientDB LTD (http://orientdb.com)
+ *  *
+ *  *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  *  you may not use this file except in compliance with the License.
+ *  *  You may obtain a copy of the License at
+ *  *
+ *  *       http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  *  Unless required by applicable law or agreed to in writing, software
+ *  *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  *  See the License for the specific language governing permissions and
+ *  *  limitations under the License.
+ *  *
+ *  * For more information: http://orientdb.com
+ *
+ */
+
 package com.orientechnologies.orient.neo4jimporter;
 
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
@@ -56,7 +76,7 @@ class ONeo4jImporterSchemaMigrator {
       this.statistics.importingElements = "constraints";
       this.importConstraints(neo4jSession);
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("\nDone\n\n");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
       /**
@@ -65,11 +85,11 @@ class ONeo4jImporterSchemaMigrator {
       this.statistics.importingElements = "indices";
       this.importIndices(neo4jSession);
       ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-      ONeo4jImporterContext.getInstance().getMessageHandler().info("\nDone\n\n");
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
       String logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 3 completed!\n";
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
     } catch(Exception e) {
       throw new RuntimeException(e);
@@ -84,7 +104,7 @@ class ONeo4jImporterSchemaMigrator {
     double value;
 
     logString = "Getting Indices from Neo4j and creating corresponding ones in OrientDB...\n";
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
     //counting Neo4j Indices so that we can show a % on OrientDB indices creation
 
@@ -112,11 +132,11 @@ class ONeo4jImporterSchemaMigrator {
         String neo4jLabelOfIndex = indexDescription.substring(indexDescription.indexOf(":") + 1, indexDescription.indexOf("("));
         orientDBIndexClassName =  neo4jLabelOfIndex;
 
-        ONeo4jImporterContext.getInstance().getMessageHandler().debug("all index: on label " + neo4jLabelOfIndex);
+        ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, "all index: on label " + neo4jLabelOfIndex);
 
         statistics.neo4jNonConstraintsIndicesCounter++;
 
-        ONeo4jImporterContext.getInstance().getMessageHandler().debug("non constraint index: on label " + neo4jLabelOfIndex);
+        ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, "non constraint index: on label " + neo4jLabelOfIndex);
 
         //gets the property this index is on
         String rawProps = indexDescription.substring(indexDescription.indexOf("(") + 1, indexDescription.indexOf(")"));
@@ -211,13 +231,13 @@ class ONeo4jImporterSchemaMigrator {
           if (oDb.getRawGraph().getMetadata().getIndexManager().existsIndex("MultipleLabelNeo4jConversion.neo4jLabelList")) {
 
             logString = "Rebuilding Index MultipleLabelNeo4jConversion.neo4jLabelList. Please wait...\n";
-            ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+            ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
             try{
               oDb.getRawGraph().getMetadata().getIndexManager().getClassIndex("MultipleLabelNeo4jConversion", "MultipleLabelNeo4jConversion.neo4jLabelList").rebuild();
-              ONeo4jImporterContext.getInstance().getMessageHandler().info("\r" + logString + "Done\n");
+              ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\r" + logString + "Done\n");
             } catch (Exception e) {
-              ONeo4jImporterContext.getInstance().getMessageHandler().info("\r" + logString + "Failed\n");
+              ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\r" + logString + "Failed\n");
               String mess = "Found an error when trying to rebuild the index 'MultipleLabelNeo4jConversion.neo4jLabelList': " + e.getMessage();
               ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
               ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
@@ -229,7 +249,7 @@ class ONeo4jImporterSchemaMigrator {
     // end index workaround
 
     logString = "Getting Constraints from Neo4j and creating corresponding ones in OrientDB...\n";
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
     //counting Neo4j Constraints so that we can show a % on OrientDB Constraints creation
     try {
@@ -360,10 +380,10 @@ class ONeo4jImporterSchemaMigrator {
                   if(!oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass).areIndexed(neo4jPropKey)) {
                     orientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass).getProperty(neo4jPropKey)
                         .createIndex(OClass.INDEX_TYPE.UNIQUE, new ODocument().field("ignoreNullValues", true));
-                    ONeo4jImporterContext.getInstance().getMessageHandler().debug("\nCreated index: " + orientDBIndex);
+                    ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, "\nCreated index: " + orientDBIndex);
                   }
 
-                  ONeo4jImporterContext.getInstance().getMessageHandler().debug("\nIndex already exists: " + orientDBIndex);
+                  ONeo4jImporterContext.getInstance().getMessageHandler().debug(this, "\nIndex already exists: " + orientDBIndex);
 
                   statistics.orientDBImportedUniqueConstraintsCounter++;
                   statistics.orientDBImportedConstraintsCounter++;
@@ -380,7 +400,7 @@ class ONeo4jImporterSchemaMigrator {
               try {
 
                 logString = "Trying to create a NOT UNIQUE Index as workaround...";
-                ONeo4jImporterContext.getInstance().getMessageHandler().info(logString);
+                ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
                 OIndex OrientDBIndex = oDb.getRawGraph().getMetadata().getSchema().getClass(orientDBIndexClass)
                     .getProperty(neo4jPropKey).createIndex(OClass.INDEX_TYPE.NOTUNIQUE, new ODocument().field("ignoreNullValues",true));
