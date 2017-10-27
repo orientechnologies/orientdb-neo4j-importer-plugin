@@ -56,7 +56,7 @@ public class ONeo4jImporterPlugin extends OServerPluginAbstract {
 
     ONeo4jImporterContext.getInstance().setMessageHandler(messageHandler);
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.ORIENT_VERSION, OConstants.COPYRIGHT));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.getVersion(), OConstants.COPYRIGHT));
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
 
     try {

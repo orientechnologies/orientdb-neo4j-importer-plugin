@@ -146,7 +146,7 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
       throw new RuntimeException(e);
     }
 
-    logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 2 completed!\n\n";
+    logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 2 completed!\n\n";
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
   }
 

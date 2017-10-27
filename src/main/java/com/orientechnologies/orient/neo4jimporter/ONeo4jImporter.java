@@ -79,7 +79,7 @@ public class ONeo4jImporter {
     DecimalFormat df = new DecimalFormat("#");
     DecimalFormat dfd = new DecimalFormat("#.##");
 
-    logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " started!\n\n";
+    logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " started!\n\n";
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
     // parameters
@@ -315,7 +315,7 @@ public class ONeo4jImporter {
     }
 
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
-    logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 4 completed!\n\n";
+    logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 4 completed!\n\n";
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
   }
 

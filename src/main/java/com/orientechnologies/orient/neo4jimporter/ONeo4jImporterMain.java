@@ -71,7 +71,7 @@ public class ONeo4jImporterMain {
 
     ONeo4jImporterContext.getInstance().setMessageHandler(messageHandler);
     ONeo4jImporterContext.getInstance().getMessageHandler().info(ONeo4jImporterMain.class, "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(ONeo4jImporterMain.class, String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.ORIENT_VERSION, OConstants.COPYRIGHT));
+    ONeo4jImporterContext.getInstance().getMessageHandler().info(ONeo4jImporterMain.class, String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.getVersion(), OConstants.COPYRIGHT));
     ONeo4jImporterContext.getInstance().getMessageHandler().info(ONeo4jImporterMain.class, "\n");
 
     //parses the command line parameters, and starts the import (.execute). Then exits

@@ -85,7 +85,7 @@ class ONeo4jImporterSchemaMigrator {
       ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\nDone\n\n");
       this.statistics.importingElements = "nothing";
 
-      String logString = PROGRAM_NAME + " - v." + OConstants.ORIENT_VERSION + " - PHASE 3 completed!\n";
+      String logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 3 completed!\n";
       ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
 
     } catch(Exception e) {
