@@ -144,7 +144,8 @@ public class ONeo4jImporterUtils {
             neo4jPropType = getNeo4jPropType(propertyValue);
             orientOtype = mapNeo4JToOrientDBPropertyType(neo4jPropType);
 
-            //not all nodes with label myNeo4jLabel may have this property - even if we have a unique constraint on this property (it is unique in the nodes where the property exists). When we find a node with this property, we exit the loop
+            //not all nodes with label myNeo4jLabel may have this property - even if we have a unique constraint on this property
+            // (it is unique in the nodes where the property exists). When we find a node with this property, we exit the loop
             foundNode = true;
           }
 

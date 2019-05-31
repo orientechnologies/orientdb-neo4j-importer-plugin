@@ -58,8 +58,8 @@ class ONeo4jImporterVerticesAndEdgesMigrator {
   private       ONeo4jImporterStatistics statistics;
   private       long                     importingRelsStartTime;
   private       long                     importingRelsStopTime;
-  private final int VERTICES_BATCH_SIZE = 1000;
-  private final int EDGES_BATCH_SIZE = 300;
+  private static final int VERTICES_BATCH_SIZE = 1000;
+  private static final int EDGES_BATCH_SIZE = 300;
 
 
   public ONeo4jImporterVerticesAndEdgesMigrator(String keepLogString, boolean migrateRels, boolean migrateNodes, DecimalFormat df,

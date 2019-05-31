@@ -292,7 +292,8 @@ class ONeo4jImporterSchemaMigrator {
           orientDBIndexClass = neo4jLabel;
 
           //create class orientDBIndexClass
-          //there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
+          //there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created.
+          // As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
           if (!oDb.getMetadata().getSchema().existsClass(neo4jLabel)) {
             orientDBIndexClass = ONeo4jImporterUtils.checkVertexClassCreation(neo4jLabel, oDb);
           }
@@ -314,7 +315,8 @@ class ONeo4jImporterSchemaMigrator {
             orientDBIndexClass = neo4jConstraintRelationshipType;
 
             //create class orientDBIndexClass
-            //there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created. As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
+            //there might be in fact cases where in neo4j the constraint as been defined, but no nodes have been created.
+            // As a result, no nodes of that class have been imported in OrientDB, so that class does not exist in Orient
             if (oDb.getMetadata().getSchema().existsClass(orientDBIndexClass) == false) {
               oDb.createEdgeClass(orientDBIndexClass);
             }
@@ -353,7 +355,10 @@ class ONeo4jImporterSchemaMigrator {
               //unique constraints can be only on nodes. with this check we avoid odd things in very odd situations that may happen
               if (isConstraintsOnNode) {
 
-                //we check that orientDBIndexClass is a vertex class; with this check we avoid odd things in very odd situations that may happen, e.g. node labels = rel types.  nodes with multiple types (that are imported in a single class). In such case it may happen that it try to create an index on the class, but that class does not exist as vertex class (because all nodes were imported into another class - but it exists as edge class)
+                //we check that orientDBIndexClass is a vertex class; with this check we avoid odd things in very odd situations that may happen,
+                // e.g. node labels = rel types.  nodes with multiple types (that are imported in a single class).
+                // In such case it may happen that it try to create an index on the class, but that class does not exist as vertex class
+                // (because all nodes were imported into another class - but it exists as edge class)
                 if (oDb.getMetadata().getSchema().getClass(orientDBIndexClass)
                     .isSubClassOf(oDb.getMetadata().getSchema().getClass("V"))) {
 
@@ -397,11 +402,11 @@ class ONeo4jImporterSchemaMigrator {
             }
           }
 
-          if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintType)) {
-          }
-
-          if ("RELATIONSHIP_PROPERTY_EXISTENCE ".equals(neo4jConstraintType)) {
-          }
+//          if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintType)) {
+//          }
+//
+//          if ("RELATIONSHIP_PROPERTY_EXISTENCE ".equals(neo4jConstraintType)) {
+//          }
         }
 
         //print progress
@@ -411,10 +416,10 @@ class ONeo4jImporterSchemaMigrator {
 //          keepLogString =
 //              df.format(statistics.orientDBImportedUniqueConstraintsCounter) + " OrientDB UNIQUE Indices have been created";
         }
-        if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintType)) {
-        }
-        if ("RELATIONSHIP_PROPERTY_EXISTENCE ".equals(neo4jConstraintType)) {
-        }
+//        if ("NODE_PROPERTY_EXISTENCE".equals(neo4jConstraintType)) {
+//        }
+//        if ("RELATIONSHIP_PROPERTY_EXISTENCE ".equals(neo4jConstraintType)) {
+//        }
       }
 
     } catch (Neo4jException e) {

@@ -252,7 +252,8 @@ public class ONeo4jImporter {
       ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + df.format(value) + "%)");
     }
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- NOT UNIQUE Indices created due to failure in creating UNIQUE Indices", ": " + df.format(counters.orientDBImportedNotUniqueWorkaroundCounter));
+    ONeo4jImporterContext.getInstance().getMessageHandler()
+            .info(this, format, "- NOT UNIQUE Indices created due to failure in creating UNIQUE Indices", ": " + df.format(counters.orientDBImportedNotUniqueWorkaroundCounter));
     if (counters.neo4jConstraintsCounter > 0) {
       value = (counters.orientDBImportedNotUniqueWorkaroundCounter / counters.neo4jConstraintsCounter) * 100;
       ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + df.format(value) + "%)");
@@ -268,7 +269,8 @@ public class ONeo4jImporter {
 
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
 
-    //ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "- Additional created Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')          : " + df.format(counters.neo4jInternalIndicesCounter));
+    //ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "- Additional created Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')          : "
+    // + df.format(counters.neo4jInternalIndicesCounter));
 
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "- Additional internal Indices created", ": " + df.format(neo4jTotalInternalIndicesCounter) + "\n");
 
@@ -298,7 +300,8 @@ public class ONeo4jImporter {
     }
 
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- Time to Create Internal Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')", ": " + OFunctionsHandler.getHMSFormat(internalVertexIndicesElapsedTime));
+    ONeo4jImporterContext.getInstance().getMessageHandler()
+            .info(this, format, "-- Time to Create Internal Indices (on vertex properties 'neo4jNodeID' & 'neo4jLabelList')", ": " + OFunctionsHandler.getHMSFormat(internalVertexIndicesElapsedTime));
     if (internalVertexIndicesElapsedTimeSeconds > 0) {
       value = (counters.neo4jInternalVertexIndicesCounter / internalVertexIndicesElapsedTimeSeconds);
       ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + dfd.format(value) + " indices/sec)");
@@ -306,7 +309,8 @@ public class ONeo4jImporter {
 
     if (neo4jRelIdIndex) {
       ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, format, "-- Time to Create Internal Indices (on edge property 'neo4jRelID')", ": " + OFunctionsHandler.getHMSFormat(internalEdgeIndicesElapsedTime));
+      ONeo4jImporterContext.getInstance().getMessageHandler()
+              .info(this, format, "-- Time to Create Internal Indices (on edge property 'neo4jRelID')", ": " + OFunctionsHandler.getHMSFormat(internalEdgeIndicesElapsedTime));
       if (internalEdgeIndicesElapsedTimeSeconds > 0) {
         value = (counters.neo4jInternalEdgeIndicesCounter / internalEdgeIndicesElapsedTimeSeconds);
         ONeo4jImporterContext.getInstance().getMessageHandler().info(this, " (" + dfd.format(value) + " indices/sec)");
