@@ -20,14 +20,12 @@
 
 package com.orientechnologies.orient.neo4jimporter;
 
-import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import org.assertj.core.api.Assertions;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Created by frank on 08/11/2016.
@@ -338,28 +336,5 @@ public class ONeo4jImporterTest {
 
     db.close();
   }
-
-  @Ignore
-  @Test
-  public void basicImportingTest() throws Exception {
-
-    String neo4jUrl = "bolt://localhost:7687";
-    String neo4jUsername = "neo4j";
-    String neo4jPassword = "admin";
-    String odbDir = "/Users/gabriele/orientdb-community-3.0.0-SNAPSHOT/databases/neo4jImportTX";
-    String odbProtocol = "plocal";
-    boolean overwriteDB = true;
-    boolean createIndexOnNeo4jRelID = true;
-
-    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overwriteDB, createIndexOnNeo4jRelID);
-
-    try {
-      ONeo4jImporterMain.executeJob(settings);
-    } catch(Exception e) {
-      fail();
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Exception message: " + e.getMessage());
-      ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Stacktrace:\n" + e.getStackTrace());
-    }
-  }
-
+  
 }
