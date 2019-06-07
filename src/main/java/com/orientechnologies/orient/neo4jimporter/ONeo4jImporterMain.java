@@ -39,28 +39,6 @@ public class ONeo4jImporterMain {
   private static OPluginMessageHandler messageHandler = new ONeo4jImporterMessageHandler(2);
 
 
-  public static void main(String[] args) throws Exception {
-
-    int returnValue = 1;
-
-//    ONeo4jImporterCommandLineParser commandParser = new ONeo4jImporterCommandLineParser();
-//    ONeo4jImporterSettings settings = commandParser.getNeo4jImporterSettings(args);
-
-    // TO DELETE
-    String neo4jUrl = "bolt://localhost:7687";
-    String neo4jUsername = "neo4j";
-    String neo4jPassword = "admin";
-    String odbDir = "/Users/gabriele/orientdb-community-2.2.18-SNAPSHOT/databases/neo4jImport";
-    String odbProtocol = "plocal";
-    boolean overwriteDB = true;
-    boolean createIndexOnNeo4jRelID = true;
-    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbDir, odbProtocol, overwriteDB, createIndexOnNeo4jRelID);
-
-    returnValue = executeJob(settings);
-
-    System.exit(returnValue);
-  }
-
   public static int executeJob(ONeo4jImporterSettings settings) {
 
     String outDbUrl = settings.getOrientDbProtocol() + ":" + settings.getOrientDbPath();
