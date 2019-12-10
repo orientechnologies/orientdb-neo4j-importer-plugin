@@ -110,7 +110,7 @@ public class OGraphCommands {
     // check index has just a key
     // TODO
 
-    OIndex<?> index = orientGraph.getClass(vertexClassName).getProperty(key).getAllIndexes().iterator().next();
+    OIndex index = orientGraph.getClass(vertexClassName).getProperty(key).getAllIndexes().iterator().next();
     OIdentifiable id = (OIdentifiable) index.get(value);
     return ((OElement)id.getRecord()).asVertex().get();
 
