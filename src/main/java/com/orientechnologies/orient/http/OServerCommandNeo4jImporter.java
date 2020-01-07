@@ -44,10 +44,10 @@ public class OServerCommandNeo4jImporter extends OServerCommandAuthenticatedServ
   public boolean execute(OHttpRequest iRequest, OHttpResponse iResponse) throws Exception {
     final String[] parts = checkSyntax(iRequest.getUrl(), 2, "Syntax error: auditing/<db>/<action>");
 
-    if ("POST".equalsIgnoreCase(iRequest.httpMethod)) {
+    if ("POST".equalsIgnoreCase(iRequest.getHttpMethod())) {
       doPost(iRequest, iResponse, parts);
     }
-    if ("GET".equalsIgnoreCase(iRequest.httpMethod)) {
+    if ("GET".equalsIgnoreCase(iRequest.getHttpMethod())) {
       doGet(iRequest, iResponse, parts);
     }
     return false;
@@ -67,12 +67,12 @@ public class OServerCommandNeo4jImporter extends OServerCommandAuthenticatedServ
   private void doPost(OHttpRequest iRequest, OHttpResponse iResponse, String[] parts) throws IOException {
 
     if ("job".equalsIgnoreCase(parts[1])) {
-      ODocument cfg = new ODocument().fromJSON(iRequest.content);
+      ODocument cfg = new ODocument().fromJSON(iRequest.getContent());
       handler.executeImport(cfg, super.server);
       iResponse.send(OHttpUtils.STATUS_OK_CODE, "OK", OHttpUtils.CONTENT_JSON, null, null);
 
     } else if ("test".equalsIgnoreCase(parts[1])) {
-      ODocument cfg = new ODocument().fromJSON(iRequest.content);
+      ODocument cfg = new ODocument().fromJSON(iRequest.getContent());
       try {
         handler.checkConnection(cfg);
       } catch (Exception e) {
