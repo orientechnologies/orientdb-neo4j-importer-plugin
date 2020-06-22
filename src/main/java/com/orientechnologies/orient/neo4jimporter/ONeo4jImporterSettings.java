@@ -20,13 +20,11 @@
 
 package com.orientechnologies.orient.neo4jimporter;
 
-
 /**
  * OrientDB's Neo4j Importer - Settings Class
  *
  * @author Santo Leto
  */
-
 public class ONeo4jImporterSettings {
 
   private String neo4jUrl;
@@ -41,8 +39,14 @@ public class ONeo4jImporterSettings {
 
   public ONeo4jImporterSettings() {}
 
-  public ONeo4jImporterSettings(String neo4jUrl, String neo4jUsername, String neo4jPassword, String orientDbPath, String orientDbProtocol,
-      boolean overwriteOrientDbDir, boolean createIndexOnNeo4jRelID) {
+  public ONeo4jImporterSettings(
+      String neo4jUrl,
+      String neo4jUsername,
+      String neo4jPassword,
+      String orientDbPath,
+      String orientDbProtocol,
+      boolean overwriteOrientDbDir,
+      boolean createIndexOnNeo4jRelID) {
 
     this.neo4jUrl = neo4jUrl;
     this.neo4jUsername = neo4jUsername;
@@ -116,5 +120,4 @@ public class ONeo4jImporterSettings {
   public void setLogLevel(int logLevel) {
     this.logLevel = logLevel;
   }
-
 }

@@ -27,26 +27,23 @@ import com.orientechnologies.orient.core.record.OElement;
 import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
-/**
- * Collects several commands executable on a OrientDb database.
- */
-
+/** Collects several commands executable on a OrientDb database. */
 public class OGraphCommands {
 
-  private static String quote =  "\"";
+  private static String quote = "\"";
 
   /**
-   * The method performs a lookup on the passed ODatabaseDocument for a OVertex, starting from a record and from a vertex type.
-   * It returns the vertex if present, null if not present.
+   * The method performs a lookup on the passed ODatabaseDocument for a OVertex, starting from a
+   * record and from a vertex type. It returns the vertex if present, null if not present.
    *
    * @param orientGraph
    * @param keys
    * @param values
    * @param vertexClassName
-   *
    * @return
    */
-  public static OVertex getVertexByIndexedKey(ODatabaseDocument orientGraph, String[] keys, String[] values, String vertexClassName) {
+  public static OVertex getVertexByIndexedKey(
+      ODatabaseDocument orientGraph, String[] keys, String[] values, String vertexClassName) {
 
     OVertex vertex = null;
 
@@ -63,23 +60,27 @@ public class OGraphCommands {
 
   /**
    * Performs the lookup in class V by default.
+   *
    * @param orientGraph
    * @param keys
    * @param values
    * @return
    */
-  public static OResultSet getVertices(ODatabaseDocument orientGraph, String[] keys, Object[] values) {
+  public static OResultSet getVertices(
+      ODatabaseDocument orientGraph, String[] keys, Object[] values) {
     return getVertices(orientGraph, "V", keys, values);
   }
 
   /**
    * Performs the lookup in the specified vertex class.
+   *
    * @param orientGraph
    * @param keys
    * @param values
    * @return
    */
-  public static OResultSet getVertices(ODatabaseDocument orientGraph, String vertexClassName, String[] keys, Object[] values) {
+  public static OResultSet getVertices(
+      ODatabaseDocument orientGraph, String vertexClassName, String[] keys, Object[] values) {
 
     Object[] params = new Object[values.length];
 
@@ -91,28 +92,29 @@ public class OGraphCommands {
     query += keys[0] + " = ?";
 
     int i;
-    for(i=1; i<keys.length; i++) {
+    for (i = 1; i < keys.length; i++) {
       query += " and " + keys[i] + " = ?";
     }
     return orientGraph.command(query, params);
   }
 
-
   /**
    * Performs the lookup in the specified vertex class.
+   *
    * @param orientGraph
    * @param key
    * @param value
    * @return
    */
-  public static OVertex getVertex(ODatabaseDocument orientGraph, String vertexClassName, String key, Object value) {
+  public static OVertex getVertex(
+      ODatabaseDocument orientGraph, String vertexClassName, String key, Object value) {
 
     // check index has just a key
     // TODO
 
-    OIndex index = orientGraph.getClass(vertexClassName).getProperty(key).getAllIndexes().iterator().next();
+    OIndex index =
+        orientGraph.getClass(vertexClassName).getProperty(key).getAllIndexes().iterator().next();
     OIdentifiable id = (OIdentifiable) index.get(value);
-    return ((OElement)id.getRecord()).asVertex().get();
-
+    return ((OElement) id.getRecord()).asVertex().get();
   }
 }

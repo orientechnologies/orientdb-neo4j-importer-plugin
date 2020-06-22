@@ -20,24 +20,20 @@
 
 package com.orientechnologies.orient.neo4jimporter;
 
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
+
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.context.ONeo4jImporterMessageHandler;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.listener.OProgressMonitor;
 import com.orientechnologies.orient.output.OPluginMessageHandler;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
-
-/**
- * Created by frank on 13/11/2016.
- */
+/** Created by frank on 13/11/2016. */
 public class ONeo4jImporterMain {
 
   private static OPluginMessageHandler messageHandler = new ONeo4jImporterMessageHandler(2);
-
 
   public static int executeJob(ONeo4jImporterSettings settings) {
 
@@ -49,10 +45,15 @@ public class ONeo4jImporterMain {
 
     ONeo4jImporterContext.getInstance().setMessageHandler(messageHandler);
     ONeo4jImporterContext.getInstance().getMessageHandler().info(ONeo4jImporterMain.class, "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(ONeo4jImporterMain.class, String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.getVersion(), OConstants.COPYRIGHT));
+    ONeo4jImporterContext.getInstance()
+        .getMessageHandler()
+        .info(
+            ONeo4jImporterMain.class,
+            String.format(
+                PROGRAM_NAME + " v.%s - %s\n\n", OConstants.getVersion(), OConstants.COPYRIGHT));
     ONeo4jImporterContext.getInstance().getMessageHandler().info(ONeo4jImporterMain.class, "\n");
 
-    //parses the command line parameters, and starts the import (.execute). Then exits
+    // parses the command line parameters, and starts the import (.execute). Then exits
     int returnValue = 1;
 
     try {
@@ -64,13 +65,16 @@ public class ONeo4jImporterMain {
       // Timer for statistics notifying
       Timer timer = new Timer();
       try {
-        timer.scheduleAtFixedRate(new TimerTask() {
+        timer.scheduleAtFixedRate(
+            new TimerTask() {
 
-          @Override
-          public void run() {
-            ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-          }
-        }, 0, 1000);
+              @Override
+              public void run() {
+                ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
+              }
+            },
+            0,
+            1000);
 
         final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings);
         returnValue = neo4jImporter.execute();
@@ -87,5 +91,4 @@ public class ONeo4jImporterMain {
     }
     return returnValue;
   }
-
 }

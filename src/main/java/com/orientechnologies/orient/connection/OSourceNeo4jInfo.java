@@ -20,9 +20,7 @@
 
 package com.orientechnologies.orient.connection;
 
-/**
- * Created by gabriele on 14/03/17.
- */
+/** Created by gabriele on 14/03/17. */
 public class OSourceNeo4jInfo {
 
   private String neo4jUrl;

@@ -21,32 +21,30 @@
 package com.orientechnologies.orient.http;
 
 import com.orientechnologies.common.log.OLogManager;
-import com.orientechnologies.orient.core.db.OrientDB;
 import com.orientechnologies.orient.context.ONeo4jImporterMessageHandler;
+import com.orientechnologies.orient.core.db.OrientDB;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.neo4jimporter.*;
 import com.orientechnologies.orient.output.OPluginMessageHandler;
 import com.orientechnologies.orient.server.OServer;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-/**
- * Created by gabriele on 27/02/17.
- */
-public class ONeo4jImporterJob  implements Runnable {
+/** Created by gabriele on 27/02/17. */
+public class ONeo4jImporterJob implements Runnable {
 
   private final ODocument cfg;
-  private       ONeo4ImporterListener listener;
-  public Status      status;
+  private ONeo4ImporterListener listener;
+  public Status status;
 
-  public    PrintStream           stream;
-  private   ByteArrayOutputStream baos;
+  public PrintStream stream;
+  private ByteArrayOutputStream baos;
   private OPluginMessageHandler messageHandler;
 
   private OServer currentServerInstance;
 
-  public ONeo4jImporterJob(ODocument cfg, OServer currentServerInstance, ONeo4ImporterListener listener) {
+  public ONeo4jImporterJob(
+      ODocument cfg, OServer currentServerInstance, ONeo4ImporterListener listener) {
     this.cfg = cfg;
     this.listener = listener;
 
@@ -55,7 +53,6 @@ public class ONeo4jImporterJob  implements Runnable {
 
     this.currentServerInstance = currentServerInstance;
   }
-
 
   @Override
   public void run() {
@@ -67,18 +64,25 @@ public class ONeo4jImporterJob  implements Runnable {
     String odbProtocol = cfg.field("odbProtocol");
     boolean overrideDB = cfg.field("overwriteDB");
     boolean indexesOnRelationships = cfg.field("indexesOnRelationships");
-    int logLevel = Integer.parseInt((String)cfg.field("logLevel"));
+    int logLevel = Integer.parseInt((String) cfg.field("logLevel"));
 
     // disabling debug level
-    if(logLevel > 0) {
+    if (logLevel > 0) {
       logLevel++;
     }
 
     status = Status.RUNNING;
     this.messageHandler = new ONeo4jImporterMessageHandler(this.stream, logLevel);
 
-
-    ONeo4jImporterSettings settings = new ONeo4jImporterSettings(neo4jUrl, neo4jUsername, neo4jPassword, odbName, odbProtocol, overrideDB, indexesOnRelationships);
+    ONeo4jImporterSettings settings =
+        new ONeo4jImporterSettings(
+            neo4jUrl,
+            neo4jUsername,
+            neo4jPassword,
+            odbName,
+            odbProtocol,
+            overrideDB,
+            indexesOnRelationships);
     final ONeo4jImporterPlugin neo4jImporterPlugin = new ONeo4jImporterPlugin();
 
     try {
@@ -88,7 +92,8 @@ public class ONeo4jImporterJob  implements Runnable {
         databaseDirectory = this.currentServerInstance.getDatabaseDirectory();
         orientDBInstance = currentServerInstance.getContext();
       }
-      neo4jImporterPlugin.executeJob(settings, this.messageHandler, databaseDirectory, orientDBInstance);
+      neo4jImporterPlugin.executeJob(
+          settings, this.messageHandler, databaseDirectory, orientDBInstance);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -103,9 +108,7 @@ public class ONeo4jImporterJob  implements Runnable {
     }
   }
 
-  public void validate() {
-
-  }
+  public void validate() {}
 
   /**
    * Single Job Status
@@ -120,7 +123,7 @@ public class ONeo4jImporterJob  implements Runnable {
       status.field("status", this.status);
 
       String lastBatchLog = "";
-      if(this.messageHandler != null) {
+      if (this.messageHandler != null) {
         lastBatchLog = extractBatchLog();
       }
       status.field("log", lastBatchLog);
@@ -130,7 +133,6 @@ public class ONeo4jImporterJob  implements Runnable {
       }
       return status;
     }
-
   }
 
   private String extractBatchLog() {
@@ -157,6 +159,8 @@ public class ONeo4jImporterJob  implements Runnable {
   }
 
   public enum Status {
-    STARTED, RUNNING, FINISHED
+    STARTED,
+    RUNNING,
+    FINISHED
   }
 }

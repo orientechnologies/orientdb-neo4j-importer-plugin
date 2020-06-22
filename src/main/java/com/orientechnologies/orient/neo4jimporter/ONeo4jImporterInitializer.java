@@ -20,6 +20,8 @@
 
 package com.orientechnologies.orient.neo4jimporter;
 
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
+
 import com.orientechnologies.orient.connection.ONeo4jConnectionManager;
 import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
@@ -28,24 +30,21 @@ import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import org.neo4j.driver.v1.Session;
 
-import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
-
-/**
- * Created by frank on 08/11/2016.
- */
+/** Created by frank on 08/11/2016. */
 class ONeo4jImporterInitializer {
 
-  private final String            orientDbName;
-  private final String            orientDbProtocol;
-  private       long              initializationStartTime;
-  private       ODatabaseDocument oDb;
-  private       String            orientVertexClass;
-  private       long              initializationStopTime;
+  private final String orientDbName;
+  private final String orientDbProtocol;
+  private long initializationStartTime;
+  private ODatabaseDocument oDb;
+  private String orientVertexClass;
+  private long initializationStopTime;
 
   private OSourceNeo4jInfo sourceNeo4jInfo;
   private Session neo4jSession;
 
-  public ONeo4jImporterInitializer(OSourceNeo4jInfo sourceNeo4jInfo, String orientDbProtocol, String orientDbName) {
+  public ONeo4jImporterInitializer(
+      OSourceNeo4jInfo sourceNeo4jInfo, String orientDbProtocol, String orientDbName) {
     this.orientDbName = orientDbName;
     this.orientDbProtocol = orientDbProtocol;
     this.sourceNeo4jInfo = sourceNeo4jInfo;
@@ -89,7 +88,9 @@ class ONeo4jImporterInitializer {
     this.initializationStartTime = System.currentTimeMillis();
 
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Trying connection to Neo4j...");
+    ONeo4jImporterContext.getInstance()
+        .getMessageHandler()
+        .info(this, "Trying connection to Neo4j...");
 
     ONeo4jConnectionManager connectionManager = new ONeo4jConnectionManager(this.sourceNeo4jInfo);
     Session neo4jSession = connectionManager.getSession();
@@ -102,26 +103,36 @@ class ONeo4jImporterInitializer {
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Initializing OrientDB...");
 
     // creating orientdb graph database
-    switch(this.orientDbProtocol) {
-    case "embedded":
-      ONeo4jImporterContext.getInstance().getOrientDBInstance().create(this.orientDbName, ODatabaseType.PLOCAL);
-      break;
-    case "plocal":
-      ONeo4jImporterContext.getInstance().getOrientDBInstance().create(this.orientDbName, ODatabaseType.PLOCAL);
-      break;
-    case "memory":
-      ONeo4jImporterContext.getInstance().getOrientDBInstance().create(this.orientDbName, ODatabaseType.MEMORY);
-      break;
-    case "remote":
-      String message = "Cannot create a new database in remote. Try to create a new empty database and restart the migration.\nThe current job will be aborted.";
-      throw new RuntimeException(message);
-    default:
-      message = "Protocol not correct. Migration will be aborted.";
-      throw new RuntimeException(message);
+    switch (this.orientDbProtocol) {
+      case "embedded":
+        ONeo4jImporterContext.getInstance()
+            .getOrientDBInstance()
+            .create(this.orientDbName, ODatabaseType.PLOCAL);
+        break;
+      case "plocal":
+        ONeo4jImporterContext.getInstance()
+            .getOrientDBInstance()
+            .create(this.orientDbName, ODatabaseType.PLOCAL);
+        break;
+      case "memory":
+        ONeo4jImporterContext.getInstance()
+            .getOrientDBInstance()
+            .create(this.orientDbName, ODatabaseType.MEMORY);
+        break;
+      case "remote":
+        String message =
+            "Cannot create a new database in remote. Try to create a new empty database and restart the migration.\nThe current job will be aborted.";
+        throw new RuntimeException(message);
+      default:
+        message = "Protocol not correct. Migration will be aborted.";
+        throw new RuntimeException(message);
     }
 
     // acquiring connection to the just created database
-    oDb = ONeo4jImporterContext.getInstance().getOrientDBInstance().open(this.orientDbName, "admin", "admin");
+    oDb =
+        ONeo4jImporterContext.getInstance()
+            .getOrientDBInstance()
+            .open(this.orientDbName, "admin", "admin");
 
     this.orientVertexClass = "";
 
@@ -129,10 +140,16 @@ class ONeo4jImporterInitializer {
 
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\r" + logString + "\n");
 
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "Importing Neo4j database from server: ");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "  '" + this.sourceNeo4jInfo.getNeo4jUrl() + "' ");
+    ONeo4jImporterContext.getInstance()
+        .getMessageHandler()
+        .info(this, "Importing Neo4j database from server: ");
+    ONeo4jImporterContext.getInstance()
+        .getMessageHandler()
+        .info(this, "  '" + this.sourceNeo4jInfo.getNeo4jUrl() + "' ");
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "into OrientDB database:");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "  '" + orientDbName + "'\n");
+    ONeo4jImporterContext.getInstance()
+        .getMessageHandler()
+        .info(this, "  '" + orientDbName + "'\n");
 
     logString = PROGRAM_NAME + " - v." + OConstants.getVersion() + " - PHASE 1 completed!\n\n";
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, logString);
@@ -140,5 +157,4 @@ class ONeo4jImporterInitializer {
     this.initializationStopTime = System.currentTimeMillis();
     return neo4jSession;
   }
-
 }

@@ -20,6 +20,8 @@
 
 package com.orientechnologies.orient.neo4jimporter;
 
+import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
+
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.OConstants;
 import com.orientechnologies.orient.core.db.OrientDB;
@@ -32,31 +34,37 @@ import com.orientechnologies.orient.server.config.OServerParameterConfiguration;
 import com.orientechnologies.orient.server.network.OServerNetworkListener;
 import com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpAbstract;
 import com.orientechnologies.orient.server.plugin.OServerPluginAbstract;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.orientechnologies.orient.neo4jimporter.ONeo4jImporter.PROGRAM_NAME;
-
-/**
- * Created by gabriele on 01/03/17.
- */
+/** Created by gabriele on 01/03/17. */
 public class ONeo4jImporterPlugin extends OServerPluginAbstract {
 
   private OServer server;
 
   public ONeo4jImporterPlugin() {}
 
-  public void executeJob(ONeo4jImporterSettings settings, OPluginMessageHandler messageHandler, String orientdbDatabasesAbsolutePath, OrientDB orientDBInstance) throws Exception {
+  public void executeJob(
+      ONeo4jImporterSettings settings,
+      OPluginMessageHandler messageHandler,
+      String orientdbDatabasesAbsolutePath,
+      OrientDB orientDBInstance)
+      throws Exception {
 
-    final ONeo4jImporter neo4jImporter = new ONeo4jImporter(settings, orientdbDatabasesAbsolutePath);
+    final ONeo4jImporter neo4jImporter =
+        new ONeo4jImporter(settings, orientdbDatabasesAbsolutePath);
 
     // working inside the orientdb server context: this execution is due to a command to the plugin
     ONeo4jImporterContext.newInstance(orientDBInstance);
 
     ONeo4jImporterContext.getInstance().setMessageHandler(messageHandler);
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
-    ONeo4jImporterContext.getInstance().getMessageHandler().info(this, String.format(PROGRAM_NAME + " v.%s - %s\n\n", OConstants.getVersion(), OConstants.COPYRIGHT));
+    ONeo4jImporterContext.getInstance()
+        .getMessageHandler()
+        .info(
+            this,
+            String.format(
+                PROGRAM_NAME + " v.%s - %s\n\n", OConstants.getVersion(), OConstants.COPYRIGHT));
     ONeo4jImporterContext.getInstance().getMessageHandler().info(this, "\n");
 
     try {
@@ -68,13 +76,16 @@ public class ONeo4jImporterPlugin extends OServerPluginAbstract {
       // Timer for statistics notifying
       Timer timer = new Timer();
       try {
-        timer.scheduleAtFixedRate(new TimerTask() {
+        timer.scheduleAtFixedRate(
+            new TimerTask() {
 
-          @Override
-          public void run() {
-            ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
-          }
-        }, 0, 1000);
+              @Override
+              public void run() {
+                ONeo4jImporterContext.getInstance().getStatistics().notifyListeners();
+              }
+            },
+            0,
+            1000);
 
         neo4jImporter.execute();
 
@@ -82,7 +93,7 @@ public class ONeo4jImporterPlugin extends OServerPluginAbstract {
         timer.cancel();
       }
 
-    } catch(Exception e) {
+    } catch (Exception e) {
       String mess = "";
       ONeo4jImporterContext.getInstance().printExceptionMessage(e, mess, "error");
       ONeo4jImporterContext.getInstance().printExceptionStackTrace(e, "error");
@@ -97,9 +108,9 @@ public class ONeo4jImporterPlugin extends OServerPluginAbstract {
   @Override
   public void startup() {
 
-    final OServerNetworkListener listener = server.getListenerByProtocol(ONetworkProtocolHttpAbstract.class);
-    if (listener == null)
-      throw new OConfigurationException("HTTP listener not found");
+    final OServerNetworkListener listener =
+        server.getListenerByProtocol(ONetworkProtocolHttpAbstract.class);
+    if (listener == null) throw new OConfigurationException("HTTP listener not found");
 
     listener.registerStatelessCommand(new OServerCommandNeo4jImporter());
   }

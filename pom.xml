@@ -19,7 +19,8 @@
 
     <scm>
         <connection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git
+        </developerConnection>
         <url>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git</url>
     </scm>
     <issueManagement>

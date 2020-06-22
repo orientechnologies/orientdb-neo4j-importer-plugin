@@ -22,19 +22,18 @@ package com.orientechnologies.orient.context;
 
 import com.orientechnologies.orient.output.OOutputStreamManager;
 import com.orientechnologies.orient.output.OPluginMessageHandler;
-
 import java.io.PrintStream;
 
 /**
- * Implementation of OPluginMessageHandler for Teleporter plugin.
- * It receives messages application from the application and just delegates its printing on a stream through the OutputStreamManager.
+ * Implementation of OPluginMessageHandler for Teleporter plugin. It receives messages application
+ * from the application and just delegates its printing on a stream through the OutputStreamManager.
  *
  * @author Gabriele Ponzi
  * @email gabriele.ponzi--at--gmail.com
  */
 public class ONeo4jImporterMessageHandler implements OPluginMessageHandler {
 
-  private int                  level;    // affects OutputStreamManager level
+  private int level; // affects OutputStreamManager level
   private OOutputStreamManager outputManager;
 
   public ONeo4jImporterMessageHandler(PrintStream outputStream, int level) {
@@ -59,7 +58,6 @@ public class ONeo4jImporterMessageHandler implements OPluginMessageHandler {
   public void setOutputManager(OOutputStreamManager outputManager) {
     this.outputManager = outputManager;
   }
-
 
   @Override
   public int getOutputManagerLevel() {
