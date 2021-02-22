@@ -26,7 +26,6 @@ import com.orientechnologies.orient.connection.ONeo4jConnectionManager;
 import com.orientechnologies.orient.connection.OSourceNeo4jInfo;
 import com.orientechnologies.orient.context.ONeo4jImporterContext;
 import com.orientechnologies.orient.core.OConstants;
-import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import org.neo4j.driver.v1.Session;
 
@@ -107,17 +106,26 @@ class ONeo4jImporterInitializer {
       case "embedded":
         ONeo4jImporterContext.getInstance()
             .getOrientDBInstance()
-            .create(this.orientDbName, ODatabaseType.PLOCAL);
+            .execute(
+                "create database "
+                    + this.orientDbName
+                    + " plocal users ( admin identified by 'admin' role admin)");
         break;
       case "plocal":
         ONeo4jImporterContext.getInstance()
             .getOrientDBInstance()
-            .create(this.orientDbName, ODatabaseType.PLOCAL);
+            .execute(
+                "create database "
+                    + this.orientDbName
+                    + " plocal users ( admin identified by 'admin' role admin)");
         break;
       case "memory":
         ONeo4jImporterContext.getInstance()
             .getOrientDBInstance()
-            .create(this.orientDbName, ODatabaseType.MEMORY);
+            .execute(
+                "create database "
+                    + this.orientDbName
+                    + " memory users ( admin identified by 'admin' role admin)");
         break;
       case "remote":
         String message =
