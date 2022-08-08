@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>orientdb-neo4j-importer-plugin</artifactId>
-  <version>3.0.44-SNAPSHOT</version>
+  <version>3.0.45-SNAPSHOT</version>
     <packaging>jar</packaging>
 
 
