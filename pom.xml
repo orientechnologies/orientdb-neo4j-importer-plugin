@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>orientdb-neo4j-importer-plugin</artifactId>
-  <version>3.2.12-SNAPSHOT</version>
+  <version>3.2.12</version>
     <packaging>jar</packaging>
 
 
@@ -22,7 +22,7 @@
         <developerConnection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git
         </developerConnection>
         <url>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git</url>
-      <tag>HEAD</tag>
+      <tag>3.2.12</tag>
   </scm>
     <issueManagement>
         <system>GitHub Issues</system>
