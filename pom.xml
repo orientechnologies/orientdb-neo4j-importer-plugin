@@ -16,6 +16,7 @@
 
     <name>OrientDB - Neo4j to OrientDB Importer Plugin</name>
     <description>OrientDB NoSQL document graph dbms</description>
+    <url>https://orientdb.dev</url>
 
     <scm>
         <connection>scm:git:git@github.com:orientechnologies/orientdb-neo4j-importer-plugin.git</connection>
@@ -28,11 +29,34 @@
         <system>GitHub Issues</system>
         <url>https://github.com/orientechnologies/orientdb-neo4j-importer-plugin/issues</url>
     </issueManagement>
-    <ciManagement>
-        <system>jenkins</system>
-        <url>https://helios.orientdb.com/</url>
-    </ciManagement>
+    <developers>
+        <developer>
+            <id>l.garulli</id>
+            <name>Luca Garulli</name>
+            <roles>
+                <role>founder</role>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>tglman</id>
+            <name>Tglman</name>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
 
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
     <properties>
         <neo4j.version>3.1.1</neo4j.version>
         <neo4j-driver.version>1.4.1</neo4j-driver.version>
