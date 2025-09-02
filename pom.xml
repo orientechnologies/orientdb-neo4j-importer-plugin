@@ -6,11 +6,11 @@
         <groupId>com.orientechnologies</groupId>
         <artifactId>orientdb-parent</artifactId>
         <version>3.2.44-SNAPSHOT</version>
-        <relativePath />
     </parent>
 
+    <groupId>com.orientechnologies</groupId>
     <artifactId>orientdb-neo4j-importer-plugin</artifactId>
-  <version>3.2.44-SNAPSHOT</version>
+    <version>3.2.44-SNAPSHOT</version>
     <packaging>jar</packaging>
 
 
